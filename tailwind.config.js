@@ -6,7 +6,11 @@ module.exports = withMT({
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        myfont: ["Oxanium","sans-serif"],
+      },
+    },
   },
   plugins: [],
 });
