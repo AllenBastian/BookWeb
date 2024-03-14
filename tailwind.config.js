@@ -5,9 +5,14 @@ module.exports = withMT({
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  theme: 
-  {
-    extend: {},
+
+  theme: {
+    extend: {
+      fontFamily: {
+        myfont: ["Oxanium","sans-serif"],
+      },
+    },
+
   },
   plugins: [],
 });
