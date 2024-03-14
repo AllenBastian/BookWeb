@@ -1,4 +1,4 @@
-import { auth } from "../firebase/firebase";
+import { auth } from "../Firebase/Firebase";
 
 const Dashboard=()=>{
 
