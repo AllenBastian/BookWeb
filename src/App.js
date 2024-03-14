@@ -3,11 +3,13 @@ import { NavbarSimple } from "./components/Navb";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import { BrowserRouter,Route,Routes } from "react-router-dom";
+import { IsSignedUpProvider } from "./context/Context";
 import "./App.css"
 
 function App() {
   return (
     <BrowserRouter>
+    <IsSignedUpProvider>
         <div className="App">
           <NavbarSimple/>
         <Routes>
@@ -15,6 +17,7 @@ function App() {
           <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>
         </Routes>
         </div>
+        </IsSignedUpProvider>
     </BrowserRouter>
   );
 }
