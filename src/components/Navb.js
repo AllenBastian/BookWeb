@@ -1,6 +1,7 @@
 import React, { useState,useEffect} from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider,signOut } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { auth } from "../Firebase/Firebase";
+
 
 import {
   Navbar,
@@ -91,12 +92,24 @@ function NavList() {
         className="p-1 font-medium"
       >
          {user===false?(
+
         <Button onClick={()=>{login()}} className="flex font-myfont items-center hover:text-blue-500 transition-colors">
+
           Login
         </Button>
          ):(<Button onClick={()=>{logout()}} className="flex items-center  hover:text-blue-500 transition-colors">
          Logout
        </Button>)}
+      </Typography>
+      <Typography
+        as="li"
+        variant="small"
+        color="blue-gray"
+        className="p-1 font-medium"
+      >
+        <a href ="/signup" className="flex items-center hover:text-blue-500 transition-colors">
+          Sign Up
+        </a>
       </Typography>
     </ul>
   );

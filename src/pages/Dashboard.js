@@ -1,3 +1,4 @@
+
 import { auth } from "../firebase/firebase";
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
@@ -5,6 +6,7 @@ import { FaPlusCircle, FaChevronDown, FaChevronUp, FaTrashAlt } from "react-icon
 import { useState } from "react";
 import { db } from "../firebase/firebase";
 import { collection, addDoc,getDocs } from "firebase/firestore";
+
 
 
 const Dashboard = () => {
