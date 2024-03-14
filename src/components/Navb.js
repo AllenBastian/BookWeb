@@ -55,17 +55,23 @@ function NavList() {
   
   }
   return (
+    
     <ul className="my-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
+      {user&&(
+        <>
       <Typography
         as="li"
         variant="small"
         color="blue-gray"
         className="p-1 font-medium"
       >
-        <a href="/dashboard" className="flex items-center hover:text-blue-500 transition-colors">
-          Dashboard
+        <a href="/dashboard" className="flex items-center hover:text-blue-500 transition-colors ">
+          DASHBOARD
         </a>
       </Typography>
+      
+
+    
       <Typography
         as="li"
         variant="small"
@@ -73,19 +79,11 @@ function NavList() {
         className="p-1 font-medium"
       >
         <a href="#" className="flex items-center hover:text-blue-500 transition-colors">
-          
+          VIEW BOOKS
         </a>
       </Typography>
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="p-1 font-medium"
-      >
-        <a href="#" className="flex items-center hover:text-blue-500 transition-colors">
-          View Books
-        </a>
-      </Typography>
+      </>
+      )}
      
       <Typography
         as="li"
@@ -94,10 +92,12 @@ function NavList() {
         className="p-1 font-medium"
       >
          {user===false?(
-        <Button onClick={()=>{login()}} className="flex items-center hover:text-blue-500 transition-colors">
+
+        <Button onClick={()=>{login()}} className="flex font-myfont items-center hover:text-blue-500 transition-colors">
+
           Login
         </Button>
-         ):(<Button onClick={()=>{logout()}} className="flex items-center hover:text-blue-500 transition-colors">
+         ):(<Button onClick={()=>{logout()}} className="flex items-center  hover:text-blue-500 transition-colors">
          Logout
        </Button>)}
       </Typography>
@@ -135,8 +135,7 @@ export function NavbarSimple() {
         <Typography
           as="a"
           href="#"
-          variant="h6"
-          className="mr-4 cursor-pointer py-1.5"
+          className="mr-4  cursor-pointer py-1.5 text-2xl font-bold"
         >
          BOOKWEB
         </Typography>
