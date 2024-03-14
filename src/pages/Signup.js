@@ -28,7 +28,7 @@ const SignUpForm = () => {
   {/* Background image */}
   <img src="images/brownbooks.jpg" alt="Background" className="absolute inset-0 w-full h-full object-cover" />
   {/* Signup box */}
-  <div className="absolute bg-offwhite p-7 rounded-md shadow-md" style={{ zIndex: 1 }}>
+  <div className="absolute bg-white p-7 rounded-md shadow-md" style={{ zIndex: 1 }}>
     <h2 className="text-2xl font-semibold mb-4">Welcome to BOOKWEB!</h2>
     <div className="mb-4">
       <input

@@ -1,10 +1,10 @@
 
-import { auth } from "../firebase/firebase";
+import { auth } from "../Firebase/Firebase";
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
 import { FaPlusCircle, FaChevronDown, FaChevronUp, FaTrashAlt } from "react-icons/fa";
 import { useState } from "react";
-import { db } from "../firebase/firebase";
+import { db } from "../Firebase/Firebase";
 import { collection, addDoc,getDocs } from "firebase/firestore";
 
 
