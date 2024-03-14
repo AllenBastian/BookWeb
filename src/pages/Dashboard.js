@@ -98,6 +98,7 @@ const Dashboard = () => {
 
   const handleSubmit = async (event) => {
     setIsDialogOpen(false);
+    setExpandedBook(null)
     setBookDetails((prev) => [...prev, newBookInfo]);
     console.log(newBookInfo);
     try {
