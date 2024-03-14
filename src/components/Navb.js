@@ -1,6 +1,6 @@
 import React, { useState,useEffect} from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider,signOut } from "firebase/auth";
-import { auth } from "../Firebase/Firebase";
+import { auth } from "../firebase/Firebase";
 
 
 import {
