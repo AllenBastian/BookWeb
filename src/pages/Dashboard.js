@@ -38,12 +38,12 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const handleExpand = (bookId) => {
+  const handleExpand = (booktitle) => {
     setExpandedBook((prevExpandedBook) => {
-      if (prevExpandedBook === bookId) {
+      if (prevExpandedBook === booktitle) {
         return null;
       }
-      return bookId;
+      return booktitle;
     });
   };
 
@@ -126,7 +126,7 @@ const Dashboard = () => {
     <div className="bg-gray-100 p-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-center">
         <div>
-          <div className="flex items-center justify-between p-4 border border-gray-300 rounded">
+          <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
             <span className="text-lg">ADD BOOKS</span>
             <FaPlusCircle
               size={20}
@@ -209,22 +209,22 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-          <div className="p-4 border border-gray-300 rounded mt-2 h-screen overflow-auto">
+          <div className="p-4 bg-white rounded-lg shadow-md mt-2 h-screen overflow-auto">
             {bookDetails.map((book, index) => (
               <div key={index} className="mb-4">
                 <div
                   className="flex justify-between items-center cursor-pointer"
-                  onClick={() => handleExpand(book.id)}
+                  onClick={() => handleExpand(book.title)}
                 >
                   <span>{book.title}</span>
-                  {expandedBook === book.id ? (
+                  {expandedBook === book.title ? (
                     <FaChevronUp />
                   ) : (
                     <FaChevronDown />
                   )}
                 </div>
 
-                {expandedBook === book.id && (
+                {expandedBook === book.title && (
                   <>
                     <div className="border-t border-gray-300 pt-2">
                       <p>Author: {book.author}</p>
@@ -261,14 +261,14 @@ const Dashboard = () => {
           </div>
         </div>
         <div>
-          <div className=" p-4 border border-gray-300 rounded">REQUESTS</div>
-          <div className=" p-4 border border-gray-300 rounded mt-2 h-screen">
+          <div className=" p-4 bg-white rounded-lg shadow-md">REQUESTS</div>
+          <div className=" p-4 bg-white rounded-lg shadow-md mt-2 h-screen">
             content here
           </div>
         </div>
         <div>
-          <div className=" p-4 border border-gray-300 rounded">STATUS </div>
-          <div className=" p-4 border border-gray-300 rounded mt-2 h-screen">
+          <div className=" p-4 bg-white rounded-lg shadow-md">STATUS </div>
+          <div className=" p-4 bg-white rounded-lg shadow-md mt-2 h-screen">
             content here
           </div>
         </div>

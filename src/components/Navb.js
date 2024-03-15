@@ -78,7 +78,7 @@ function NavList() {
         color="blue-gray"
         className="p-1 font-medium"
       >
-        <a href="#" className="flex items-center hover:text-blue-500 transition-colors">
+        <a href="/viewbooks" className="flex items-center hover:text-blue-500 transition-colors">
           VIEW BOOKS
         </a>
       </Typography>
