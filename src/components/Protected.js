@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { auth } from "../Firebase/Firebase";
+import { auth } from "../firebase/Firebase";
 
 
 
