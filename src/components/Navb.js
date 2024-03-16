@@ -134,7 +134,7 @@ export function NavbarSimple() {
       <div className="flex items-center justify-between text-blue-gray-900">
         <Typography
           as="a"
-          href="#"
+          href="http://localhost:3000/"
           className="mr-4  cursor-pointer py-1.5 text-2xl font-bold"
         >
          BOOKWEB

@@ -1,5 +1,7 @@
 
+
 import { auth } from "../firebase/Firebase";
+
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
 import {
@@ -9,6 +11,7 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { useState } from "react";
+
 
 import { db } from "../firebase/Firebase";
 import { collection, addDoc, getDocs, where, query,deleteDoc } from "firebase/firestore";
