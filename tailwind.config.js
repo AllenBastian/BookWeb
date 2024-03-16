@@ -8,6 +8,9 @@ module.exports = withMT({
 
   theme: {
     extend: {
+      colors: {
+        'offwhite':'#FAF9F6'
+      },
       fontFamily: {
         myfont: ["Oxanium","sans-serif"],
       },
