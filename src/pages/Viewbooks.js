@@ -17,6 +17,8 @@ const Viewbooks = () => {
   const [searchCat, setSearchCat] = useState("");
   const [searchUser, setSearchUser] = useState("");
 
+  console.log(window.innerWidth)
+
   const auth = getAuth();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -125,33 +127,23 @@ const Viewbooks = () => {
     //   </div>
     // </div>
     <div className="bg-gray-100 p-4">
-      <div class="grid md:grid-rows-7 grid-rows-1 md:grid-flow-col gap-4">
-        <div class="md:row-span-7 md:col-span-3 bg-white rounded-lg shadow-md p-4 h-screen mt-5 overflow-y-auto">
+      <div class="grid md:grid-rows-7 grid-rows-1 md:grid-flow-col gap-4 " >
+        <div class="md:row-span-7 md:col-span-3 bg-white rounded-lg shadow-md p-4 h-screen mt-5  overflow-y-auto" style={window.innerWidth >= 1024 ? { width: '900px' } : {}}>
           <h2 className="text-xl font-medium mb-4">Book Listings</h2>
           {bookDetails.map((book, index) => (
             <div key={index} className="mb-4">
               <div
-                className="flex justify-between items-center cursor-pointer"
+                className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-200 "
                 onClick={() => handleExpand(book.id)}
               >
-                <span>{book.title}</span>
-                {expandedBook === book.id ? <FaChevronUp /> : <FaChevronDown />}
+                 <div>
+        {book.title} 
+        <span className="ml-5 text-gray-500">{book.author}</span>
+      </div>
+               
               </div>
 
-              {expandedBook === book.id && (
-                <div className="border-t border-gray-300 pt-2">
-                  <p className="mb-2">Author: {book.author}</p>
-                  <p className="mb-2">Description: {book.description}</p>
-                  <div className="flex items-center justify-end mr-2 mt-2">
-                    <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
-                      <FaRegHandPaper /> Request
-                    </button>
-                    <button className="text-green-300 mr-2 hover:text-green-800 transition-colors duration-300 transform hover:scale-110">
-                      <FaRegComments /> Chat
-                    </button>
-                  </div>
-                </div>
-              )}
+          
             </div>
           ))}
         </div>
@@ -186,11 +178,17 @@ const Viewbooks = () => {
 
         </div>
      
-      <div class="md:col-span-2 md:row-span-6 bg-white rounded-lg shadow-md p-4 ">
-      <div className="flex items-center">
-        <h2>Reviews</h2>
-        </div>
-      </div>
+        <div class="md:col-span-2 md:row-span-6 bg-white rounded-lg shadow-md p-4 relative">
+  <h2>Book and user Info</h2>
+  <div className="absolute bottom-0 right-0 mb-2 mr-2 info">
+    <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
+      <FaRegHandPaper /> Request
+    </button>
+    <button className="text-green-300 mr-2 hover:text-green-800 transition-colors duration-300 transform hover:scale-110">
+      <FaRegComments /> Chat
+    </button>
+  </div>
+</div>
     </div>
     </div>
   );
