@@ -1,7 +1,6 @@
 
 
 import { auth } from "../firebase/Firebase";
-
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
 import {
