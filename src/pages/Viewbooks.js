@@ -47,6 +47,7 @@ const Viewbooks = () => {
 
           const querySnapshot = await getDocs(q);
           const fetched = querySnapshot.docs.map((doc) => doc.data());
+          console.log("during on clickcc")
 
           let r;
           r = query(
@@ -76,9 +77,10 @@ const Viewbooks = () => {
     console.log("in here");
 
     fetchData();
-  }, [user]);
+  }, [user,clicked]);
 
   const sendReq = async () => {
+
     try {
       let ids = doc(collection(db, "books")).id;
       const docRef = await addDoc(collection(db, "requests"), {
@@ -122,7 +124,7 @@ const Viewbooks = () => {
         
     }
 };
-
+console.log(selectedBook)
 
   return (
     <div className="bg-gray-100 p-4">
@@ -186,7 +188,7 @@ const Viewbooks = () => {
               <div className="absolute bottom-0 right-0 mb-2 mr-2 info">
                 {selectedBook.requested === false ? (
                   <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
-                    <FaRegHandPaper onClick={() => sendReq()} /> Request
+                    <FaRegHandPaper onClick={() =>{sendReq(); setClicked(prev=>!prev);setSelectedBook(book=>({...book,requested:true}))}} /> Request
                   </button>
                 ) : (
                   <div>You have already requested.</div>
