@@ -99,7 +99,7 @@ const Viewbooks = () => {
 
   const dynamicSearch = async (searchString, category) => {
     console.log(initialBook);
-    await setSearchBook(searchString.trim());
+    await setSearchBook(searchString);
     console.log(searchString);
     if (searchString === "" && category === "all") setBookDetails(initialBook);
     else if (searchString === "") {
