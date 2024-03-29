@@ -1,6 +1,8 @@
-import React, { useState,useEffect} from "react";
+import React, { useState,useEffect,useContext} from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider,signOut } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
+import { useNavigate } from "react-router-dom";
+import { IsSignedUpContext } from "../context/Context";
 
 
 import {
@@ -14,6 +16,8 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
  
 function NavList() {
 
+  const { isSignedUp } = useContext(IsSignedUpContext);
+  const nav = useNavigate();
   const provider = new GoogleAuthProvider();
   const [user,setUser] = useState(false);
 
@@ -33,6 +37,7 @@ function NavList() {
   const logout = ()=>{
     signOut(auth).then(() => {
       setUser(false)
+      nav("/")
       console.log("signed out")
     }).catch((error) => {
       
@@ -51,7 +56,6 @@ function NavList() {
             const email = error.customData.email;
             const credential = GoogleAuthProvider.credentialFromError(error);
         });
-
   
   }
   return (
@@ -101,6 +105,8 @@ function NavList() {
          Logout
        </Button>)}
       </Typography>
+
+      {isSignedUp===false&&user===true&&(
       <Typography
         as="li"
         variant="small"
@@ -111,6 +117,7 @@ function NavList() {
           Sign Up
         </a>
       </Typography>
+      )}
     </ul>
   );
 }
