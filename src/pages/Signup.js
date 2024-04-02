@@ -1,8 +1,28 @@
-import React, { useState } from 'react';
-import { db } from "../Firebase/Firebase";
-import { collection,addDoc } from "firebase/firestore";
+import { useState,useEffect, useContext } from 'react';
+import { db } from "../firebase/Firebase";
+import { collection,addDoc} from "firebase/firestore";
+import { IsSignedUpContext } from '../context/Context';
+import { onAuthStateChanged,getAuth } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+
 
 const SignUpForm = () => {
+
+  const [user,setUser] = useState()
+  const nav = useNavigate()
+  const auth = getAuth();
+  const {setIsSignedUp} = useContext(IsSignedUpContext)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const [userInfo, setUserInfo] = useState({
     name: '',
     semester: '',
@@ -12,7 +32,7 @@ const SignUpForm = () => {
     contact: ''
   });
 
-  console.log(userInfo);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,7 +45,7 @@ const SignUpForm = () => {
    const handleSignUp = async () => {
     console.log("enetrerd the functtion")
     try {
-      const userRef = await addDoc(collection(db, 'users'), userInfo);
+      const userRef = await addDoc(collection(db, 'users'),{ ...userInfo, email: user.email});
     console.log('User signed up successfully! User ID:', userRef.id);
 
       setUserInfo({
@@ -36,6 +56,9 @@ const SignUpForm = () => {
         college: '',
         contact: ''
       });
+
+      setIsSignedUp(true)
+      nav("/")
     } catch (error) {
       console.error('Error signing up:', error);
     }
@@ -108,7 +131,7 @@ const SignUpForm = () => {
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
       />
     </div>
-    <button onClick={()=>handleSignUp} className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500">Sign Up</button>
+    <button onClick={()=>handleSignUp()} className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500">Sign Up</button>
      </div>
     </div>
   );

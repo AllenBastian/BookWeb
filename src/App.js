@@ -1,5 +1,5 @@
 import { Protected } from "./components/Protected";
-import { NavbarSimple } from "./components/Navb";
+import  {NavbarSimple}  from "./components/Navb";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import SignUpForm from "./pages/Signup";
@@ -17,8 +17,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage/>}/>
           <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>
-          <Route path="/Signup" element={<SignUpForm/>} />
-          <Route path="/viewbooks" element={<Viewbooks/>} />
+          <Route path="/Signup" element={<Protected><SignUpForm/></Protected>} />
+          <Route path="/viewbooks" element={<Protected><Viewbooks/></Protected>} />
         </Routes>
         </div>
         </IsSignedUpProvider>

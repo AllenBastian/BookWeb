@@ -3,7 +3,14 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { FaSearch } from "react-icons/fa";
 import { db } from "../firebase/Firebase";
 import { Select, Option } from "@material-tailwind/react";
-import { collection, where, query, getDocs } from "firebase/firestore";
+import {
+  collection,
+  where,
+  query,
+  getDocs,
+  doc,
+  addDoc,
+} from "firebase/firestore";
 import {
   FaChevronDown,
   FaChevronUp,
@@ -13,68 +20,58 @@ import {
 
 const Viewbooks = () => {
   const [bookDetails, setBookDetails] = useState([]);
+  const [req, setReq] = useState([]);
   const [user, setUser] = useState("");
-  const [expandedBook, setExpandedBook] = useState(null);
   const [searchCat, setSearchCat] = useState("all");
-  const [searchUser, setSearchUser] = useState("");
+  const [searchBook, setSearchBook] = useState("");
   const [clicked, setClicked] = useState(false);
-
+  const [selectedBook, setSelectedBook] = useState("");
+  const [initialBook,setInitialBook] = useState("");
   const auth = getAuth();
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
       }
     });
+    return ()=>{
+      unsubscribe();
+    }
   }, []);
 
   useEffect(() => {
-
     const fetchData = async () => {
       try {
-        const fetched = [];
         if (user) {
           let q;
-          if ((searchUser === "")) {
-            console.log("incat")
-            if (searchCat === "all") {
-              q = query(
-                collection(db, "books"),
-                where("owner", "!=", user.email)
-              );
-            } else {
-              q = query(
-                collection(db, "books"),
-                where("owner", "!=", user.email),
-                where("category", "==", searchCat)
-              );
-            }
-          }
-          else
-          {
-            console.log("inuser")
-            if (searchCat === "all") {
-                q = query(
-                  collection(db, "books"),
-                  where("owner", "!=", user.email),
-                  where("owner", "==", searchUser)
-                );
-              } else {
-                q = query(
-                  collection(db, "books"),
-                  where("owner", "!=", user.email),
-                  where("category", "==", searchCat),
-                  where("owner", "==", searchUser)
-                );
-              }
-          }
+
+          q = query(collection(db, "books"), where("owner", "!=", user.email));
+
           const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            fetched.push({ id: doc.id, ...doc.data() });
-          });
+          const fetched = querySnapshot.docs.map((doc) => doc.data());
+          console.log("during on clickcc")
+
+          let r;
+          r = query(
+            collection(db, "requests"),
+            where("requestfrom", "==", user.email)
+          );
+          const querySnapshot2 = await getDocs(r);
+          const requestData = querySnapshot2.docs.map((doc) => doc.data());
+          console.log(requestData);
+          const requestUids = requestData.map((data) => data.bookuid);
+          console.log("requids" + requestUids);
+          const updatedFetched = fetched.map((element) => ({
+            ...element,
+            requested: requestUids.includes(element.uid) ? true : false,
+          }));
+
+    
+          console.log(updatedFetched);
+          setInitialBook(updatedFetched)
+          setBookDetails(updatedFetched);
         }
-        setBookDetails(fetched);
       } catch (error) {
         console.error("Error fetching books: ", error);
       }
@@ -83,18 +80,54 @@ const Viewbooks = () => {
     console.log("in here");
 
     fetchData();
-  }, [user, searchCat, clicked]);
+  }, [user,clicked]);
 
-  console.log(bookDetails);
+  const sendReq = async () => {
 
-  const handleExpand = (bookid) => {
-    setExpandedBook((prevExpandedBook) => {
-      if (prevExpandedBook === bookid) {
-        return null;
-      }
-      return bookid;
-    });
+    try {
+      let ids = doc(collection(db, "books")).id;
+      const docRef = await addDoc(collection(db, "requests"), {
+        requestfrom: user.email,
+        requestto: selectedBook.owner,
+        booktitile: selectedBook.title,
+        bookuid: selectedBook.uid,
+        ruid: ids,
+      });
+
+      alert("request send successfully");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
+
+  const dynamicSearch = async (searchString, category) => {
+    console.log(initialBook);
+    await setSearchBook(searchString);
+    console.log(searchString);
+    if (searchString === "" && category === "all") setBookDetails(initialBook);
+    else if (searchString === "") {
+      console.log("in here yeah");
+      const filteredSearch = initialBook.filter(
+        (book) =>
+          book.category.toLowerCase().trim() === category.toLowerCase().trim()
+      );
+      setBookDetails(filteredSearch);
+    } else {
+      const filteredSearch = initialBook.filter((book) =>
+        book.title.toLowerCase().trim().startsWith(searchString)
+      );
+      if (category !== "all") {
+        const filteredSearch2 = filteredSearch.filter(
+          (book) => book.category.toLowerCase() === category.toLowerCase()
+        );
+        setBookDetails(filteredSearch2);
+      }
+      else
+        setBookDetails(filteredSearch);
+        
+    }
+};
+console.log(selectedBook)
 
   return (
     <div className="bg-gray-100 p-4">
@@ -104,11 +137,11 @@ const Viewbooks = () => {
           style={window.innerWidth >= 1024 ? { width: "900px" } : {}}
         >
           <h2 className="text-xl font-medium mb-4">Book Listings</h2>
-          {bookDetails.map((book, index) => (
-            <div key={index} className="mb-4">
+          {bookDetails.map((book) => (
+            <div key={book.uid} className="mb-4">
               <div
                 className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-200 "
-                onClick={() => handleExpand(book.id)}
+                onClick={() => setSelectedBook(book)}
               >
                 <div>
                   {book.title}
@@ -124,7 +157,8 @@ const Viewbooks = () => {
               <Select
                 value={searchCat}
                 onChange={(val) => {
-                  setSearchCat(val);
+                    setSearchCat(val);
+                    dynamicSearch(searchBook.toLowerCase(), val);
                 }}
                 label="Search Category"
                 className=""
@@ -138,32 +172,36 @@ const Viewbooks = () => {
               <input
                 type="text"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                value={searchUser}
-                onChange={(event) => setSearchUser(event.target.value)}
-                placeholder="search by username"
+                value={searchBook}
+                onChange={(event) => dynamicSearch(event.target.value.toLowerCase(), searchCat)}
+                placeholder="search by title"
               />
             </div>
-            <button
-              onClick={() => {
-                setClicked((prevClicked) => !prevClicked)
-              }}
-              className="ml-2 bg-blue-500 text-white rounded-lg px-4 py-2 focus:outline-none hover:bg-blue-600"
-            >
-              <FaSearch />
-            </button>
+            
           </div>
         </div>
 
         <div class="md:col-span-2 md:row-span-6 bg-white rounded-lg shadow-md p-4 relative">
           <h2>Book and user Info</h2>
-          <div className="absolute bottom-0 right-0 mb-2 mr-2 info">
-            <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
-              <FaRegHandPaper /> Request
-            </button>
-            <button className="text-green-300 mr-2 hover:text-green-800 transition-colors duration-300 transform hover:scale-110">
-              <FaRegComments /> Chat
-            </button>
-          </div>
+          {selectedBook && (
+            <>
+              <p>title:{selectedBook.title}</p>
+              <p>author:{selectedBook.author}</p>
+              <p>description:{selectedBook.description}</p>
+              <div className="absolute bottom-0 right-0 mb-2 mr-2 info">
+                {selectedBook.requested === false ? (
+                  <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
+                    <FaRegHandPaper onClick={() =>{sendReq(); setClicked(prev=>!prev);setSelectedBook(book=>({...book,requested:true}))}} /> Request
+                  </button>
+                ) : (
+                  <div>You have already requested.</div>
+                )}
+                <button className="text-green-300 mr-2 hover:text-green-800 transition-colors duration-300 transform hover:scale-110">
+                  <FaRegComments /> Chat
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
