@@ -1,5 +1,5 @@
 import { Protected } from "./components/Protected";
-import { NavbarSimple } from "./components/Navb";
+import  {NavbarSimple}  from "./components/Navb";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import SignUpForm from "./pages/Signup";

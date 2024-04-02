@@ -30,11 +30,14 @@ const Viewbooks = () => {
   const auth = getAuth();
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
       }
     });
+    return ()=>{
+      unsubscribe();
+    }
   }, []);
 
   useEffect(() => {

@@ -10,7 +10,8 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { useState } from "react";
-
+import { css } from "@emotion/react";
+import { ClipLoader } from "react-spinners";
 
 import { db } from "../firebase/Firebase";
 import { collection, addDoc, getDocs,doc, where, query,deleteDoc } from "firebase/firestore";
@@ -19,11 +20,13 @@ import { Button } from "@material-tailwind/react";
 
 const Dashboard = () => {
   const user = auth.currentUser;
+  const { isSignedUp } = useContext(IsSignedUpContext);
   const [expandedReq,setExpandedReq] = useState(null)
   const [expandedBook, setExpandedBook] = useState(null);
   const [deletePop, setDeletePop] = useState(false);
   const [bookDetails, setBookDetails] = useState([]);
   const [reqDetails,setReqDetails] = useState([]);
+  const [loading,setLoading] = useState(true)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -45,9 +48,12 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Error fetching books: ", error);
       }
+      finally{
+        setLoading(false)
+      }
     };
-
     fetchData();
+   
   }, []);
 
   console.log(bookDetails)
@@ -96,7 +102,7 @@ const Dashboard = () => {
 
   
   console.log(bookDetails);
-  const { isSignedUp } = useContext(IsSignedUpContext);
+ 
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newBookInfo, setNewBookInfo] = useState({
@@ -146,6 +152,13 @@ const Dashboard = () => {
       category: "",
     });
   };
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader color={"#123abc"} loading={loading} size={50} />
+      </div>
+    );
 
   return (
     <div className="bg-gray-100 p-4">
