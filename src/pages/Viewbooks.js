@@ -12,8 +12,6 @@ import {
   addDoc,
 } from "firebase/firestore";
 import {
-  FaChevronDown,
-  FaChevronUp,
   FaRegComments,
   FaRegHandPaper,
 } from "react-icons/fa";
@@ -106,7 +104,6 @@ const Viewbooks = () => {
     console.log(searchString);
     if (searchString === "" && category === "all") setBookDetails(initialBook);
     else if (searchString === "") {
-      console.log("in here yeah");
       const filteredSearch = initialBook.filter(
         (book) =>
           book.category.toLowerCase().trim() === category.toLowerCase().trim()
