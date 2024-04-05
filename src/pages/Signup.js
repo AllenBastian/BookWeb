@@ -1,17 +1,16 @@
-import { useState,useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { db } from "../firebase/Firebase";
-import { collection,addDoc} from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { IsSignedUpContext } from '../context/Context';
-import { onAuthStateChanged,getAuth } from 'firebase/auth';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-
 
 const SignUpForm = () => {
 
-  const [user,setUser] = useState()
-  const nav = useNavigate()
+  const [user, setUser] = useState();
+  const nav = useNavigate();
   const auth = getAuth();
-  const {setIsSignedUp} = useContext(IsSignedUpContext)
+  const { setIsSignedUp } = useContext(IsSignedUpContext);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -29,10 +28,19 @@ const SignUpForm = () => {
     department: '',
     batch: '',
     college: '',
-    contact: ''
+    contact: '',
+    email: '' // Add email field to userInfo state
   });
 
-
+  useEffect(() => {
+    // Pre-fill email field with user's email if available
+    if (user) {
+      setUserInfo(prevState => ({
+        ...prevState,
+        email: user.email
+      }));
+    }
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,11 +50,10 @@ const SignUpForm = () => {
     }));
   };
 
-   const handleSignUp = async () => {
-    console.log("enetrerd the functtion")
+  const handleSignUp = async () => {
     try {
-      const userRef = await addDoc(collection(db, 'users'),{ ...userInfo, email: user.email});
-    console.log('User signed up successfully! User ID:', userRef.id);
+      const userRef = await addDoc(collection(db, 'users'), userInfo);
+      console.log('User signed up successfully! User ID:', userRef.id);
 
       setUserInfo({
         name: '',
@@ -54,11 +61,12 @@ const SignUpForm = () => {
         department: '',
         batch: '',
         college: '',
-        contact: ''
+        contact: '',
+        email: userInfo.email // Preserve the email for prefilling in next signup
       });
 
-      setIsSignedUp(true)
-      nav("/")
+      setIsSignedUp(true);
+      nav("/");
     } catch (error) {
       console.error('Error signing up:', error);
     }
@@ -66,73 +74,84 @@ const SignUpForm = () => {
 
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
-  {/* Background image */}
-  <img src="images/brownbooks.jpg" alt="Background" className="absolute inset-0 w-full h-full object-cover" />
-  {/* Signup box */}
-  <div className="absolute bg-offwhite p-7 rounded-md shadow-md" style={{ zIndex: 1 }}>
-    <h2 className="text-2xl font-semibold mb-4">Welcome to BOOKWEB!</h2>
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="Name"
-        name="name"
-        value={userInfo.name}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="Semester"
-        name="semester"
-        value={userInfo.semester}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="Department"
-        name="department"
-        value={userInfo.department}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="Batch"
-        name="batch"
-        value={userInfo.batch}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="College"
-        name="college"
-        value={userInfo.college}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="Contact"
-        name="contact"
-        value={userInfo.contact}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <button onClick={()=>handleSignUp()} className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500">Sign Up</button>
-     </div>
+      {/* Background image */}
+      <img src="images/brownbooks.jpg" alt="Background" className="absolute inset-0 w-full h-full object-cover" />
+      {/* Signup box */}
+      <div className="absolute bg-offwhite p-7 rounded-md shadow-md" style={{ zIndex: 1 }}>
+        <h2 className="text-2xl font-semibold mb-4">Welcome to BOOKWEB!</h2>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Name"
+            name="name"
+            value={userInfo.name}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Semester"
+            name="semester"
+            value={userInfo.semester}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Department"
+            name="department"
+            value={userInfo.department}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Batch"
+            name="batch"
+            value={userInfo.batch}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="College"
+            name="college"
+            value={userInfo.college}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Contact"
+            name="contact"
+            value={userInfo.contact}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={userInfo.email}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            readOnly // Make the email field read-only to prevent modification
+          />
+        </div>
+        <button onClick={handleSignUp} className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500">Sign Up</button>
+      </div>
     </div>
   );
 };
