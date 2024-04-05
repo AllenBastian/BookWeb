@@ -93,9 +93,12 @@ const Viewbooks = () => {
 
   const dynamicSearch = async (searchString, category) => {
     await setSearchBook(searchString);
-    if (searchString === "" && category === "all") {
-      setBookDetails(initialBook);
-    } else if (searchString === "") {
+
+    console.log(searchString);
+    if (searchString === "" && category === "all") setBookDetails(initialBook);
+    else if (searchString === "") {
+
+
       const filteredSearch = initialBook.filter(
         (book) => book.category.toLowerCase().trim() === category.toLowerCase().trim()
       );
