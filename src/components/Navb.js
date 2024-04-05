@@ -93,6 +93,16 @@ function NavList() {
               DASHBOARD
             </a>
           </Typography>
+          <Typography
+            as="li"
+            variant="small"
+            color="blue-gray"
+            className="p-1 font-medium"
+          >
+            <a href="/userprofile" className="flex items-center hover:text-blue-500 transition-colors ">
+              PROFILE
+            </a>
+            </Typography>
 
           <Typography
             as="li"
