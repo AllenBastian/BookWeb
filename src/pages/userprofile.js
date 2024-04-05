@@ -19,6 +19,7 @@ const UserProfilePage = () => {
           const userCollectionRef = collection(db, 'users');
           const q = query(userCollectionRef, where('email', '==', currentUser.email));
           const querySnapshot = await getDocs(q);
+          console.log(querySnapshot)
 
           if (!querySnapshot.empty) {
             const userDataFromSignup = querySnapshot.docs[0].data();
@@ -44,12 +45,13 @@ const UserProfilePage = () => {
   };
 
   const handleSaveClick = async () => {
+    setEditing(false);
     try {
-      console.log("Save button clicked"); // Log that the save button was clicked
+      console.log("Save button clicked"); 
   
-      // Construct a new object with the updated user data
+
       const updatedUserData = {
-        ...userData, // Preserve other fields from the existing user data
+        ...userData, 
         name: formData.name,
         semester: formData.semester,
         department: formData.department,
@@ -58,21 +60,33 @@ const UserProfilePage = () => {
         contact: formData.contact
       };
   
-      // Update user data in Firestore
-      const userRef = doc(db, 'users', userData.uid);
-      await updateDoc(userRef, updatedUserData);
+
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const userCollectionRef = collection(db, 'users');
+        const q = query(userCollectionRef, where('email', '==', currentUser.email));
+        const querySnapshot = await getDocs(q);
   
-      console.log("Updated user data in Firestore:", updatedUserData);
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0];
+          const userRef = doc(db, 'users', userDoc.id);
+          await updateDoc(userRef, updatedUserData);
   
-      // Update local state with the new user data
-      setUserData(updatedUserData);
-      setEditing(false); // Exit editing mode
+          console.log("Updated user data in Firestore:", updatedUserData);
+  
+          setUserData(updatedUserData);
+         
+        } else {
+          console.error('User document not found');
+        }
+      } else {
+        console.error('Current user not found');
+      }
   
     } catch (error) {
       console.error('Error saving user data:', error);
     }
   };
-  
   
   
   
@@ -113,8 +127,8 @@ const UserProfilePage = () => {
               <input type="text" name="batch" value={formData.batch || ''} onChange={handleInputChange} className="mb-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
               <input type="text" name="college" value={formData.college || ''} onChange={handleInputChange} className="mb-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
               <input type="text" name="contact" value={formData.contact || ''} onChange={handleInputChange} className="mb-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
-              <button type="button" onClick={handleSaveClick} className="bg-blue-500 text-white py-2 px-4 rounded">Save</button>
-              <button type="button" onClick={closeModal} className="bg-red-500 text-white py-2 px-4 rounded ml-2">Cancel</button>
+              <button type="button" onClick={()=>handleSaveClick()} className="bg-blue-500 text-white py-2 px-4 rounded">Save</button>
+              <button type="button" onClick={()=>closeModal()} className="bg-red-500 text-white py-2 px-4 rounded ml-2">Cancel</button>
             </form>
           </div>
         </div>
@@ -124,6 +138,3 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
-
-
-
