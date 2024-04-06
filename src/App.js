@@ -4,10 +4,11 @@ import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import SignUpForm from "./pages/Signup";
 import Viewbooks from "./pages/Viewbooks";
-
+import Postpage from "./pages/Postpage"
+import UserProfile from "./pages/userprofile"; 
 import Forum from "./pages/Forum";
 import { BrowserRouter,Route,Routes } from "react-router-dom";
-import UserProfile from "./pages/userprofile"; // Import UserProfile component
+
 
 
 import { IsSignedUpProvider } from "./context/Context";
@@ -27,6 +28,7 @@ function App() {
           <Route path="/viewbooks" element={<Protected><Viewbooks/></Protected>} />
           <Route path="/Forum" element={<Protected><Forum/></Protected>}/>
           <Route path="/userprofile" element={<Protected><UserProfile /></Protected>} />
+          <Route path="/forum/:id" element={<Protected><Postpage/></Protected>}/>
         </Routes>
         </div>
       </IsSignedUpProvider>
