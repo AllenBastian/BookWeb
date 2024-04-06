@@ -93,11 +93,13 @@ const Viewbooks = () => {
 
   const dynamicSearch = async (searchString, category) => {
     await setSearchBook(searchString);
-    if (searchString === "" && category === "all") {
-      setBookDetails(initialBook);
-    } else if (searchString === "") {
+    console.log(searchString);
+    if (searchString === "" && category === "all") setBookDetails(initialBook);
+    else if (searchString === "") {
+      console.log("in here yeah");
       const filteredSearch = initialBook.filter(
-        (book) => book.category.toLowerCase().trim() === category.toLowerCase().trim()
+        (book) =>
+          book.category.toLowerCase().trim() === category.toLowerCase().trim()
       );
       setBookDetails(filteredSearch);
     } else {
@@ -109,18 +111,19 @@ const Viewbooks = () => {
           (book) => book.category.toLowerCase() === category.toLowerCase()
         );
         setBookDetails(filteredSearch2);
-      } else {
-        setBookDetails(filteredSearch);
       }
+      else
+        setBookDetails(filteredSearch);
+        
     }
-  };
+};
 
   return (
     <div className="bg-gray-100 p-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow-md p-4">
           <h2 className="text-xl font-medium mb-4">Book Listings</h2>
-          <div className="overflow-y-auto max-h-screen">
+          <div className="overflow-y-auto lg:h-screen">
             {bookDetails.map((book) => (
               <div key={book.uid} className="mb-4">
                 <div
@@ -137,30 +140,37 @@ const Viewbooks = () => {
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl font-medium mb-4">Search Category</h2>
+  <h2 className="text-xl font-medium mb-4">Filters</h2>
+  <div className="lg:flex lg:items-center mb-4">
+    <div className="flex mb-4 lg:mb-0 lg:mr-4 lg:w-1/2">
+      <Select
+        value={searchCat}
+        onChange={(val) => {
+          setSearchCat(val);
+          dynamicSearch(searchBook.toLowerCase(), val);
+        }}
+        label="Search Category"
+        className="w-full"
+      >
+        <Option value="all">All</Option>
+        <Option value="Fiction">Fiction</Option>
+        <Option value="Non-Fiction">Non-Fiction</Option>
+      </Select>
+    </div>
+    <div className="flex lg:w-1/2">
+      <input
+        type="text"
+        className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
+        value={searchBook}
+        onChange={(event) => dynamicSearch(event.target.value.toLowerCase(), searchCat)}
+        placeholder="Search by title"
+      />
+    </div>
+</div>
+
+          
           <div className="mb-4">
-            <Select
-              value={searchCat}
-              onChange={(val) => {
-                setSearchCat(val);
-                dynamicSearch(searchBook.toLowerCase(), val);
-              }}
-              label="Search Category"
-              className=""
-            >
-              <Option value="all">All</Option>
-              <Option value="Fiction">Fiction</Option>
-              <Option value="Non-Fiction">Non-Fiction</Option>
-            </Select>
-          </div>
-          <div className="mb-4">
-            <input
-              type="text"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-              value={searchBook}
-              onChange={(event) => setSearchBook(event.target.value)}
-              placeholder="Search by title"
-            />
+            
           </div>
           <div>
             <h2>Book and User Info</h2>
@@ -169,7 +179,7 @@ const Viewbooks = () => {
                 <p>Title: {selectedBook.title}</p>
                 <p>Author: {selectedBook.author}</p>
                 <p>Description: {selectedBook.description}</p>
-                <div className="mb-2 mr-2">
+                <div className="mb-2 mr-2 mt-5">
                   {selectedBook.requested === false ? (
                     <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
                       <FaRegHandPaper onClick={() => { sendReq(); setClicked(prev => !prev); setSelectedBook(book => ({ ...book, requested: true })) }} /> Request
@@ -181,6 +191,7 @@ const Viewbooks = () => {
                     <FaRegComments /> Chat
                   </button>
                 </div>
+                <h1 className="text-xl">Reviews</h1>
               </>
             )}
           </div>
