@@ -207,7 +207,6 @@ const UserProfilePage = () => {
   <p className="text-gray-500">You haven't made any posts yet.</p>
 )}
 
-
             </div>
           )}
           {selectedOption === "Exchange" && (
