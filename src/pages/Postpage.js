@@ -117,7 +117,7 @@ const Postpage = () => {
               </p>
             </div>
 
-            <div className=" lg:mt-12 lg:w-1/4 lg:pl-4">
+            <div className=" lg:mt lg:w-1/4 lg:pl-4 ">
               <div className="mb-8">
                 <textarea
                   value={currentComment}
@@ -137,12 +137,14 @@ const Postpage = () => {
                 </button>
               </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Comments</h3>
+
+              <h3 className="text-lg font-semibold mb-4">Comments</h3>
+              <div className="overflow-auto" style={{ maxHeight: "500px" }}>
+                
                 {fetchedComments.map((element) => (
                   <div
                     key={element.uid}
-                    className="bg-gray-100 rounded-lg p-4 mb-4"
+                    className="bg-gray-100 rounded-lg p-4 mb-4 "
                   >
                     <p className="text-gray-600 text-sm">{element.comment}</p>
                     <div className="text-xs text-green-500 mb-3">

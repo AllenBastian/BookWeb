@@ -80,7 +80,7 @@ const Forum = () => {
         owner: user.email,
         username: name,
         uid: ids,
-        date: formattedDate
+        time: formattedDate
       });
       console.log("User signed up successfully! User ID:", userRef.id);
       setPostDetails({
@@ -182,7 +182,7 @@ const Forum = () => {
               {element.category}
             </p>
             <p className="text-sm text-gray-500">
-             Posted by {element.username} on {element.date}.
+             Posted by {element.username} on {element.time}.
             </p>
           </div>
         </div>
