@@ -1,5 +1,5 @@
 import React from 'react';
-import Carousel from './Carousel'; // Assuming you have the Carousel component in a file named Carousel.js
+import Carouselc from '../components/Carousel'; 
 
 
 const Homepage = ()=>{
@@ -20,7 +20,7 @@ const Homepage = ()=>{
       
       <section className="mb-8">
         <h2 className="text-2xl text-center font-bold mb-4">Top Trending Books</h2>
-        <Carousel/>
+        <Carouselc/>
       </section>
 
 
