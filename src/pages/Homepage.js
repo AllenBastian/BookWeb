@@ -2,7 +2,6 @@
 
 const Homepage = ()=>{
 
-  
     return(
       <div className="container mx-auto p-4">
       <header className="text-center mb-8">

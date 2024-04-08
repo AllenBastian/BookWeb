@@ -4,6 +4,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { IsSignedUpContext } from '../context/Context';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@material-tailwind/react';
 
 const SignUpForm = () => {
 
@@ -62,7 +63,7 @@ const SignUpForm = () => {
         batch: '',
         college: '',
         contact: '',
-        email: userInfo.email // Preserve the email for prefilling in next signup
+        email: userInfo.email 
       });
 
       setIsSignedUp(true);
@@ -74,9 +75,9 @@ const SignUpForm = () => {
 
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
-      {/* Background image */}
+      
       <img src="images/brownbooks.jpg" alt="Background" className="absolute inset-0 w-full h-full object-cover" />
-      {/* Signup box */}
+     
       <div className="absolute bg-offwhite p-7 rounded-md shadow-md" style={{ zIndex: 1 }}>
         <h2 className="text-2xl font-semibold mb-4">Welcome to BOOKWEB!</h2>
         <div className="mb-4">
@@ -147,7 +148,7 @@ const SignUpForm = () => {
             value={userInfo.email}
             onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-            readOnly // Make the email field read-only to prevent modification
+            readOnly
           />
         </div>
         <button onClick={handleSignUp} className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500">Sign Up</button>
