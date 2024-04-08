@@ -1,3 +1,5 @@
+import React from 'react';
+import Carousel from './Carousel'; // Assuming you have the Carousel component in a file named Carousel.js
 
 
 const Homepage = ()=>{
@@ -16,15 +18,11 @@ const Homepage = ()=>{
         We want to share the joy of reading and connecting with fellow book lovers. Together, let's explore the endless possibilities that lie behind every page.</p>
       </section>
       
-      <section className=" pt-10">
-        <h2 className="text-3xl text-center font-bold mb-8">Top Trending Books</h2>
-        <ul>
-          <li className="text-lg">1.The Seven Husbands of Evelyn Hugo</li>
-          <li className="text-lg">2.The Song of Achilles</li>
-          <li className="text-lg">3.The Midnight Library</li>
-          {/* Add more books as needed */}
-        </ul>
+      <section className="mb-8">
+        <h2 className="text-2xl text-center font-bold mb-4">Top Trending Books</h2>
+        <Carousel/>
       </section>
+
 
       <section className="pt-20 mb-8">
         <h2 className="text-2xl text-center text-gray-800 mb-8">How BookWeb Works</h2>
