@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db, storage } from "../firebase/Firebase";
+import { db, storage } from "../Firebase/Firebase";
 import { collection, getDocs, query, where, doc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { Button } from "@material-tailwind/react";

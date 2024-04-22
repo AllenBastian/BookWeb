@@ -2,9 +2,9 @@ import { RiPencilLine } from "react-icons/ri";
 import { Select, Option } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/Firebase";
+import { auth } from "../Firebase/Firebase";
 import { addDoc, collection, doc, query, getDocs,where } from "firebase/firestore";
-import { db } from "../firebase/Firebase";
+import { db } from "../Firebase/Firebase";
 import { useNavigate } from 'react-router-dom';
 
 const Forum = () => {

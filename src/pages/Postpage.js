@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { db } from "../firebase/Firebase";
+import { db } from "../Firebase/Firebase";
 import { getUserByEmail } from "../utils/Search";
 import {
   addDoc,
@@ -11,7 +11,7 @@ import {
   where,
   updateDoc,
 } from "firebase/firestore";
-import { auth } from "../firebase/Firebase";
+import { auth } from "../Firebase/Firebase";
 
 const Postpage = () => {
   const [currentPost, setCurrentPost] = useState(null);

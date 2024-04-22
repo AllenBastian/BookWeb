@@ -1,6 +1,6 @@
 
 
-import { auth } from "../firebase/Firebase";
+import { auth } from "../Firebase/Firebase";
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
 import {
@@ -13,7 +13,7 @@ import { useState } from "react";
 import { css } from "@emotion/react";
 import { ClipLoader } from "react-spinners";
 
-import { db } from "../firebase/Firebase";
+import { db } from "../Firebase/Firebase";
 import { collection, addDoc, getDocs,doc, where, query,deleteDoc } from "firebase/firestore";
 import { Button } from "@material-tailwind/react";
 
@@ -165,7 +165,9 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-center">
         <div>
           <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-            <span className="text-lg">MY BOOKS</span>
+          <span className="text-lg">MY BOOKS</span>
+            
+
             <FaPlusCircle
               size={20}
               onClick={() => {

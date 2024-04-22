@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext,useMemo } from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { auth } from "../firebase/Firebase";
+import { auth } from "../Firebase/Firebase";
 import { useNavigate } from "react-router-dom";
 import { IsSignedUpContext } from "../context/Context";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase/Firebase";
+import { db } from "../Firebase/Firebase";
 import { css } from "@emotion/react";
 import { ClipLoader } from "react-spinners";
 
@@ -168,12 +168,13 @@ export function NavbarSimple() {
     <Navbar className="mx-auto max-w-screen-xl px-6 py-3">
       <div className="flex items-center justify-between text-blue-gray-900">
         <Typography
-          as="a"
-          href="/"
-          className="mr-4  cursor-pointer py-1.5 text-2xl font-bold"
-        >
-          BOOKWEB
+            as="a"
+            href="/"
+            className="mr-4 cursor-pointer py-1.5 text-3xl font-bold" // Increase text size to text-3xl
+          >
+            BOOKWEB
         </Typography>
+
         <div className="hidden lg:block">
           <NavList />
         </div>
