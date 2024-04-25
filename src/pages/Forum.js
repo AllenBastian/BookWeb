@@ -117,20 +117,20 @@ const Forum = () => {
             <Option>Material Tailwind Angular</Option>
             <Option>Material Tailwind Svelte</Option>
           </Select>
-          <h1 className="text-lg font-semibold mt-5">Trending</h1>
-          {/* Display names of posts in descending order of likes with scrolling */}
-          <div>
+          <div className="bg-white-200 rounded-lg p-4 mt-4"> {/* Boxed layout for Trending section */}
+            <h1 className="text-lg font-semibold mb-2">Trending</h1>
+            {/* Display names of posts in descending order of likes */}
             {sortedPostTitles.map((title, index) => {
               const post = fetchedPosts.find(post => post.title === title);
               const likesCount = post.likes ? post.likes.length : 0;
               const commentsCount = post.commentsCount ? post.commentsCount : 0;
 
               return (
-                <div key={index} className="text-sm mt-1" style={{ color: "black", fontWeight: "bold" }}>
-                  <span>{title}</span>
+                <div key={index} className="text-sm mt-1 p-2 border border-gray-300 rounded-lg "> {/* Box each post */}
+                  <span className="font-bold">{title}</span>
                   <div className="flex mt-1">
                     <span><FaThumbsUp className="text-blue-500" /> {likesCount}</span>
-                    <span className="ml-2"><FaComment className="text-gray-500" /> {commentsCount} Comments</span>
+                    <span className="ml-2"><FaComment className="text-gray-500" /> {commentsCount} </span>
                   </div>
                 </div>
               );
@@ -224,5 +224,4 @@ const Forum = () => {
 };
 
 export default Forum;
-
 
