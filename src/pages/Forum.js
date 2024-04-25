@@ -6,6 +6,7 @@ import { auth } from "../firebase/Firebase";
 import { addDoc, collection, query, getDocs, where } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
 import { useNavigate } from 'react-router-dom';
+import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
 
 const Forum = () => {
   const nav = useNavigate();
@@ -40,12 +41,24 @@ const Forum = () => {
           const querySnapshot = await getDocs(q);
           const fetched = querySnapshot.docs.map((doc) => doc.data());
 
+          // Fetch comments count for each post
+          for (let i = 0; i < fetched.length; i++) {
+            const postId = fetched[i].uid;
+            const commentsQuery = query(collection(db, "comments"), where("postid", "==", postId));
+            const commentsSnapshot = await getDocs(commentsQuery);
+            fetched[i].commentsCount = commentsSnapshot.size;
+          }
+
           setFetchedPosts(fetched);
 
           const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
-          const username = querySnapshot2.docs[0].data().name;
-          setName(username);
+
+          // Ensure that the querySnapshot2 is not empty before accessing its data
+          if (!querySnapshot2.empty) {
+            const username = querySnapshot2.docs[0].data().name;
+            setName(username);
+          }
         }
       } catch (error) {
         console.error("Error fetching posts: ", error);
@@ -107,11 +120,21 @@ const Forum = () => {
           <h1 className="text-lg font-semibold mt-5">Trending</h1>
           {/* Display names of posts in descending order of likes with scrolling */}
           <div>
-            {sortedPostTitles.map((title, index) => (
-              <div key={index} className="text-sm mt-1" style={{ color: "black", fontWeight: "bold" }}>
-                {title}
-              </div>
-            ))}
+            {sortedPostTitles.map((title, index) => {
+              const post = fetchedPosts.find(post => post.title === title);
+              const likesCount = post.likes ? post.likes.length : 0;
+              const commentsCount = post.commentsCount ? post.commentsCount : 0;
+
+              return (
+                <div key={index} className="text-sm mt-1" style={{ color: "black", fontWeight: "bold" }}>
+                  <span>{title}</span>
+                  <div className="flex mt-1">
+                    <span><FaThumbsUp className="text-blue-500" /> {likesCount}</span>
+                    <span className="ml-2"><FaComment className="text-gray-500" /> {commentsCount} Comments</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -201,3 +224,5 @@ const Forum = () => {
 };
 
 export default Forum;
+
+

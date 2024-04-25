@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { db } from "../firebase/Firebase";
 import { getUserByEmail } from "../utils/Search";
-import { FaThumbsUp } from "react-icons/fa";
+import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
 import { ClipLoader } from "react-spinners";
 import {
   addDoc,
@@ -28,66 +28,60 @@ const Postpage = () => {
   const [showReplyInput, setShowReplyInput] = useState();
   const [showReplies, setShowReplies] = useState();
   const [liked, setLiked] = useState(false);
-  const [noOfLikes,setNoOfLikes] = useState();
-  
+  const [noOfLikes, setNoOfLikes] = useState();
 
   useEffect(() => {
-    console.log("hey in 1");
     setUser(auth.currentUser);
     setCurrentPost(location.state);
 
     const fetchData = async () => {
-        try {
-            if (user) {
-                const cuser = await getUserByEmail(user.email);
-                setCurrentUser(cuser);
-                console.log(currentPost);
-                let q = query(
-                    collection(db, "comments"),
-                    where("postid", "==", currentPost.uid)
-                );
-                const querySnapshot = await getDocs(q);
-                const fetched = querySnapshot.docs.map((doc) => doc.data());
-                setFetchedComments(fetched);
-            }
-        } catch (error) {
-            console.error("Error fetching data:", error);
+      try {
+        if (user) {
+          const cuser = await getUserByEmail(user.email);
+          setCurrentUser(cuser);
+          let q = query(
+            collection(db, "comments"),
+            where("postid", "==", currentPost.uid)
+          );
+          const querySnapshot = await getDocs(q);
+          const fetched = querySnapshot.docs.map((doc) => doc.data());
+          setFetchedComments(fetched);
         }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
     fetchData();
-}, [location.state, user, clicked]);
+  }, [location.state, user, clicked]);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
-        try {
-            if (currentUser) {
-                const querySnapshot2 = await getDocs(
-                    query(collection(db, "posts"), where("uid", "==", currentPost.uid))
-                );
-                const refData = querySnapshot2.docs[0].data();
-                const likes = refData.likes || [];
-                console.log(likes);
-                
-                const hasLiked = likes.some(
-                    (element) => element === currentUser.name
-                );
-                console.log("hs"+hasLiked);
-                setLiked(hasLiked);
-                setNoOfLikes(likes.length)
-            }
-        } catch (error) {
-            console.error("Error fetching likes:", error);
-        } finally {
-            setLoading(false); 
+      try {
+        if (currentUser) {
+          const querySnapshot2 = await getDocs(
+            query(
+              collection(db, "posts"),
+              where("uid", "==", currentPost.uid)
+            )
+          );
+          const refData = querySnapshot2.docs[0].data();
+          const likes = refData.likes || [];
+          const hasLiked = likes.some(
+            (element) => element === currentUser.name
+          );
+          setLiked(hasLiked);
+          setNoOfLikes(likes.length);
         }
+      } catch (error) {
+        console.error("Error fetching likes:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchData()
-}, [currentUser]);
-
-
-  console.log("out");
+    fetchData();
+  }, [currentUser]);
 
   const postComment = async () => {
     setCurrenComment("");
@@ -109,19 +103,15 @@ useEffect(() => {
     }
   };
 
-  console.log("liked", liked);
   const commentReply = async (uid) => {
     setCurrentReply("");
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-US", options);
     try {
-      console.log(uid);
-
       const querySnapshot = await getDocs(
         query(collection(db, "comments"), where("uid", "==", uid))
       );
-
       const refId = querySnapshot.docs[0].id;
       const refData = querySnapshot.docs[0].data();
       const newReply = {
@@ -130,7 +120,6 @@ useEffect(() => {
         date: formattedDate,
       };
       const updatedReplies = [...(refData.replies || []), newReply];
-      console.log(updatedReplies);
       const commentRef = doc(db, "comments", refId);
       await updateDoc(commentRef, { replies: updatedReplies });
     } catch {
@@ -139,14 +128,9 @@ useEffect(() => {
   };
 
   const likePost = async (newliked) => {
+    if (newliked === false) setNoOfLikes(noOfLikes - 1);
+    else setNoOfLikes(noOfLikes + 1);
 
-    if(newliked===false)
-      setNoOfLikes(noOfLikes-1)
-    else
-      setNoOfLikes(noOfLikes+1)
-
-
-    console.log("new value"+newliked)
     try {
       const querySnapshot = await getDocs(
         query(collection(db, "posts"), where("uid", "==", currentPost.uid))
@@ -155,7 +139,6 @@ useEffect(() => {
       const refId = querySnapshot.docs[0].id;
 
       const postRef = doc(db, "posts", refId);
-      console.log(currentPost.username);
 
       let likeToAdd = [];
       const likeData = refData.likes || [];
@@ -165,17 +148,10 @@ useEffect(() => {
       );
 
       if (indexToRemove !== -1) {
-        console.log("inside");
-        likeToAdd = likeData.filter((_,index) => index!=indexToRemove)
-        console.log((likeToAdd))
+        likeToAdd = likeData.filter((_, index) => index !== indexToRemove);
       } else {
-        console.log("innnnn");
-        likeToAdd = [
-          ...likeData,
-          currentUser.name,
-        ];
+        likeToAdd = [...likeData, currentUser.name];
       }
-      console.log(likeToAdd);
 
       await updateDoc(postRef, { likes: likeToAdd });
     } catch (error) {
@@ -206,21 +182,20 @@ useEffect(() => {
               </p>
 
               <div className="transition-colors duration-300 ease-in-out">
-              <FaThumbsUp
-    size={25}
-    className={`inline-block ${
-        liked === true
-            ? "text-blue-500 hover:text-blue-700"
-            : "text-gray-500 hover:text-gray-700"
-        } transition-colors duration-300 ease-in-out mb-2`}
-    onClick={() => {
-        const newLiked = !liked;
-        setLiked(newLiked); 
-        likePost(newLiked); 
-    }}
-/>
-<div className="text-green text-2xl">{noOfLikes}</div>
-
+                <FaThumbsUp
+                  size={25}
+                  className={`inline-block ${
+                    liked === true
+                      ? "text-blue-500 hover:text-blue-700"
+                      : "text-gray-500 hover:text-gray-700"
+                  } transition-colors duration-300 ease-in-out mb-2`}
+                  onClick={() => {
+                    const newLiked = !liked;
+                    setLiked(newLiked);
+                    likePost(newLiked);
+                  }}
+                />
+                <div className="text-green text-2xl">{noOfLikes}</div>
               </div>
             </div>
 
@@ -319,6 +294,17 @@ useEffect(() => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Display number of likes and comments below the comments section */}
+        <div className="container mx-auto px-4 pb-8 flex items-center justify-end pr-12">
+          <FaThumbsUp className="text-blue-500 mr-1" />
+          <span className="text-sm text-gray-600 mr-4">{noOfLikes} Likes</span>
+
+          <FaComment className="text-gray-500 mr-1" />
+          <span className="text-sm text-gray-600">
+            {fetchedComments.length} Comments
+          </span>
         </div>
       </div>
     );
