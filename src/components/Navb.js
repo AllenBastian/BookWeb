@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext,useMemo } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
@@ -17,12 +17,14 @@ import {
 } from "@material-tailwind/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
+import { SlLogin, SlLogout } from "react-icons/sl"; // Importing SlLogin and SlLogout icons for login and logout
+
 function NavList() {
   const { isSignedUp, setIsSignedUp } = useContext(IsSignedUpContext);
   const nav = useNavigate();
   const provider = new GoogleAuthProvider();
   const [user, setUser] = useState(false);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -42,7 +44,7 @@ function NavList() {
         setUser(false);
         setIsSignedUp(false);
       }
-      setLoading(false); 
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [auth]);
@@ -67,13 +69,13 @@ function NavList() {
   };
 
   if (loading)
-    return <div></div>
+    return <div></div>;
 
   return (
     <ul className="my-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
       {user && (
         <>
-         <Typography
+          <Typography
             as="li"
             variant="small"
             color="blue-gray"
@@ -102,7 +104,7 @@ function NavList() {
             <a href="/userprofile" className="flex items-center hover:text-blue-500 transition-colors ">
               PROFILE
             </a>
-            </Typography>
+          </Typography>
 
           <Typography
             as="li"
@@ -125,11 +127,11 @@ function NavList() {
       >
         {user === false ? (
           <Button onClick={login} className="flex font-myfont items-center hover:text-blue-500 transition-colors">
-            Login
+            <SlLogin className="mr-1" /> Login
           </Button>
         ) : (
           <Button onClick={logout} className="flex items-center  hover:text-blue-500 transition-colors">
-            Logout
+            <SlLogout className="mr-1" /> Logout
           </Button>
         )}
       </Typography>

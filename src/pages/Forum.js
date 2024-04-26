@@ -3,18 +3,24 @@ import { Select, Option } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
-import { addDoc, collection, doc, query, getDocs,where } from "firebase/firestore";
+import { addDoc, collection, query, getDocs, where } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
 import { useNavigate } from 'react-router-dom';
+import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
 
 const Forum = () => {
   const nav = useNavigate();
   const [post, setPost] = useState(false);
   const [cat, setCat] = useState();
   const [user, setUser] = useState();
-  const [name,setName] = useState();
-  const [fetchedPosts,setFetchedPosts] = useState([])
-  const [clicked,setClicked] = useState(false)
+  const [name, setName] = useState();
+  const [fetchedPosts, setFetchedPosts] = useState([]);
+  const [clicked, setClicked] = useState(false);
+  const [postDetails, setPostDetails] = useState({
+    title: "",
+    description: "",
+    category: "",
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -31,19 +37,28 @@ const Forum = () => {
     const fetchData = async () => {
       try {
         if (user) {
-          let q;
-
-          q = query(collection(db, "posts"));
+          const q = query(collection(db, "posts"));
           const querySnapshot = await getDocs(q);
           const fetched = querySnapshot.docs.map((doc) => doc.data());
-          console.log("hello");
-          setFetchedPosts(fetched)
 
-          let r = query(collection(db,"users"),where("email","==",user.email))
+          // Fetch comments count for each post
+          for (let i = 0; i < fetched.length; i++) {
+            const postId = fetched[i].uid;
+            const commentsQuery = query(collection(db, "comments"), where("postid", "==", postId));
+            const commentsSnapshot = await getDocs(commentsQuery);
+            fetched[i].commentsCount = commentsSnapshot.size;
+          }
+
+          setFetchedPosts(fetched);
+
+          const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
-          const username = querySnapshot2.docs[0].data().name;
-          setName(username)
 
+          // Ensure that the querySnapshot2 is not empty before accessing its data
+          if (!querySnapshot2.empty) {
+            const username = querySnapshot2.docs[0].data().name;
+            setName(username);
+          }
         }
       } catch (error) {
         console.error("Error fetching posts: ", error);
@@ -51,15 +66,7 @@ const Forum = () => {
     };
 
     fetchData();
-  }, [user,clicked]);
-  console.log("hello");
-  const [postDetails, setPostDetails] = useState({
-    title: "",
-    description: "",
-    category: "",
-  });
-
-  console.log(fetchedPosts)
+  }, [user, clicked]);
 
   const setInput = (event) => {
     const { name, value } = event.target;
@@ -70,29 +77,34 @@ const Forum = () => {
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-US", options);
-    console.log(formattedDate);
     setPost(false);
     try {
-      let ids = doc(collection(db, "posts")).id;
-      const userRef = await addDoc(collection(db, "posts"), {
+      const ids = await addDoc(collection(db, "posts"), {
         ...postDetails,
         category: cat,
         owner: user.email,
         username: name,
-        uid: ids,
         time: formattedDate
       });
-      console.log("User signed up successfully! User ID:", userRef.id);
+      console.log("Post created successfully! Post ID:", ids.id);
       setPostDetails({
         title: "",
         description: "",
         category: "",
       });
-    } catch {
-      console.log("error");
+      setClicked(prev => !prev); // Trigger data fetching after creating a post
+    } catch (error) {
+      console.error("Error creating post: ", error);
     }
   };
-  console.log(clicked);
+
+  // Create a separate array with just post titles for displaying in descending order of likes
+  const sortedPostTitles = fetchedPosts.map(post => post.title).sort((a, b) => {
+    const postA = fetchedPosts.find(p => p.title === a);
+    const postB = fetchedPosts.find(p => p.title === b);
+    return postB.likes.length - postA.likes.length;
+  });
+
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="hidden lg:flex flex-col w-1/4 bg-white border-r border-gray-300">
@@ -105,7 +117,25 @@ const Forum = () => {
             <Option>Material Tailwind Angular</Option>
             <Option>Material Tailwind Svelte</Option>
           </Select>
-          <h1 className="text-lg font-semibold mt-5">Trending</h1>
+          <div className="bg-white-200 rounded-lg p-4 mt-4"> {/* Boxed layout for Trending section */}
+            <h1 className="text-lg font-semibold mb-2">Trending</h1>
+            {/* Display names of posts in descending order of likes */}
+            {sortedPostTitles.map((title, index) => {
+              const post = fetchedPosts.find(post => post.title === title);
+              const likesCount = post.likes ? post.likes.length : 0;
+              const commentsCount = post.commentsCount ? post.commentsCount : 0;
+
+              return (
+                <div key={index} className="text-sm mt-1 p-2 border border-gray-300 rounded-lg "> {/* Box each post */}
+                  <span className="font-bold">{title}</span>
+                  <div className="flex mt-1">
+                    <span><FaThumbsUp className="text-blue-500" /> {likesCount}</span>
+                    <span className="ml-2"><FaComment className="text-gray-500" /> {commentsCount} </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -158,7 +188,7 @@ const Forum = () => {
 
               <div className="flex justify-end mt-4">
                 <button
-                  onClick={() => {createPost(); setClicked(prev=>!prev);}}
+                  onClick={createPost}
                   className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-2"
                 >
                   POST
@@ -174,22 +204,24 @@ const Forum = () => {
           </div>
         )}
 
-{fetchedPosts.map((element)=>(
-        <div key={element.uid} className="p-2">
-          <div onClick={()=>{nav(`/forum/${element.uid}`,{state:element})}} className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200">
-            <h2 className="text-lg font-semibold mb-2">{element.title}</h2>
-            <p className="text-gray-600 mb-2">
-              {element.category}
-            </p>
-            <p className="text-sm text-gray-500">
-             Posted by {element.username} on {element.time}.
-            </p>
+        {/* Render posts */}
+        {fetchedPosts.map((element) => (
+          <div key={element.uid} className="p-2">
+            <div onClick={() => nav(`/forum/${element.uid}`, { state: element })} className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200">
+              <h2 className="text-lg font-semibold mb-2">{element.title}</h2>
+              <p className="text-gray-600 mb-2">
+                {element.category}
+              </p>
+              <p className="text-sm text-gray-500">
+                Posted by {element.username} on {element.time}.
+              </p>
+            </div>
           </div>
-        </div>
-))}
+        ))}
       </div>
     </div>
   );
 };
 
 export default Forum;
+

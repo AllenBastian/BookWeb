@@ -22,6 +22,7 @@ const UserProfilePage = () => {
           const userCollectionRef = collection(db, 'users');
           const q = query(userCollectionRef, where('email', '==', currentUser.email));
           const querySnapshot = await getDocs(q);
+          console.log(querySnapshot)
 
           if (!querySnapshot.empty) {
             const userDataFromSignup = querySnapshot.docs[0].data();
@@ -92,7 +93,6 @@ const UserProfilePage = () => {
         const userCollectionRef = collection(db, 'users');
         const q = query(userCollectionRef, where('email', '==', currentUser.email));
         const querySnapshot = await getDocs(q);
-
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0];
           const userRef = doc(db, 'users', userDoc.id);
@@ -108,7 +108,6 @@ const UserProfilePage = () => {
       } else {
         console.error('Current user not found');
       }
-
     } catch (error) {
       console.error('Error saving user data:', error);
     }
@@ -245,4 +244,5 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
+
 
