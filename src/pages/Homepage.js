@@ -29,19 +29,19 @@ const Homepage = ()=>{
 <section className="pt-20 mb-8">
     <h2 className="text-2xl text-center text-gray-800 mb-8">How BookWeb Works</h2>
     <div className="flex justify-center  mb-8 p-10 ">
-        <div className="flex items-center flex-col items-center mr-4">
+        <div className="flex  flex-col items-center mr-4">
             <User className="text-3xl text-red-500 mr-2" />
             <h3 className="text-x1 text-center text-500 p-5">1.  Login or Create Your Account</h3>
         </div>
-        <div className="flex items-center flex-col items-center mr-4">
+        <div className="flex  flex-col items-center mr-4">
             <Search className="text-3xl text-red-500 mr-2" />
             <h3 className="text-x1 text-center text-500 p-5">2.  Search for and find your next dream book</h3>
         </div>
-        <div className="flex items-center flex-col items-center mr-4">
+        <div className="flex  flex-col items-center mr-4">
             <MessageCircle className="text-3xl text-red-500 mr-2" />
             <h3 className="text-x1 text-center text-500 p-5">3.  Connect with the book owner via WebChat</h3>
         </div>
-        <div className="flex items-center flex-col items-center ">
+        <div className="flex ¯ß flex-col items-center ">
             <BookOpen className="text-3xl text-red-500 mr-2" />
             <h3 className="text-x1 text-center text-500 p-5">4.  Get the book and enjoy your reading!</h3>
         </div>

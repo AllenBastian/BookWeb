@@ -44,7 +44,8 @@ const Viewbooks = () => {
 
           q = query(
             collection(db, "books"),
-            where("owner", "!=", user.email)
+            where("owner", "!=", user.email),
+            where("isBorrowed","==",false)
           );
 
           const querySnapshot = await getDocs(q);
@@ -83,7 +84,9 @@ const Viewbooks = () => {
         booktitile: selectedBook.title,
         bookuid: selectedBook.uid,
         ruid: ids,
+        accepted: false,
       });
+
 
       alert("Request sent successfully");
     } catch (e) {
@@ -181,8 +184,8 @@ const Viewbooks = () => {
                 <p>Description: {selectedBook.description}</p>
                 <div className="mb-2 mr-2 mt-5">
                   {selectedBook.requested === false ? (
-                    <button className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
-                      <FaRegHandPaper onClick={() => { sendReq(); setClicked(prev => !prev); setSelectedBook(book => ({ ...book, requested: true })) }} /> Request
+                    <button onClick={() => { sendReq(); setClicked((prev)=>!prev); setSelectedBook(book => ({ ...book, requested: true })) }}  className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
+                      <FaRegHandPaper /> Request
                     </button>
                   ) : (
                     <div>You have already requested.</div>
