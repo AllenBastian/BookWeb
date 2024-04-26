@@ -41,20 +41,30 @@ const Forum = () => {
           const querySnapshot = await getDocs(q);
           const fetched = querySnapshot.docs.map((doc) => doc.data());
 
-          // Fetch comments count for each post
-          for (let i = 0; i < fetched.length; i++) {
-            const postId = fetched[i].uid;
-            const commentsQuery = query(collection(db, "comments"), where("postid", "==", postId));
-            const commentsSnapshot = await getDocs(commentsQuery);
-            fetched[i].commentsCount = commentsSnapshot.size;
-          }
+        // Get all post IDs
+const postIds = fetched.map(post => post.uid);
+const commentsCountMap = {};
+
+
+const commentsQuery = query(collection(db, "comments"), where("postid", "in", postIds));
+const commentsSnapshot = await getDocs(commentsQuery);
+
+
+commentsSnapshot.forEach(commentDoc => {
+    const postId = commentDoc.data().postid;
+    commentsCountMap[postId] = (commentsCountMap[postId] || 0) + 1;
+});
+
+fetched.forEach(post => {
+    post.commentsCount = commentsCountMap[post.uid] || 0;
+});
+
 
           setFetchedPosts(fetched);
 
           const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
 
-          // Ensure that the querySnapshot2 is not empty before accessing its data
           if (!querySnapshot2.empty) {
             const username = querySnapshot2.docs[0].data().name;
             setName(username);
@@ -92,7 +102,7 @@ const Forum = () => {
         description: "",
         category: "",
       });
-      setClicked(prev => !prev); // Trigger data fetching after creating a post
+      setClicked(prev => !prev); 
     } catch (error) {
       console.error("Error creating post: ", error);
     }
