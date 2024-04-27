@@ -128,9 +128,14 @@ const Postpage = () => {
   };
 
   const likePost = async (newliked) => {
-    if (newliked === false) setNoOfLikes(noOfLikes - 1);
-    else setNoOfLikes(noOfLikes + 1);
 
+    if(newliked===false)
+      setNoOfLikes(noOfLikes-1)
+    else
+      setNoOfLikes(noOfLikes+1)
+
+
+    console.log("new value"+newliked)
     try {
       const querySnapshot = await getDocs(
         query(collection(db, "posts"), where("uid", "==", currentPost.uid))
@@ -139,6 +144,7 @@ const Postpage = () => {
       const refId = querySnapshot.docs[0].id;
 
       const postRef = doc(db, "posts", refId);
+      console.log(currentPost.username);
 
       let likeToAdd = [];
       const likeData = refData.likes || [];
@@ -148,10 +154,17 @@ const Postpage = () => {
       );
 
       if (indexToRemove !== -1) {
-        likeToAdd = likeData.filter((_, index) => index !== indexToRemove);
+        console.log("inside");
+        likeToAdd = likeData.filter((_,index) => index!=indexToRemove)
+        console.log((likeToAdd))
       } else {
-        likeToAdd = [...likeData, currentUser.name];
+        console.log("innnnn");
+        likeToAdd = [
+          ...likeData,
+          currentUser.name,
+        ];
       }
+      console.log(likeToAdd);
 
       await updateDoc(postRef, { likes: likeToAdd });
     } catch (error) {
@@ -296,8 +309,8 @@ const Postpage = () => {
           </div>
         </div>
 
-        {/* Display number of likes and comments below the comments section */}
-        <div className="container mx-auto px-4 pb-8 flex items-center justify-end pr-12">
+ 
+        <div className="container mx-5 px-4 pb-8 flex items-end justify-end  pr-12">
           <FaThumbsUp className="text-blue-500 mr-1" />
           <span className="text-sm text-gray-600 mr-4">{noOfLikes} Likes</span>
 

@@ -3,9 +3,9 @@ import { Select, Option } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
-import { addDoc, collection, query, getDocs, where } from "firebase/firestore";
+import { addDoc, collection, query, getDocs, where,doc } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
 
 const Forum = () => {
@@ -41,30 +41,34 @@ const Forum = () => {
           const querySnapshot = await getDocs(q);
           const fetched = querySnapshot.docs.map((doc) => doc.data());
 
-        // Get all post IDs
-const postIds = fetched.map(post => post.uid);
-const commentsCountMap = {};
+          const commentsQuery = query(collection(db, "comments"));
+          const commentsSnapshot = await getDocs(commentsQuery);
+          const allComments = commentsSnapshot.docs.map((doc) => doc.data());
+  
+         
+          const commentsByPostId = {};
+          allComments.forEach((comment) => {
+            const postId = comment.postid;
+            commentsByPostId[postId] = commentsByPostId[postId] || 0;
+            commentsByPostId[postId]++;
+          });
 
+          const updatedFetchedPosts = fetched.map((post) => {
+            const commentsCount = commentsByPostId[post.uid] || 0;
+            const totalLikesAndComments = (post.likes ? post.likes.length : 0) + commentsCount;
+            return { ...post, commentsCount, totalLikesAndComments };
+          });
 
-const commentsQuery = query(collection(db, "comments"), where("postid", "in", postIds));
-const commentsSnapshot = await getDocs(commentsQuery);
+          updatedFetchedPosts.sort((a, b) => b.totalLikesAndComments - a.totalLikesAndComments);
 
-
-commentsSnapshot.forEach(commentDoc => {
-    const postId = commentDoc.data().postid;
-    commentsCountMap[postId] = (commentsCountMap[postId] || 0) + 1;
-});
-
-fetched.forEach(post => {
-    post.commentsCount = commentsCountMap[post.uid] || 0;
-});
-
-
-          setFetchedPosts(fetched);
+          setFetchedPosts(updatedFetchedPosts);
+    
+        
 
           const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
 
+    
           if (!querySnapshot2.empty) {
             const username = querySnapshot2.docs[0].data().name;
             setName(username);
@@ -78,6 +82,7 @@ fetched.forEach(post => {
     fetchData();
   }, [user, clicked]);
 
+  console.log(fetchedPosts);
   const setInput = (event) => {
     const { name, value } = event.target;
     setPostDetails((prev) => ({ ...prev, [name]: value }));
@@ -89,31 +94,28 @@ fetched.forEach(post => {
     const formattedDate = date.toLocaleDateString("en-US", options);
     setPost(false);
     try {
-      const ids = await addDoc(collection(db, "posts"), {
+      let ids = doc(collection(db, "posts")).id;
+      const userRef = await addDoc(collection(db, "posts"), {
         ...postDetails,
         category: cat,
         owner: user.email,
         username: name,
+        uid: ids,
         time: formattedDate
       });
-      console.log("Post created successfully! Post ID:", ids.id);
+      console.log("User signed up successfully! User ID:", userRef.id);
       setPostDetails({
         title: "",
         description: "",
         category: "",
       });
-      setClicked(prev => !prev); 
+      setClicked((prev) => !prev);
     } catch (error) {
       console.error("Error creating post: ", error);
     }
   };
 
-  // Create a separate array with just post titles for displaying in descending order of likes
-  const sortedPostTitles = fetchedPosts.map(post => post.title).sort((a, b) => {
-    const postA = fetchedPosts.find(p => p.title === a);
-    const postB = fetchedPosts.find(p => p.title === b);
-    return postB.likes.length - postA.likes.length;
-  });
+
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -127,23 +129,34 @@ fetched.forEach(post => {
             <Option>Material Tailwind Angular</Option>
             <Option>Material Tailwind Svelte</Option>
           </Select>
-          <div className="bg-white-200 rounded-lg p-4 mt-4"> {/* Boxed layout for Trending section */}
+          <div className="bg-white-200 rounded-lg p-4 mt-4">
+            {" "}
+            {/* Boxed layout for Trending section */}
             <h1 className="text-lg font-semibold mb-2">Trending</h1>
             {/* Display names of posts in descending order of likes */}
-            {sortedPostTitles.map((title, index) => {
-              const post = fetchedPosts.find(post => post.title === title);
-              const likesCount = post.likes ? post.likes.length : 0;
-              const commentsCount = post.commentsCount ? post.commentsCount : 0;
 
+            {fetchedPosts.length>0 && fetchedPosts.map((post, index) => {
+
+              let likes = post.likes ? post.likes.length : 0;
               return (
-                <div key={index} className="text-sm mt-1 p-2 border border-gray-300 rounded-lg "> {/* Box each post */}
-                  <span className="font-bold">{title}</span>
+                <div
+                  key={index}
+                  className="text-sm mt-1 p-2 border border-gray-300 rounded-lg "
+                >
+                  {" "}
+                  {/* Box each post */}
+                  <span className="font-bold">{post.title}</span>
                   <div className="flex mt-1">
-                    <span><FaThumbsUp className="text-blue-500" /> {likesCount}</span>
-                    <span className="ml-2"><FaComment className="text-gray-500" /> {commentsCount} </span>
+                    <span>
+                      <FaThumbsUp className="text-blue-500" /> {likes}
+                    </span>
+                    <span className="ml-2">
+                      <FaComment className="text-gray-500" /> {post.commentsCount}{" "}
+                    </span>
                   </div>
                 </div>
               );
+      
             })}
           </div>
         </div>
@@ -214,14 +227,14 @@ fetched.forEach(post => {
           </div>
         )}
 
-        {/* Render posts */}
         {fetchedPosts.map((element) => (
           <div key={element.uid} className="p-2">
-            <div onClick={() => nav(`/forum/${element.uid}`, { state: element })} className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200">
+            <div
+              onClick={() => nav(`/forum/${element.uid}`, { state: element })}
+              className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200"
+            >
               <h2 className="text-lg font-semibold mb-2">{element.title}</h2>
-              <p className="text-gray-600 mb-2">
-                {element.category}
-              </p>
+              <p className="text-gray-600 mb-2">{element.category}</p>
               <p className="text-sm text-gray-500">
                 Posted by {element.username} on {element.time}.
               </p>
@@ -234,4 +247,3 @@ fetched.forEach(post => {
 };
 
 export default Forum;
-
