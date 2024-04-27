@@ -1,15 +1,17 @@
+import React, { useState, useEffect } from "react";
+import { ClipLoader } from "react-spinners";
 import { RiPencilLine } from "react-icons/ri";
+import { FaThumbsUp, FaComment } from "react-icons/fa";
 import { Select, Option } from "@material-tailwind/react";
-import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
 import { addDoc, collection, query, getDocs, where, doc } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
-import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
 
 const Forum = () => {
   const nav = useNavigate();
+  const [loading, setLoading] = useState(true); // State to manage loading
   const [post, setPost] = useState(false);
   const [cat, setCat] = useState();
   const [user, setUser] = useState();
@@ -61,6 +63,7 @@ const Forum = () => {
           updatedFetchedPosts.sort((a, b) => b.totalLikesAndComments - a.totalLikesAndComments);
 
           setFetchedPosts(updatedFetchedPosts);
+          setLoading(false); // Set loading to false after data fetching is completed
 
           const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
@@ -109,6 +112,14 @@ const Forum = () => {
       console.error("Error creating post: ", error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader color={"#123abc"} loading={loading} size={50} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">

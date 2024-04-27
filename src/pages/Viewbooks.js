@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase/Firebase";
 import { Select, Option } from "@material-tailwind/react";
@@ -14,8 +14,10 @@ import {
   FaRegComments,
   FaRegHandPaper,
 } from "react-icons/fa";
+import { ClipLoader } from "react-spinners";
 
 const Viewbooks = () => {
+  const [loading, setLoading] = useState(true); // State to manage loading
   const [bookDetails, setBookDetails] = useState([]);
   const [user, setUser] = useState("");
   const [searchCat, setSearchCat] = useState("all");
@@ -66,6 +68,7 @@ const Viewbooks = () => {
 
           setInitialBook(updatedFetched);
           setBookDetails(updatedFetched);
+          setLoading(false); // Set loading to false after data fetching is completed
         }
       } catch (error) {
         console.error("Error fetching books: ", error);
@@ -121,6 +124,14 @@ const Viewbooks = () => {
     }
 };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader color={"#123abc"} loading={loading} size={50} />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-100 p-4">
       <div className="grid md:grid-cols-2 gap-4">
@@ -143,40 +154,40 @@ const Viewbooks = () => {
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-4">
-  <h2 className="text-xl font-medium mb-4">Filters</h2>
-  <div className="lg:flex lg:items-center mb-4">
-    <div className="flex mb-4 lg:mb-0 lg:mr-4 lg:w-1/2">
-      <Select
-        value={searchCat}
-        onChange={(val) => {
-          setSearchCat(val);
-          dynamicSearch(searchBook.toLowerCase(), val);
-        }}
-        label="Search Category"
-        className="w-full"
-      >
-        <Option value="all">All</Option>
-        <Option value="Fiction">Fiction</Option>
-        <Option value="Non-Fiction">Non-Fiction</Option>
-      </Select>
-    </div>
-    <div className="flex lg:w-1/2">
-      <input
-        type="text"
-        className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
-        value={searchBook}
-        onChange={(event) => dynamicSearch(event.target.value.toLowerCase(), searchCat)}
-        placeholder="Search by title"
-      />
-    </div>
-</div>
-
-          
-          <div className="mb-4">
-            
+          <h2 className="text-xl font-medium mb-4">Filters</h2>
+          <div className="lg:flex lg:items-center mb-4">
+            <div className="flex mb-4 lg:mb-0 lg:mr-4 lg:w-1/2">
+              <Select
+                value={searchCat}
+                onChange={(val) => {
+                  setSearchCat(val);
+                  dynamicSearch(searchBook.toLowerCase(), val);
+                }}
+                label="Search Category"
+                className="w-full"
+              >
+                <Option value="all">All</Option>
+                <Option value="Fiction">Fiction</Option>
+                <Option value="Non-Fiction">Non-Fiction</Option>
+              </Select>
+            </div>
+            <div className="flex lg:w-1/2">
+              <input
+                type="text"
+                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
+                value={searchBook}
+                onChange={(event) =>
+                  dynamicSearch(event.target.value.toLowerCase(), searchCat)
+                }
+                placeholder="Search by title"
+              />
+            </div>
           </div>
+          <div className="mb-4"></div>
           <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Book and User Info</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Book and User Info
+            </h2>
 
             {selectedBook && (
               <>
@@ -185,7 +196,17 @@ const Viewbooks = () => {
                 <p>Description: {selectedBook.description}</p>
                 <div className="mb-2 mr-2 mt-5">
                   {selectedBook.requested === false ? (
-                    <button onClick={() => { sendReq(); setClicked((prev)=>!prev); setSelectedBook(book => ({ ...book, requested: true })) }}  className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110">
+                    <button
+                      onClick={() => {
+                        sendReq();
+                        setClicked((prev) => !prev);
+                        setSelectedBook((book) => ({
+                          ...book,
+                          requested: true,
+                        }));
+                      }}
+                      className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110"
+                    >
                       <FaRegHandPaper /> Request
                     </button>
                   ) : (
