@@ -3,8 +3,10 @@ import { db, storage } from "../firebase/Firebase";
 import { collection, getDocs, query, where, doc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { Button } from "@material-tailwind/react";
+import { ClipLoader } from "react-spinners";
 
 const UserProfilePage = () => {
+  const [loading, setLoading] = useState(true); // State to manage loading
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({});
   const [editing, setEditing] = useState(false);
@@ -32,6 +34,7 @@ const UserProfilePage = () => {
               setProfilePicture(userDataFromSignup.profilePicture);
             }
           }
+          setLoading(false); // Set loading to false after data fetching is completed
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -63,8 +66,14 @@ const UserProfilePage = () => {
   
     fetchUserPosts();
   }, [auth]);
-  
-  
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader color={"#123abc"} loading={loading} size={50} />
+      </div>
+    );
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -244,5 +253,3 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
-
-
