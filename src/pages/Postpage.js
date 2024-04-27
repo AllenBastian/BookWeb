@@ -19,16 +19,16 @@ const Postpage = () => {
   const [loading, setLoading] = useState(true);
   const [currentPost, setCurrentPost] = useState(null);
   const location = useLocation();
-  const [currentReply, setCurrentReply] = useState();
-  const [currentComment, setCurrenComment] = useState();
+  const [currentReply, setCurrentReply] = useState("");
+  const [currentComment, setCurrentComment] = useState("");
   const [fetchedComments, setFetchedComments] = useState([]);
-  const [user, setUser] = useState();
-  const [currentUser, setCurrentUser] = useState();
+  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [clicked, setClicked] = useState(false);
-  const [showReplyInput, setShowReplyInput] = useState();
-  const [showReplies, setShowReplies] = useState();
+  const [showReplyInput, setShowReplyInput] = useState(null);
+  const [showReplies, setShowReplies] = useState(null);
   const [liked, setLiked] = useState(false);
-  const [noOfLikes, setNoOfLikes] = useState();
+  const [noOfLikes, setNoOfLikes] = useState(0);
 
   useEffect(() => {
     setUser(auth.currentUser);
@@ -36,7 +36,8 @@ const Postpage = () => {
 
     const fetchData = async () => {
       try {
-        if (user) {
+        setLoading(true); // Set loading to true when fetching comments
+        if (user && currentPost) {
           const cuser = await getUserByEmail(user.email);
           setCurrentUser(cuser);
           let q = query(
@@ -49,11 +50,13 @@ const Postpage = () => {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Set loading to false when comments are fetched
       }
     };
 
     fetchData();
-  }, [location.state, user, clicked]);
+  }, [location.state, user, currentPost]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,8 +78,6 @@ const Postpage = () => {
         }
       } catch (error) {
         console.error("Error fetching likes:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -84,7 +85,7 @@ const Postpage = () => {
   }, [currentUser]);
 
   const postComment = async () => {
-    setCurrenComment("");
+    setCurrentComment("");
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-US", options);
@@ -128,14 +129,9 @@ const Postpage = () => {
   };
 
   const likePost = async (newliked) => {
+    if (newliked === false) setNoOfLikes(noOfLikes - 1);
+    else setNoOfLikes(noOfLikes + 1);
 
-    if(newliked===false)
-      setNoOfLikes(noOfLikes-1)
-    else
-      setNoOfLikes(noOfLikes+1)
-
-
-    console.log("new value"+newliked)
     try {
       const querySnapshot = await getDocs(
         query(collection(db, "posts"), where("uid", "==", currentPost.uid))
@@ -144,7 +140,6 @@ const Postpage = () => {
       const refId = querySnapshot.docs[0].id;
 
       const postRef = doc(db, "posts", refId);
-      console.log(currentPost.username);
 
       let likeToAdd = [];
       const likeData = refData.likes || [];
@@ -154,17 +149,10 @@ const Postpage = () => {
       );
 
       if (indexToRemove !== -1) {
-        console.log("inside");
-        likeToAdd = likeData.filter((_,index) => index!=indexToRemove)
-        console.log((likeToAdd))
+        likeToAdd = likeData.filter((_, index) => index !== indexToRemove);
       } else {
-        console.log("innnnn");
-        likeToAdd = [
-          ...likeData,
-          currentUser.name,
-        ];
+        likeToAdd = [...likeData, currentUser.name];
       }
-      console.log(likeToAdd);
 
       await updateDoc(postRef, { likes: likeToAdd });
     } catch (error) {
@@ -172,69 +160,68 @@ const Postpage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader color={"#123abc"} loading={loading} size={50} />
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row">
-            <div className="lg:w-3/4 lg:pr-4">
-              <h2 className="text-xl font-semibold mb-4">
-                {currentPost.title}
-              </h2>
-              <h1 className="text-sm font-semibold mb-4">
-                by {currentPost.username}
-              </h1>
-              <p className="text-gray-600 mb-4 text-justify">
-                {currentPost.description}
-              </p>
+  return (
+    <div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row">
+          <div className="lg:w-3/4 lg:pr-4">
+            <h2 className="text-xl font-semibold mb-4">
+              {currentPost && currentPost.title} {/* Add null check */}
+            </h2>
+            <h1 className="text-sm font-semibold mb-4">
+              by {currentPost && currentPost.username} {/* Add null check */}
+            </h1>
+            <p className="text-gray-600 mb-4 text-justify">
+              {currentPost && currentPost.description} {/* Add null check */}
+            </p>
 
-              <div className="transition-colors duration-300 ease-in-out">
-                <FaThumbsUp
-                  size={25}
-                  className={`inline-block ${
-                    liked === true
-                      ? "text-blue-500 hover:text-blue-700"
-                      : "text-gray-500 hover:text-gray-700"
-                  } transition-colors duration-300 ease-in-out mb-2`}
-                  onClick={() => {
-                    const newLiked = !liked;
-                    setLiked(newLiked);
-                    likePost(newLiked);
-                  }}
-                />
-                <div className="text-green text-2xl">{noOfLikes}</div>
-              </div>
+            <div className="transition-colors duration-300 ease-in-out">
+              <FaThumbsUp
+                size={25}
+                className={`inline-block ${
+                  liked === true
+                    ? "text-blue-500 hover:text-blue-700"
+                    : "text-gray-500 hover:text-gray-700"
+                } transition-colors duration-300 ease-in-out mb-2`}
+                onClick={() => {
+                  const newLiked = !liked;
+                  setLiked(newLiked);
+                  likePost(newLiked);
+                }}
+              />
+              <div className="text-green text-2xl">{noOfLikes}</div>
+            </div>
+          </div>
+
+          <div className=" lg:mt lg:w-1/4 lg:pl-4 ">
+            <div className="mb-8">
+              <textarea
+                value={currentComment}
+                onChange={(e) => setCurrentComment(e.target.value)}
+                type="text"
+                placeholder="Write your comment..."
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4"
+              />
+              <button
+                onClick={() => {
+                  postComment();
+                  setClicked((prev) => !prev);
+                }}
+                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+              >
+                Post Comment
+              </button>
             </div>
 
-            <div className=" lg:mt lg:w-1/4 lg:pl-4 ">
-              <div className="mb-8">
-                <textarea
-                  value={currentComment}
-                  onChange={(e) => setCurrenComment(e.target.value)}
-                  type="text"
-                  placeholder="Write your comment..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4"
-                />
-                <button
-                  onClick={() => {
-                    postComment();
-                    setClicked((prev) => !prev);
-                  }}
-                  className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-                >
-                  Post Comment
-                </button>
-              </div>
-
-              <h3 className="text-lg font-semibold mb-4">Comments</h3>
-              <div className="overflow-auto" style={{ maxHeight: "500px" }}>
-                {fetchedComments.map((element) => (
+            <h3 className="text-lg font-semibold mb-4">Comments</h3>
+            <div className="overflow-auto" style={{ maxHeight: "500px" }}>
+              {loading && (
+                <div className="flex justify-center items-center h-64">
+                  <ClipLoader color={"#123abc"} loading={loading} size={50} />
+                </div>
+              )}
+              {!loading &&
+                fetchedComments.map((element) => (
                   <div
                     key={element.uid}
                     className="bg-gray-100 rounded-lg p-4 mb-4 "
@@ -242,9 +229,10 @@ const Postpage = () => {
                     <p className="text-gray-600 text-sm">{element.comment}</p>
                     <div className="text-xs text-green-500 mb-3">
                       .posted on {element.date} by{" "}
-                      {currentPost.username === element.commenter
+                      {currentPost && currentPost.username === element.commenter
                         ? "Author"
-                        : element.commenter}
+                        : element.commenter}{" "}
+                      {/* Add null check */}
                     </div>
                     <button
                       onClick={() => {
@@ -304,24 +292,29 @@ const Postpage = () => {
                     )}
                   </div>
                 ))}
-              </div>
             </div>
           </div>
         </div>
-
- 
-        <div className="container mx-5 px-4 pb-8 flex items-end justify-end  pr-12">
-          <FaThumbsUp className="text-blue-500 mr-1" />
-          <span className="text-sm text-gray-600 mr-4">{noOfLikes} Likes</span>
-
-          <FaComment className="text-gray-500 mr-1" />
-          <span className="text-sm text-gray-600">
-            {fetchedComments.length} Comments
-          </span>
-        </div>
       </div>
-    );
-  }
+
+      <div className="container mx-5 px-4 pb-8 flex items-end justify-end  pr-12">
+        <FaThumbsUp className="text-blue-500 mr-1" />
+        <span className="text-sm text-gray-600 mr-4">{noOfLikes} Likes</span>
+
+        <FaComment className="text-gray-500 mr-1" />
+        <span className="text-sm text-gray-600">
+          {fetchedComments.length} Comments
+        </span>
+      </div>
+    </div>
+  );
 };
 
 export default Postpage;
+
+
+
+              
+
+
+
