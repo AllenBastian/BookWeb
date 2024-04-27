@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import { auth } from "../firebase/Firebase";
@@ -12,6 +12,7 @@ const Chat = () => {
     const [newMessage, setNewMessage] = useState('');
     const location = useLocation();
     const messagesEndRef = useRef(null);
+
     useEffect(() => {
         setCurrentChat(location.state);
         if (currentChat) {
@@ -37,9 +38,8 @@ const Chat = () => {
 
             return () => unsubscribe();
         }
-    }, [location.state,currentChat]);
+    }, [location.state, currentChat]);
 
-    console.log(currentChat)
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
@@ -47,8 +47,8 @@ const Chat = () => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
     const sendMessage = async () => {
-        setNewMessage('');
         try {
             await addDoc(collection(db, 'messages'), {
                 sender: user.email,
@@ -57,7 +57,7 @@ const Chat = () => {
                 timestamp: new Date(),
                 chatid: currentChat.ruid,
             });
-           
+            setNewMessage('');
         } catch (error) {
             console.error('Error sending message:', error);
         }
@@ -66,6 +66,12 @@ const Chat = () => {
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && newMessage.trim() !== "") {
             e.preventDefault();
+            sendMessage();
+        }
+    };
+
+    const handleSendButtonClick = () => {
+        if (newMessage.trim() !== "") {
             sendMessage();
         }
     };
@@ -102,15 +108,20 @@ const Chat = () => {
                             className="flex-1 mr-2 px-3 py-2 rounded-full border border-gray-300 focus:outline-none"
                             value={newMessage}
                             onChange={e => setNewMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
+                            onKeyDown={handleKeyDown} // Add keydown event listener
                         />
-<button className={`flex-none bg-blue-500 text-white rounded-full p-2 ${newMessage === "" ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={()=>sendMessage} disabled={newMessage === ""}>
-    <FaPaperPlane className="w-4 h-4" />
-</button>
+                        <button 
+                            className={`flex-none bg-blue-500 text-white rounded-full p-2 ${newMessage === "" ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                            onClick={handleSendButtonClick} // Add onClick event listener
+                           
+                        >
+                            <FaPaperPlane className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </div>
         </>
     );
 }
+
 export default Chat;
