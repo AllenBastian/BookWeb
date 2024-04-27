@@ -3,7 +3,7 @@ import { Select, Option } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
-import { addDoc, collection, query, getDocs, where,doc } from "firebase/firestore";
+import { addDoc, collection, query, getDocs, where, doc } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
 import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
@@ -44,8 +44,7 @@ const Forum = () => {
           const commentsQuery = query(collection(db, "comments"));
           const commentsSnapshot = await getDocs(commentsQuery);
           const allComments = commentsSnapshot.docs.map((doc) => doc.data());
-  
-         
+
           const commentsByPostId = {};
           allComments.forEach((comment) => {
             const postId = comment.postid;
@@ -62,13 +61,10 @@ const Forum = () => {
           updatedFetchedPosts.sort((a, b) => b.totalLikesAndComments - a.totalLikesAndComments);
 
           setFetchedPosts(updatedFetchedPosts);
-    
-        
 
           const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
 
-    
           if (!querySnapshot2.empty) {
             const username = querySnapshot2.docs[0].data().name;
             setName(username);
@@ -82,7 +78,6 @@ const Forum = () => {
     fetchData();
   }, [user, clicked]);
 
-  console.log(fetchedPosts);
   const setInput = (event) => {
     const { name, value } = event.target;
     setPostDetails((prev) => ({ ...prev, [name]: value }));
@@ -101,7 +96,7 @@ const Forum = () => {
         owner: user.email,
         username: name,
         uid: ids,
-        time: formattedDate
+        time: formattedDate,
       });
       console.log("User signed up successfully! User ID:", userRef.id);
       setPostDetails({
@@ -114,8 +109,6 @@ const Forum = () => {
       console.error("Error creating post: ", error);
     }
   };
-
-
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -130,34 +123,28 @@ const Forum = () => {
             <Option>Material Tailwind Svelte</Option>
           </Select>
           <div className="bg-white-200 rounded-lg p-4 mt-4">
-            {" "}
-            {/* Boxed layout for Trending section */}
             <h1 className="text-lg font-semibold mb-2">Trending</h1>
-            {/* Display names of posts in descending order of likes */}
-
-            {fetchedPosts.length>0 && fetchedPosts.map((post, index) => {
-
-              let likes = post.likes ? post.likes.length : 0;
-              return (
-                <div
-                  key={index}
-                  className="text-sm mt-1 p-2 border border-gray-300 rounded-lg "
-                >
-                  {" "}
-                  {/* Box each post */}
-                  <span className="font-bold">{post.title}</span>
-                  <div className="flex mt-1">
-                    <span>
-                      <FaThumbsUp className="text-blue-500" /> {likes}
-                    </span>
-                    <span className="ml-2">
-                      <FaComment className="text-gray-500" /> {post.commentsCount}{" "}
-                    </span>
+            {fetchedPosts.length > 0 &&
+              fetchedPosts.map((post, index) => {
+                let likes = post.likes ? post.likes.length : 0;
+                return (
+                  <div
+                    key={index}
+                    className="text-sm mt-1 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                    onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+                  >
+                    <span className="font-bold">{post.title}</span>
+                    <div className="flex mt-1">
+                      <span>
+                        <FaThumbsUp className="text-blue-500" /> {likes}
+                      </span>
+                      <span className="ml-2">
+                        <FaComment className="text-gray-500" /> {post.commentsCount}{" "}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              );
-      
-            })}
+                );
+              })}
           </div>
         </div>
       </div>
@@ -171,7 +158,7 @@ const Forum = () => {
           </select>
         </div>
 
-        <div className="fixed bottom-4 right-4 ">
+        <div className="fixed bottom-4 right-4">
           <div className="rounded-full bg-blue-500 p-2">
             <RiPencilLine
               onClick={() => setPost(true)}
@@ -227,17 +214,25 @@ const Forum = () => {
           </div>
         )}
 
-        {fetchedPosts.map((element) => (
-          <div key={element.uid} className="p-2">
+        {fetchedPosts.map((post) => (
+          <div key={post.uid} className="p-2">
             <div
-              onClick={() => nav(`/forum/${element.uid}`, { state: element })}
+              onClick={() => nav(`/forum/${post.uid}`, { state: post })}
               className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200"
             >
-              <h2 className="text-lg font-semibold mb-2">{element.title}</h2>
-              <p className="text-gray-600 mb-2">{element.category}</p>
+              <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
+              <p className="text-gray-600 mb-2">{post.category}</p>
               <p className="text-sm text-gray-500">
-                Posted by {element.username} on {element.time}.
+                Posted by {post.username} on {post.time}.
               </p>
+              <div className="flex justify-end">
+                <span className="text-gray-500 mr-2">
+                  <FaThumbsUp className="text-blue-500" /> {post.likes ? post.likes.length : 0}
+                </span>
+                <span className="text-gray-500">
+                  <FaComment className="text-gray-500" /> {post.commentsCount}
+                </span>
+              </div>
             </div>
           </div>
         ))}
