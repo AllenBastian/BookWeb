@@ -14,6 +14,7 @@ import { BrowserRouter,Route,Routes } from "react-router-dom";
 
 import { IsSignedUpProvider } from "./context/Context";
 import "./App.css";
+import Inbox from "./pages/inbox";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/userprofile" element={<Protected><UserProfile /></Protected>} />
           <Route path="/forum/:id" element={<Protected><Postpage/></Protected>}/>
           <Route path="/chat" element={<Protected><Chat/></Protected>}/>
+          <Route path="/inbox" element={<Protected><Inbox/></Protected>}/>
         </Routes>
         </div>
       </IsSignedUpProvider>

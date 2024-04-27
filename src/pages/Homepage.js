@@ -28,24 +28,44 @@ const Homepage = ()=>{
 
 <section className="pt-20 mb-8">
     <h2 className="text-2xl text-center text-gray-800 mb-8">How BookWeb Works</h2>
-    <div className="flex justify-center  mb-8 p-10 ">
-        <div className="flex  flex-col items-center mr-4">
-            <User className="text-3xl text-red-500 mr-2" />
-            <h3 className="text-x1 text-center text-500 p-5">1.  Login or Create Your Account</h3>
-        </div>
-        <div className="flex  flex-col items-center mr-4">
-            <Search className="text-3xl text-red-500 mr-2" />
-            <h3 className="text-x1 text-center text-500 p-5">2.  Search for and find your next dream book</h3>
-        </div>
-        <div className="flex  flex-col items-center mr-4">
-            <MessageCircle className="text-3xl text-red-500 mr-2" />
-            <h3 className="text-x1 text-center text-500 p-5">3.  Connect with the book owner via WebChat</h3>
-        </div>
-        <div className="flex ¯ß flex-col items-center ">
-            <BookOpen className="text-3xl text-red-500 mr-2" />
-            <h3 className="text-x1 text-center text-500 p-5">4.  Get the book and enjoy your reading!</h3>
-        </div>
+    <div className="flex justify-center mb-8 p-10 space-x-6">
+  <div className="relative flex flex-col items-center justify-center mt-6 text-gray-700 bg-white rounded-xl w-96 shadow-lg">
+    <div className="p-6">
+      <div className="flex items-center justify-center">
+        <User className="text-3xl text-red-500 mr-5" />
+      </div>
+      <h3 className="text-x1 text-center text-500 p-5">1. Login or Create Your Account</h3>
     </div>
+  </div>
+
+  <div className="relative flex flex-col items-center justify-center mt-6 text-gray-700 bg-white rounded-xl w-96 shadow-lg">
+    <div className="p-6">
+      <div className="flex items-center justify-center">
+        <Search className="text-3xl text-red-500 mr-2" />
+      </div>
+      <h3 className="text-x1 text-center text-500 p-5">2. Search for and find your next dream book</h3>
+    </div>
+  </div>
+
+  <div className="relative flex flex-col items-center justify-center mt-6 text-gray-700 bg-white rounded-xl w-96 shadow-lg">
+    <div className="p-6">
+      <div className="flex items-center justify-center">
+        <MessageCircle className="text-3xl text-red-500 mr-2" />
+      </div>
+      <h3 className="text-x1 text-center text-500 p-5">3. Connect with the book owner via WebChat</h3>
+    </div>
+  </div>
+
+  <div className="relative flex flex-col items-center justify-center mt-6 text-gray-700 bg-white rounded-xl w-96 shadow-lg">
+    <div className="p-6">
+      <div className="flex items-center justify-center">
+        <BookOpen className="text-3xl text-red-500 mr-2" />
+      </div>
+      <h3 className="text-x1 text-center text-500 p-5">4. Get the book and enjoy your reading!</h3>
+    </div>
+  </div>
+</div>
+
 </section>
       
       <section>
@@ -57,3 +77,4 @@ const Homepage = ()=>{
 }
 
 export default Homepage;
+
