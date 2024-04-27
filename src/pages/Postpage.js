@@ -241,7 +241,7 @@ const Postpage = () => {
                   >
                     <p className="text-gray-600 text-sm">{element.comment}</p>
                     <div className="text-xs text-green-500 mb-3">
-                      .posted on {element.date} by{" "}
+                      posted on {element.date} by{" "}
                       {currentPost.username === element.commenter
                         ? "Author"
                         : element.commenter}
@@ -296,7 +296,7 @@ const Postpage = () => {
                               {value.comment}
                             </p>
                             <div className="text-xs text-green-500">
-                              .posted on {value.date} by {value.name}
+                              posted on {value.date} by {value.name}
                             </div>
                           </div>
                         ))}
@@ -307,17 +307,6 @@ const Postpage = () => {
               </div>
             </div>
           </div>
-        </div>
-
- 
-        <div className="container mx-5 px-4 pb-8 flex items-end justify-end  pr-12">
-          <FaThumbsUp className="text-blue-500 mr-1" />
-          <span className="text-sm text-gray-600 mr-4">{noOfLikes} Likes</span>
-
-          <FaComment className="text-gray-500 mr-1" />
-          <span className="text-sm text-gray-600">
-            {fetchedComments.length} Comments
-          </span>
         </div>
       </div>
     );
