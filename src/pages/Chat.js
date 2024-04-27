@@ -49,6 +49,7 @@ const Chat = () => {
     };
 
     const sendMessage = async () => {
+        setNewMessage('');
         try {
             await addDoc(collection(db, 'messages'), {
                 sender: user.email,
@@ -57,7 +58,7 @@ const Chat = () => {
                 timestamp: new Date(),
                 chatid: currentChat.ruid,
             });
-            setNewMessage('');
+            
         } catch (error) {
             console.error('Error sending message:', error);
         }
@@ -80,7 +81,7 @@ const Chat = () => {
         <>
             <div className="flex flex-col h-screen">
                 <div className="flex-none bg-gray-200 p-4">
-                    <h1 className="text-lg font-semibold">Chat</h1>
+                    <h1 className="text-lg font-semibold center">chat</h1>
                 </div>
                 <div className="flex-auto overflow-y-auto p-4">
                     {messages.map((message, index) => (
