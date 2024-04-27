@@ -16,8 +16,12 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-
+import { IoPeopleOutline } from "react-icons/io5";
+import { LuLayoutDashboard } from "react-icons/lu";
+import { IoBookOutline } from "react-icons/io5";
 import { SlLogin, SlLogout } from "react-icons/sl"; // Importing SlLogin and SlLogout icons for login and logout
+import { HiOutlineUserCircle } from "react-icons/hi2";
+import { IoIosNotificationsOutline } from "react-icons/io";
 
 function NavList() {
   const { isSignedUp, setIsSignedUp } = useContext(IsSignedUpContext);
@@ -81,8 +85,9 @@ function NavList() {
             color="blue-gray"
             className="p-1 font-medium"
           >
-            <a href="/forum" className="flex items-center hover:text-blue-500 transition-colors ">
-              COMMUNITY
+            <a href="/forum">
+            <IoPeopleOutline size={23} className="mr-5 text-4x1 flex items-center" />
+              
             </a>
           </Typography>
           <Typography
@@ -91,8 +96,8 @@ function NavList() {
             color="blue-gray"
             className="p-1 font-medium"
           >
-            <a href="/dashboard" className="flex items-center hover:text-blue-500 transition-colors ">
-              DASHBOARD
+            <a href="/dashboard">
+            <LuLayoutDashboard  size={20}/>
             </a>
           </Typography>
           <Typography
@@ -102,7 +107,7 @@ function NavList() {
             className="p-1 font-medium"
           >
             <a href="/userprofile" className="flex items-center hover:text-blue-500 transition-colors ">
-              PROFILE
+            <HiOutlineUserCircle size = {25}/>
             </a>
           </Typography>
 
@@ -113,12 +118,26 @@ function NavList() {
             className="p-1 font-medium"
           >
             <a href="/viewbooks" className="flex items-center hover:text-blue-500 transition-colors">
-              VIEW BOOKS
+            <IoBookOutline size={25}/>
+
+            </a>
+          </Typography>
+
+          <Typography
+            as="li"
+            variant="small"
+            color="blue-gray"
+            className="p-1 font-medium"
+          >
+            <a href="/inbox" className="flex items-center hover:text-blue-500 transition-colors">
+            <IoIosNotificationsOutline  size={25}/>
+
             </a>
           </Typography>
         </>
       )}
-
+      
+      
       <Typography
         as="li"
         variant="small"
@@ -127,11 +146,11 @@ function NavList() {
       >
         {user === false ? (
           <Button onClick={login} className="flex font-myfont items-center hover:text-blue-500 transition-colors">
-            <SlLogin className="mr-1" /> Login
+            <SlLogin className="mr-1" /> 
           </Button>
         ) : (
           <Button onClick={logout} className="flex items-center  hover:text-blue-500 transition-colors">
-            <SlLogout className="mr-1" /> Logout
+            <SlLogout className="mr-1" /> 
           </Button>
         )}
       </Typography>
