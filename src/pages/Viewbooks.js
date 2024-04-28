@@ -57,7 +57,7 @@ const Viewbooks = () => {
                 ...element,
                 requested: requestData.includes(element.uid),
               }));
-              initialBook.current = fetched;
+              initialBook.current = updatedFetched;
               setBookDetails(updatedFetched);
               setLoading(false);
             },
