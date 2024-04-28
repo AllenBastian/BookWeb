@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef} from "react";
 import { ClipLoader } from "react-spinners";
 import { RiPencilLine } from "react-icons/ri";
 import { FaThumbsUp, FaComment } from "react-icons/fa";
@@ -16,6 +16,7 @@ const Forum = () => {
   const [cat, setCat] = useState();
   const [user, setUser] = useState();
   const [name, setName] = useState();
+  const allPosts = useRef([]);
   const [fetchedPosts, setFetchedPosts] = useState([]);
   const [clicked, setClicked] = useState(false);
   const [postDetails, setPostDetails] = useState({
@@ -63,7 +64,8 @@ const Forum = () => {
           updatedFetchedPosts.sort((a, b) => b.totalLikesAndComments - a.totalLikesAndComments);
 
           setFetchedPosts(updatedFetchedPosts);
-          setLoading(false); // Set loading to false after data fetching is completed
+          allPosts.current = updatedFetchedPosts;
+          setLoading(false);
 
           const r = query(collection(db, "users"), where("email", "==", user.email));
           const querySnapshot2 = await getDocs(r);
@@ -113,6 +115,16 @@ const Forum = () => {
     }
   };
 
+  const catFilter = (selected) => {
+    console.log(selected);
+    setFetchedPosts(allPosts.current);
+    if(selected === "all")
+         return;
+
+    const newFetch = allPosts.current.filter((post) => post.category === selected);
+    setFetchedPosts(newFetch);
+    console.log(newFetch);
+  }
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -126,35 +138,43 @@ const Forum = () => {
       <div className="hidden lg:flex flex-col w-1/4 bg-white border-r border-gray-300">
         <div className="p-4">
           <h1 className="text-lg font-semibold mb-4">Filters</h1>
-          <Select label="Select Version">
-            <Option value="fiction">fiction</Option>
-            <Option>Material Tailwind React</Option>
-            <Option>Material Tailwind Vue</Option>
-            <Option>Material Tailwind Angular</Option>
-            <Option>Material Tailwind Svelte</Option>
-          </Select>
+          <Select onChange={catFilter} label="Select Category" className="w-full mb-4">
+          <Option value="all" className="py-2 px-4 block w-full text-left">All</Option>
+  <Option value="fiction" className="py-2 px-4 block w-full text-left">Fiction</Option>
+  <Option value="non-fiction" className="py-2 px-4 block w-full text-left">Non-fiction</Option>
+  <Option value="engineering" className="py-2 px-4 block w-full text-left">Engineering</Option>
+</Select>
+
           <div className="bg-white-200 rounded-lg p-4 mt-4">
-            <h1 className="text-lg font-semibold mb-2">Trending</h1>
+            <h1 className="text-lg font-semibold mb-2">Trending Posts</h1>
             {fetchedPosts.length > 0 &&
               fetchedPosts.map((post, index) => {
                 let likes = post.likes ? post.likes.length : 0;
-                return (
-                  <div
-                    key={index}
-                    className="text-sm mt-1 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer transform transition-transform duration-300 hover:scale-105"
-                    onClick={() => nav(`/forum/${post.uid}`, { state: post })}
-                  >
-                    <span className="font-bold">{post.title}</span>
-                    <div className="flex mt-1">
-                      <span>
-                        <FaThumbsUp className="text-blue-500" /> {likes}
-                      </span>
-                      <span className="ml-2">
-                        <FaComment className="text-gray-500" /> {post.commentsCount}{" "}
-                      </span>
+                if (index < 5)
+                {
+                  return (
+                    <div
+                      key={index}
+                      className="relative text-sm mt-5 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                      onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+                    >
+                      <div className="absolute left-0 top-0 h-full bg-blue-500 text-white rounded-l-lg px-2  py-1">
+                        #{index + 1}
+                      </div>
+                      <div className="ml-10">
+                      <span className="font-bold">{post.title}</span>
+                      <div className="flex mt-1">
+                        <span>
+                          <FaThumbsUp className="text-blue-500" /> {likes}
+                        </span>
+                        <span className="ml-2">
+                          <FaComment className="text-gray-500" /> {post.commentsCount}{" "}
+                        </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
+              }
               })}
           </div>
         </div>
@@ -162,14 +182,42 @@ const Forum = () => {
 
       <div className="flex flex-col flex-grow overflow-y-auto">
         <div className="bg-white border-b border-gray-300 py-4 px-4 lg:hidden">
-          <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500">
-            <option value="latest">Lastest</option>
-            <option value="top">Top</option>
-            <option value="trending">Trending</option>
-          </select>
+        <Select onChange={catFilter} label="Select Category" className="w-full mb-4">
+          <Option value="all" className="py-2 px-4 block w-full text-left">All</Option>
+  <Option value="fiction" className="py-2 px-4 block w-full text-left">Fiction</Option>
+  <Option value="non-fiction" className="py-2 px-4 block w-full text-left">Non-fiction</Option>
+  <Option value="engineering" className="py-2 px-4 block w-full text-left">Engineering</Option>
+</Select>
         </div>
 
-        <div className="fixed bottom-4 right-4">
+   
+
+{fetchedPosts.map((post) => (
+  <div key={post.uid} className="p-2 z-0">
+    <div
+      onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+      className="bg-white shadow-sm rounded-lg p-4 mb-4 cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-90"
+      style={{ zIndex: 1 }}
+    >
+      <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
+      <p className="text-gray-600 mb-2">{post.category}</p>
+      <p className="text-sm text-gray-500 mb-4">
+        Posted by {post.username} on {post.time}.
+      </p>
+      <div className="flex justify-end items-center">
+        <span className="text-gray-500 flex items-center mr-4">
+          <FaThumbsUp className="text-blue-500 mr-1" />
+          {post.likes ? post.likes.length : 0}
+        </span>
+        <span className="text-gray-500 flex items-center">
+          <FaComment className="text-gray-500 mr-1" />
+          {post.commentsCount}
+        </span>
+      </div>
+    </div>
+  </div>
+))}
+     <div className="fixed bottom-4 right-4">
           <div className="rounded-full bg-blue-500 p-2">
             <RiPencilLine
               onClick={() => setPost(true)}
@@ -178,7 +226,8 @@ const Forum = () => {
             />
           </div>
         </div>
-        {post === true && (
+       
+ {post === true && (
           <div className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50">
             <div className="bg-white p-8 border border-gray-300 rounded-lg w-3/4">
               <h2 className="text-lg font-semibold mb-4">NEW POST</h2>
@@ -205,6 +254,8 @@ const Forum = () => {
                 onChange={(selectedOption) => setCat(selectedOption)}
               >
                 <Option value="fiction">fiction</Option>
+                <Option value="non-fiction">non-fiction</Option>
+                <Option value="engineering">Engineering</Option>
               </Select>
 
               <div className="flex justify-end mt-4">
@@ -225,28 +276,7 @@ const Forum = () => {
           </div>
         )}
 
-        {fetchedPosts.map((post) => (
-          <div key={post.uid} className="p-2">
-            <div
-              onClick={() => nav(`/forum/${post.uid}`, { state: post })}
-              className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200"
-            >
-              <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
-              <p className="text-gray-600 mb-2">{post.category}</p>
-              <p className="text-sm text-gray-500">
-                Posted by {post.username} on {post.time}.
-              </p>
-              <div className="flex justify-end">
-                <span className="text-gray-500 mr-2">
-                  <FaThumbsUp className="text-blue-500" /> {post.likes ? post.likes.length : 0}
-                </span>
-                <span className="text-gray-500">
-                  <FaComment className="text-gray-500" /> {post.commentsCount}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
+
       </div>
     </div>
   );
