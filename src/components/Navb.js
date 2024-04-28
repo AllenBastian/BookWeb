@@ -79,110 +79,109 @@ function NavList() {
     return <div></div>;
 
   return (
-    <ul className="my-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-      {user && (
-        <>
-          <Typography
-            as="li"
-            variant="small"
-            color="blue-gray"
-            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
-          >
-            <Tooltip placement="bottom" content="Forum">
-              <a href="/forum">
-                <IoPeopleOutline size={23} />
-                <span className="lg:hidden ml-1">Forum</span>
-              </a>
-            </Tooltip>
-          </Typography>
-          <Typography
-            as="li"
-            variant="small"
-            color="blue-gray"
-            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
-          >
-            <Tooltip placement="bottom" content="Dashboard">
-              <a href="/dashboard">
-                <LuLayoutDashboard size={20} />
-                <span className="lg:hidden ml-1">Dashboard</span>
-              </a>
-            </Tooltip>
-          </Typography>
-          <Typography
-            as="li"
-            variant="small"
-            color="blue-gray"
-            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
-          >
-            <Tooltip placement="bottom" content="User Profile">
-              <a href="/userprofile">
-                <HiOutlineUserCircle size={25} />
-                <span className="lg:hidden ml-1">User Profile</span>
-              </a>
-            </Tooltip>
-          </Typography>
-
-          <Typography
-            as="li"
-            variant="small"
-            color="blue-gray"
-            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
-          >
-            <Tooltip placement="bottom" content="View Books">
-              <a href="/viewbooks">
-                <IoBookOutline size={25} />
-                <span className="lg:hidden ml-1">View Books</span>
-              </a>
-            </Tooltip>
-          </Typography>
-
-          <Typography
-            as="li"
-            variant="small"
-            color="blue-gray"
-            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
-          >
-            <Tooltip placement="bottom" content="Inbox">
-              <a href="/inbox">
-                <IoNotificationsOutline size={25} />
-                <span className="lg:hidden ml-1">Inbox</span>
-              </a>
-            </Tooltip>
-          </Typography>
-        </>
+    <ul className="my-2 flex flex-col mx-4 gap-5 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
+    {user && (
+      <>
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+        >
+          <Tooltip placement="bottom" content="Forum">
+            <a href="/forum">
+              <IoPeopleOutline size={23} />
+            </a>
+          </Tooltip>
+          <span className="lg:hidden ml-4">Forum</span>
+        </Typography>
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+        >
+          <Tooltip placement="bottom" content="Dashboard">
+            <a href="/dashboard">
+              <LuLayoutDashboard size={20} />
+            </a>
+          </Tooltip>
+          <span className="lg:hidden ml-4">Dashboard</span>
+        </Typography>
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+        >
+          <Tooltip placement="bottom" content="User Profile">
+            <a href="/userprofile">
+              <HiOutlineUserCircle size={25} />
+            </a>
+          </Tooltip>
+          <span className="lg:hidden ml-4">User Profile</span>
+        </Typography>
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+        >
+          <Tooltip placement="bottom" content="View Books">
+            <a href="/viewbooks">
+              <IoBookOutline size={25} />
+            </a>
+          </Tooltip>
+          <span className="lg:hidden ml-4">View Books</span>
+        </Typography>
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+        >
+          <Tooltip placement="bottom" content="Inbox">
+            <a href="/inbox">
+              <IoNotificationsOutline size={25} />
+            </a>
+          </Tooltip>
+          <span className="lg:hidden ml-4">Inbox</span>
+        </Typography>
+      </>
+    )}
+  
+    <Typography
+      as="li"
+      variant="small"
+      color="blue-gray"
+      className="p-1 ml-4 font-medium"
+    >
+      {user === false ? (
+        <Button onClick={login} className="flex font-myfont items-center">
+          <SlLogin className="mr-1" /> 
+        </Button>
+      ) : (
+        <Button onClick={logout} className="flex items-center">
+          <SlLogout className="mr-1" /> 
+        </Button>
       )}
-      
-      
+    </Typography>
+  
+    {isSignedUp === false && user === true && (
       <Typography
         as="li"
         variant="small"
         color="blue-gray"
         className="p-1 font-medium"
       >
-        {user === false ? (
-          <Button onClick={login} className="flex font-myfont items-center">
-            <SlLogin className="mr-1" /> 
-          </Button>
-        ) : (
-          <Button onClick={logout} className="flex items-center">
-            <SlLogout className="mr-1" /> 
-          </Button>
-        )}
+        <a href="/signup" className="flex items-center">
+          Sign Up
+        </a>
       </Typography>
-
-      {isSignedUp === false && user === true && (
-        <Typography
-          as="li"
-          variant="small"
-          color="blue-gray"
-          className="p-1 font-medium"
-        >
-          <a href="/signup" className="flex items-center">
-            Sign Up
-          </a>
-        </Typography>
-      )}
-    </ul>
+    )}
+  </ul>
+  
+  
   );
 }
 
@@ -206,7 +205,7 @@ export function NavbarSimple() {
         <Typography
           as="a"
           href="/"
-          className="mr-4 cursor-pointer py-1.5 text-2xl font-bold"
+          className="mr-4 ml-4 cursor-pointer py-1.5 text-2xl font-bold"
         >
           BOOKWEB
         </Typography>
