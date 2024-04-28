@@ -4,6 +4,8 @@ import { auth } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
 import { IsSignedUpContext } from "../context/Context";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { IoNotificationsOutline } from "react-icons/io5";
+
 import { db } from "../firebase/Firebase";
 import { css } from "@emotion/react";
 import { ClipLoader } from "react-spinners";
@@ -21,7 +23,8 @@ import { LuLayoutDashboard } from "react-icons/lu";
 import { IoBookOutline } from "react-icons/io5";
 import { SlLogin, SlLogout } from "react-icons/sl"; // Importing SlLogin and SlLogout icons for login and logout
 import { HiOutlineUserCircle } from "react-icons/hi2";
-import { IoIosNotificationsOutline } from "react-icons/io";
+import { IoIosNotificationsOutline } from "react-icons/io5";
+import { Tooltip } from "@material-tailwind/react";
 
 function NavList() {
   const { isSignedUp, setIsSignedUp } = useContext(IsSignedUpContext);
@@ -83,56 +86,68 @@ function NavList() {
             as="li"
             variant="small"
             color="blue-gray"
-            className="p-1 font-medium"
+            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
           >
-            <a href="/forum">
-            <IoPeopleOutline size={23} className="mr-5 text-4x1 flex items-center" />
-              
-            </a>
+            <Tooltip placement="bottom" content="Forum">
+              <a href="/forum">
+                <IoPeopleOutline size={23} />
+                <span className="lg:hidden ml-1">Forum</span>
+              </a>
+            </Tooltip>
           </Typography>
           <Typography
             as="li"
             variant="small"
             color="blue-gray"
-            className="p-1 font-medium"
+            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
           >
-            <a href="/dashboard">
-            <LuLayoutDashboard  size={20}/>
-            </a>
+            <Tooltip placement="bottom" content="Dashboard">
+              <a href="/dashboard">
+                <LuLayoutDashboard size={20} />
+                <span className="lg:hidden ml-1">Dashboard</span>
+              </a>
+            </Tooltip>
           </Typography>
           <Typography
             as="li"
             variant="small"
             color="blue-gray"
-            className="p-1 font-medium"
+            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
           >
-            <a href="/userprofile" className="flex items-center hover:text-blue-500 transition-colors ">
-            <HiOutlineUserCircle size = {25}/>
-            </a>
-          </Typography>
-
-          <Typography
-            as="li"
-            variant="small"
-            color="blue-gray"
-            className="p-1 font-medium"
-          >
-            <a href="/viewbooks" className="flex items-center hover:text-blue-500 transition-colors">
-            <IoBookOutline size={25}/>
-
-            </a>
+            <Tooltip placement="bottom" content="User Profile">
+              <a href="/userprofile">
+                <HiOutlineUserCircle size={25} />
+                <span className="lg:hidden ml-1">User Profile</span>
+              </a>
+            </Tooltip>
           </Typography>
 
           <Typography
             as="li"
             variant="small"
             color="blue-gray"
-            className="p-1 font-medium"
+            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
           >
-            <a href="/inbox" className="flex items-center hover:text-blue-500 transition-colors">
-            <IoIosNotificationsOutline  size={25}/>
+            <Tooltip placement="bottom" content="View Books">
+              <a href="/viewbooks">
+                <IoBookOutline size={25} />
+                <span className="lg:hidden ml-1">View Books</span>
+              </a>
+            </Tooltip>
+          </Typography>
 
-            </a>
+          <Typography
+            as="li"
+            variant="small"
+            color="blue-gray"
+            className="p-1 font-medium nav-icon hover:text-blue-500 transition-colors"
+          >
+            <Tooltip placement="bottom" content="Inbox">
+              <a href="/inbox">
+                <IoNotificationsOutline size={25} />
+                <span className="lg:hidden ml-1">Inbox</span>
+              </a>
+            </Tooltip>
           </Typography>
         </>
       )}
@@ -145,11 +160,11 @@ function NavList() {
         className="p-1 font-medium"
       >
         {user === false ? (
-          <Button onClick={login} className="flex font-myfont items-center hover:text-blue-500 transition-colors">
+          <Button onClick={login} className="flex font-myfont items-center">
             <SlLogin className="mr-1" /> 
           </Button>
         ) : (
-          <Button onClick={logout} className="flex items-center  hover:text-blue-500 transition-colors">
+          <Button onClick={logout} className="flex items-center">
             <SlLogout className="mr-1" /> 
           </Button>
         )}
@@ -162,7 +177,7 @@ function NavList() {
           color="blue-gray"
           className="p-1 font-medium"
         >
-          <a href="/signup" className="flex items-center hover:text-blue-500 transition-colors">
+          <a href="/signup" className="flex items-center">
             Sign Up
           </a>
         </Typography>
@@ -191,7 +206,7 @@ export function NavbarSimple() {
         <Typography
           as="a"
           href="/"
-          className="mr-4  cursor-pointer py-1.5 text-2xl font-bold"
+          className="mr-4 cursor-pointer py-1.5 text-2xl font-bold"
         >
           BOOKWEB
         </Typography>
