@@ -90,10 +90,13 @@ function NavList() {
         >
           <Tooltip placement="bottom" content="Forum">
             <a href="/forum">
+              <div className="flex">
               <IoPeopleOutline size={23} />
+              <span className="lg:hidden ml-4">Forum</span>
+              </div>
             </a>
           </Tooltip>
-          <span className="lg:hidden ml-4">Forum</span>
+         
         </Typography>
         <Typography
           as="li"
@@ -103,10 +106,13 @@ function NavList() {
         >
           <Tooltip placement="bottom" content="Dashboard">
             <a href="/dashboard">
+              <div className="flex">
               <LuLayoutDashboard size={20} />
+              <span className="lg:hidden ml-4">Dashboard</span>
+              </div>
             </a>
           </Tooltip>
-          <span className="lg:hidden ml-4">Dashboard</span>
+          
         </Typography>
         <Typography
           as="li"
@@ -116,10 +122,13 @@ function NavList() {
         >
           <Tooltip placement="bottom" content="User Profile">
             <a href="/userprofile">
+              <div className="flex">
               <HiOutlineUserCircle size={25} />
+              <span className="lg:hidden ml-4">User Profile</span>
+              </div>
             </a>
           </Tooltip>
-          <span className="lg:hidden ml-4">User Profile</span>
+        
         </Typography>
         <Typography
           as="li"
@@ -129,10 +138,13 @@ function NavList() {
         >
           <Tooltip placement="bottom" content="View Books">
             <a href="/viewbooks">
+              <div className="flex">
               <IoBookOutline size={25} />
+              <span className="lg:hidden ml-4">View Books</span>
+              </div>
             </a>
           </Tooltip>
-          <span className="lg:hidden ml-4">View Books</span>
+        
         </Typography>
         <Typography
           as="li"
@@ -142,10 +154,13 @@ function NavList() {
         >
           <Tooltip placement="bottom" content="Inbox">
             <a href="/inbox">
+              <div className="flex">
               <IoNotificationsOutline size={25} />
+              <span className="lg:hidden ml-4">Inbox</span>
+              </div>
             </a>
           </Tooltip>
-          <span className="lg:hidden ml-4">Inbox</span>
+         
         </Typography>
       </>
     )}
