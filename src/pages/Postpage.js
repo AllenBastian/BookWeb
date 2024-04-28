@@ -12,6 +12,7 @@ import {
   getDocs,
   where,
   updateDoc,
+  onSnapshot
 } from "firebase/firestore";
 import { auth } from "../firebase/Firebase";
 
@@ -36,7 +37,8 @@ const Postpage = () => {
 
     const fetchData = async () => {
       try {
-        setLoading(true); // Set loading to true when fetching comments
+        console.log("hello")
+        setLoading(true); 
         if (user && currentPost) {
           const cuser = await getUserByEmail(user.email);
           setCurrentUser(cuser);
@@ -44,19 +46,22 @@ const Postpage = () => {
             collection(db, "comments"),
             where("postid", "==", currentPost.uid)
           );
-          const querySnapshot = await getDocs(q);
-          const fetched = querySnapshot.docs.map((doc) => doc.data());
-          setFetchedComments(fetched);
+          const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const fetched = querySnapshot.docs.map((doc) => doc.data());
+            setFetchedComments(fetched);
+          });
+          return unsubscribe; 
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); // Set loading to false when comments are fetched
+        setLoading(false); 
       }
     };
 
     fetchData();
-  }, [location.state, user, currentPost]);
+  }, [location.state,user]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,7 +87,8 @@ const Postpage = () => {
     };
 
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, currentPost]);
+
 
   const postComment = async () => {
     setCurrentComment("");
@@ -99,8 +105,8 @@ const Postpage = () => {
         uid: ids,
         date: formattedDate,
       });
-    } catch {
-      console.log("error");
+    } catch(error){
+      console.log(error);
     }
   };
 

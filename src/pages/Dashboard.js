@@ -24,8 +24,10 @@ import {
   query,
   deleteDoc,
   updateDoc,
+  onSnapshot
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { set } from "firebase/database";
 
 const Dashboard = () => {
   const user = auth.currentUser;
@@ -46,33 +48,47 @@ const Dashboard = () => {
           collection(db, "books"),
           where("owner", "==", user.email)
         );
-
+  
         const r = query(collection(db, "requests"));
-
-        const querySnapshot = await getDocs(q);
-        const querySnapshot2 = await getDocs(r);
-        const fetched = querySnapshot.docs.map((doc) => doc.data());
-        const reqfetched = querySnapshot2.docs.map((doc) => doc.data());
-        const filtered = reqfetched.filter(
-          (req) => req.requestto === user.email
-        );
-        const filtered2 = reqfetched.filter(
-          (req) =>
-            (req.requestto === user.email || req.requestfrom === user.email) &&
-            req.accepted === true
-        );
-
-        setTemp(filtered);
-        setBookDetails(fetched);
-        setReqDetails(reqfetched);
+  
+        const unsubscribeBooks = onSnapshot(q, (snapshot) => {
+          const fetched = snapshot.docs.map((doc) => doc.data());
+          setBookDetails(fetched);
+        }, (error) => {
+          console.error("Error fetching books: ", error);
+        });
+  
+        const unsubscribeRequests = onSnapshot(r, (snapshot) => {
+          const reqfetched = snapshot.docs.map((doc) => doc.data());
+          const filtered = reqfetched.filter(
+            (req) => req.requestto === user.email
+          );
+          const filtered2 = reqfetched.filter(
+            (req) =>
+              (req.requestto === user.email || req.requestfrom === user.email) &&
+              req.accepted === true
+          );
+          setTemp(filtered);
+          setReqDetails(reqfetched);
+          setTemp2(filtered2);
+        }, (error) => {
+          console.error("Error fetching requests: ", error);
+        });
+  
+        return () => {  
+          unsubscribeBooks();
+          unsubscribeRequests();
+        };
       } catch (error) {
-        console.error("Error fetching books: ", error);
+        console.error("Error fetching data: ", error);
       } finally {
         setLoading(false);
       }
     };
+  
     fetchData();
   }, []);
+  
 
   console.log(reqDetails);
 
@@ -348,8 +364,8 @@ const Dashboard = () => {
               <span className="text-lg text-white">STATUS</span>
             </div>
             <div className="p-4 bg-white rounded-lg shadow-md mt-2 md:h-screen lg:h-screen  overflow-auto">
-              {reqDetails.length === 0 ? (
-                <div className="text-center text-gray-500">No requests</div>
+              {temp2.length === 0 ? (
+                <div className="text-center text-gray-500">No accepted requests</div>
               ) : (
                 reqDetails.map(
                   (req) =>

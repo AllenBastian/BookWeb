@@ -27,9 +27,7 @@ export const Protected=({children})=>{
         case false:
              nav("/");
         case null:
-            return ( <div className="flex justify-center items-center h-screen">
-            <h1>Loading</h1>
-          </div>)
+            return
                 
     }
 

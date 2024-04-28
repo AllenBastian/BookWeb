@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase/Firebase";
 import { Select, Option } from "@material-tailwind/react";
@@ -9,6 +9,7 @@ import {
   getDocs,
   doc,
   addDoc,
+  onSnapshot
 } from "firebase/firestore";
 import {
   FaRegComments,
@@ -17,14 +18,14 @@ import {
 import { ClipLoader } from "react-spinners";
 
 const Viewbooks = () => {
-  const [loading, setLoading] = useState(true); // State to manage loading
+  const [loading, setLoading] = useState(true); 
   const [bookDetails, setBookDetails] = useState([]);
   const [user, setUser] = useState("");
   const [searchCat, setSearchCat] = useState("all");
   const [searchBook, setSearchBook] = useState("");
   const [clicked, setClicked] = useState(false);
   const [selectedBook, setSelectedBook] = useState("");
-  const [initialBook, setInitialBook] = useState("");
+  const initialBook = useRef([]);
   const auth = getAuth();
 
   useEffect(() => {
@@ -42,41 +43,62 @@ const Viewbooks = () => {
     const fetchData = async () => {
       try {
         if (user) {
-          let q;
-
-          q = query(
-            collection(db, "books"),
-            where("owner", "!=", user.email),
-            where("isBorrowed","==",false)
+      
+          const unsubscribeBooks = onSnapshot(
+            query(
+              collection(db, "books"),
+              where("owner", "!=", user.email),
+              where("isBorrowed", "==", false)
+            ),
+            (snapshot) => {
+              const fetched = snapshot.docs.map((doc) => doc.data());
+              const requestData = initialBook.current.map((data) => data.uid);
+              const updatedFetched = fetched.map((element) => ({
+                ...element,
+                requested: requestData.includes(element.uid),
+              }));
+              initialBook.current = fetched;
+              setBookDetails(updatedFetched);
+              setLoading(false);
+            },
+            (error) => {
+              console.error("Error fetching books: ", error);
+            }
           );
+  
 
-          const querySnapshot = await getDocs(q);
-          const fetched = querySnapshot.docs.map((doc) => doc.data());
-
-          let r;
-          r = query(
-            collection(db, "requests"),
-            where("requestfrom", "==", user.email)
+          const unsubscribeRequests = onSnapshot(
+            query(
+              collection(db, "requests"),
+              where("requestfrom", "==", user.email)
+            ),
+            (snapshot) => {
+              const requestData = snapshot.docs.map((doc) => doc.data().bookuid);
+              const updatedBookDetails = initialBook.current.map((element) => ({
+                ...element,
+                requested: requestData.includes(element.uid),
+              }));
+              setBookDetails(updatedBookDetails);
+            },
+            (error) => {
+              console.error("Error fetching requests: ", error);
+            }
           );
-          const querySnapshot2 = await getDocs(r);
-          const requestData = querySnapshot2.docs.map((doc) => doc.data());
-          const requestUids = requestData.map((data) => data.bookuid);
-          const updatedFetched = fetched.map((element) => ({
-            ...element,
-            requested: requestUids.includes(element.uid) ? true : false,
-          }));
-
-          setInitialBook(updatedFetched);
-          setBookDetails(updatedFetched);
-          setLoading(false); // Set loading to false after data fetching is completed
+  
+          
+          return () => {
+            unsubscribeBooks();
+            unsubscribeRequests();
+          };
         }
       } catch (error) {
-        console.error("Error fetching books: ", error);
+        console.error("Error fetching data: ", error);
       }
     };
-
+  
     fetchData();
-  }, [user, clicked]);
+  }, [user, initialBook]);
+  console.log(initialBook.current)
 
   const sendReq = async () => {
     try {
@@ -100,16 +122,17 @@ const Viewbooks = () => {
   const dynamicSearch = async (searchString, category) => {
     await setSearchBook(searchString);
     console.log(searchString);
-    if (searchString === "" && category === "all") setBookDetails(initialBook);
+    if (searchString === "" && category === "all") setBookDetails(initialBook.current);
     else if (searchString === "") {
       console.log("in here yeah");
-      const filteredSearch = initialBook.filter(
+      const filteredSearch = initialBook.current.filter(
         (book) =>
           book.category.toLowerCase().trim() === category.toLowerCase().trim()
       );
+      console.log(filteredSearch);
       setBookDetails(filteredSearch);
     } else {
-      const filteredSearch = initialBook.filter((book) =>
+      const filteredSearch = initialBook.current.filter((book) =>
         book.title.toLowerCase().trim().startsWith(searchString)
       );
       if (category !== "all") {
@@ -131,14 +154,14 @@ const Viewbooks = () => {
       </div>
     );
   }
-
+console.log(bookDetails);
   return (
     <div className="bg-gray-100 p-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow-md p-4">
           <h2 className="text-xl font-medium mb-4">Book Listings</h2>
           <div className="overflow-y-auto lg:h-screen">
-            {bookDetails.map((book) => (
+            {bookDetails && bookDetails.map((book) => (
               <div key={book.uid} className="mb-4">
                 <div
                   className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-200"
