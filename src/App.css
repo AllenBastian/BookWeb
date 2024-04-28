@@ -25,4 +25,13 @@ body{
     border-radius: 50px;
 }
 
+.nav-icon {
+    transition: transform 0.3s ease;
+  }
+  
+  .nav-icon:hover {
+    transform: scale(1.1);
+  }
+  
+
 
