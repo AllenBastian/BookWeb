@@ -25,7 +25,6 @@ const Viewbooks = () => {
   const [searchBook, setSearchBook] = useState("");
   const [clicked, setClicked] = useState(false);
   const [selectedBook, setSelectedBook] = useState("");
-  const [ownerName, setOwnerName] = useState(""); // State to store owner's name
   const initialBook = useRef([]);
   const auth = getAuth();
 
@@ -44,6 +43,7 @@ const Viewbooks = () => {
     const fetchData = async () => {
       try {
         if (user) {
+      
           const unsubscribeBooks = onSnapshot(
             query(
               collection(db, "books"),
@@ -65,6 +65,7 @@ const Viewbooks = () => {
               console.error("Error fetching books: ", error);
             }
           );
+  
 
           const unsubscribeRequests = onSnapshot(
             query(
@@ -83,7 +84,8 @@ const Viewbooks = () => {
               console.error("Error fetching requests: ", error);
             }
           );
-
+  
+          
           return () => {
             unsubscribeBooks();
             unsubscribeRequests();
@@ -93,29 +95,10 @@ const Viewbooks = () => {
         console.error("Error fetching data: ", error);
       }
     };
-
+  
     fetchData();
   }, [user, initialBook]);
-
-  useEffect(() => {
-    const fetchOwnerName = async () => {
-      try {
-        if (selectedBook) {
-          const userDoc = await getDocs(
-            query(collection(db, "users"), where("email", "==", selectedBook.owner))
-          );
-          if (!userDoc.empty) {
-            const userData = userDoc.docs[0].data();
-            setOwnerName(userData.name); // Set owner's name
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching owner's name: ", error);
-      }
-    };
-
-    fetchOwnerName();
-  }, [selectedBook]);
+  console.log(initialBook.current)
 
   const sendReq = async () => {
     try {
@@ -128,6 +111,7 @@ const Viewbooks = () => {
         ruid: ids,
         accepted: false,
       });
+
 
       alert("Request sent successfully");
     } catch (e) {
@@ -156,9 +140,12 @@ const Viewbooks = () => {
           (book) => book.category.toLowerCase() === category.toLowerCase()
         );
         setBookDetails(filteredSearch2);
-      } else setBookDetails(filteredSearch);
+      }
+      else
+        setBookDetails(filteredSearch);
+        
     }
-  };
+};
 
   if (loading) {
     return (
@@ -167,29 +154,26 @@ const Viewbooks = () => {
       </div>
     );
   }
-
-  console.log(bookDetails);
-
+console.log(bookDetails);
   return (
     <div className="bg-gray-100 p-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow-md p-4">
           <h2 className="text-xl font-medium mb-4">Book Listings</h2>
           <div className="overflow-y-auto lg:h-screen">
-            {bookDetails &&
-              bookDetails.map((book) => (
-                <div key={book.uid} className="mb-4">
-                  <div
-                    className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-200"
-                    onClick={() => setSelectedBook(book)}
-                  >
-                    <div>
-                      {book.title}
-                      <span className="ml-5 text-gray-500">{book.author}</span>
-                    </div>
+            {bookDetails && bookDetails.map((book) => (
+              <div key={book.uid} className="mb-4">
+                <div
+                  className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-200"
+                  onClick={() => setSelectedBook(book)}
+                >
+                  <div>
+                    {book.title}
+                    <span className="ml-5 text-gray-500">{book.author}</span>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-4">
@@ -224,17 +208,15 @@ const Viewbooks = () => {
           </div>
           <div className="mb-4"></div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Book and User Info
             </h2>
-  
-            {selectedBook ? (
+
+            {selectedBook && (
               <>
-                 <p style={{ fontSize: '1rem' }}>Title: {selectedBook.title}</p>
-                 <p style={{ fontSize: '1rem' }}>Author: {selectedBook.author}</p>
-                 <p style={{ fontSize: '1rem' }}>Description: {selectedBook.description}</p>
-                 <p style={{ fontSize: '1rem' }}>Owner: {ownerName}</p>{/* Display owner's name */}
-                 <p style={{ fontSize: '1rem' }}>Borrow Period: {selectedBook.borrowPeriod}</p>
+                <p>Title: {selectedBook.title}</p>
+                <p>Author: {selectedBook.author}</p>
+                <p>Description: {selectedBook.description}</p>
                 <div className="mb-2 mr-2 mt-5">
                   {selectedBook.requested === false ? (
                     <button
@@ -253,20 +235,18 @@ const Viewbooks = () => {
                   ) : (
                     <div>You have already requested.</div>
                   )}
+                  <button className="text-green-300 mr-2 hover:text-green-800 transition-colors duration-300 transform hover:scale-110">
+                    <FaRegComments /> Chat
+                  </button>
                 </div>
                 <h1 className="text-xl">Reviews</h1>
               </>
-            ) : (
-              <div className="flex justify-center items-center h-full mt-40 text-lg">
-            <div className="text-500">Please select a book</div>
-          </div>
             )}
           </div>
         </div>
       </div>
     </div>
   );
-  
 };
 
 export default Viewbooks;
