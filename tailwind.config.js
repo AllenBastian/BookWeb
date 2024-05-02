@@ -13,6 +13,9 @@ module.exports = withMT({
       },
       fontFamily: {
         myfont: ["Oxanium","sans-serif"],
+        myfont2: ["Reddit Sans","sans-serif"],
+        myfont3: ["Commissioner","sans-serif"],
+
       },
     },
 

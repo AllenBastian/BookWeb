@@ -194,12 +194,20 @@ const Dashboard = () => {
     setBookDetails((prev) => [...prev, newBookInfo]);
     console.log(newBookInfo);
     try {
+      const nameRef = collection(db, "users");
+      const querySnapshot = await getDocs(
+        query(nameRef, where("email", "==", user.email))
+      );
+      console.log(user.email)
+      const docu = querySnapshot.docs[0].data();
+      console.log(querySnapshot.docs[0].data());
       let ids = doc(collection(db, "books")).id;
       const docRef = await addDoc(collection(db, "books"), {
         ...newBookInfo,
         isBorrowed: false,
         owner: user.email,
         uid: ids,
+        name: docu.name,
       });
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {

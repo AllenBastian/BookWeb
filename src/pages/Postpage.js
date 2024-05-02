@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { db } from "../firebase/Firebase";
 import { getUserByEmail } from "../utils/Search";
 import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
+import { FiSend } from 'react-icons/fi'
 import { ClipLoader } from "react-spinners";
 import {
   addDoc,
@@ -12,10 +13,10 @@ import {
   getDocs,
   where,
   updateDoc,
-  onSnapshot
+  onSnapshot,
 } from "firebase/firestore";
 import { auth } from "../firebase/Firebase";
-
+import { motion } from "framer-motion";
 const Postpage = () => {
   const [loading, setLoading] = useState(true);
   const [currentPost, setCurrentPost] = useState(null);
@@ -37,8 +38,8 @@ const Postpage = () => {
 
     const fetchData = async () => {
       try {
-        console.log("hello")
-        setLoading(true); 
+        console.log("hello");
+        setLoading(true);
         if (user && currentPost) {
           const cuser = await getUserByEmail(user.email);
           setCurrentUser(cuser);
@@ -50,28 +51,24 @@ const Postpage = () => {
             const fetched = querySnapshot.docs.map((doc) => doc.data());
             setFetchedComments(fetched);
           });
-          return unsubscribe; 
+          return unsubscribe;
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [location.state,user]);
-
+  }, [location.state, user]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (currentUser) {
           const querySnapshot2 = await getDocs(
-            query(
-              collection(db, "posts"),
-              where("uid", "==", currentPost.uid)
-            )
+            query(collection(db, "posts"), where("uid", "==", currentPost.uid))
           );
           const refData = querySnapshot2.docs[0].data();
           const likes = refData.likes || [];
@@ -89,7 +86,6 @@ const Postpage = () => {
     fetchData();
   }, [currentUser, currentPost]);
 
-
   const postComment = async () => {
     setCurrentComment("");
     const date = new Date();
@@ -105,7 +101,7 @@ const Postpage = () => {
         uid: ids,
         date: formattedDate,
       });
-    } catch(error){
+    } catch (error) {
       console.log(error);
     }
   };
@@ -166,47 +162,65 @@ const Postpage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <ClipLoader color={"#123abc"} loading={loading} size={50} />
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row">
           <div className="lg:w-3/4 lg:pr-4">
-            <h2 className="text-xl font-semibold mb-4">
-              {currentPost && currentPost.title} {/* Add null check */}
-            </h2>
-            <h1 className="text-sm font-semibold mb-4">
-              by {currentPost && currentPost.username} {/* Add null check */}
-            </h1>
-            <p className="text-gray-600 mb-4 text-justify">
-              {currentPost && currentPost.description} {/* Add null check */}
-            </p>
+            <motion.div
+              className="bg-gray-100 p-4 rounded-lg shadow-md mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="text-2xl font-semibold mb-2">
+                {currentPost && currentPost.title}
+              </h2>
+              <h3 className="text-gray-600 text-sm mb-2 border-b-2 border-gray-500">
+                by {currentPost && currentPost.username}
+              </h3>
+              <p className="text-gray-700 mb-4 mt-5">
+                {currentPost && currentPost.description}
+              </p>
 
-            <div className="transition-colors duration-300 ease-in-out">
-              <FaThumbsUp
-                size={25}
-                className={`inline-block ${
-                  liked === true
-                    ? "text-blue-500 hover:text-blue-700"
-                    : "text-gray-500 hover:text-gray-700"
-                } transition-colors duration-300 ease-in-out mb-2`}
-                onClick={() => {
-                  const newLiked = !liked;
-                  setLiked(newLiked);
-                  likePost(newLiked);
-                }}
-              />
-              <div className="text-green text-2xl">{noOfLikes}</div>
-            </div>
+              <div className="flex items-center justify-start">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 1.1 }}
+                  className={`flex items-center ${
+                    liked
+                      ? "text-blue-500 hover:text-blue-700"
+                      : "text-gray-500 hover:text-gray-700"
+                  } focus:outline-none`}
+                  onClick={() => {
+                    const newLiked = !liked;
+                    setLiked(newLiked);
+                    likePost(newLiked);
+                  }}
+                >
+                  <FaThumbsUp className="mr-1" size={20} />
+                  <span className="text-black text-2xl">{noOfLikes}</span>
+                </motion.button>
+              </div>
+            </motion.div>
           </div>
 
-          <div className=" lg:mt lg:w-1/4 lg:pl-4 ">
+          <div className=" lg:mt lg:w-1/4 lg:pl-4 border-l lg:border-gray-200 ">
             <div className="mb-8">
               <textarea
                 value={currentComment}
                 onChange={(e) => setCurrentComment(e.target.value)}
                 type="text"
                 placeholder="Write your comment..."
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
               />
               <button
                 onClick={() => {
@@ -215,105 +229,109 @@ const Postpage = () => {
                 }}
                 className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
               >
-                Post Comment
+                 <FiSend className="text-xl" />
               </button>
             </div>
 
-            <h3 className="text-lg font-semibold mb-4">Comments</h3>
-            <div className="overflow-auto" style={{ maxHeight: "500px" }}>
-              {loading && (
-                <div className="flex justify-center items-center h-64">
-                  <ClipLoader color={"#123abc"} loading={loading} size={50} />
-                </div>
-              )}
-              {!loading &&
-                fetchedComments.map((element) => (
-                  <div
-                    key={element.uid}
-                    className="bg-gray-100 rounded-lg p-4 mb-4 "
-                  >
-                    <p className="text-gray-600 text-sm">{element.comment}</p>
-                    <div className="text-xs text-green-500 mb-3">
+            <h3 className="text-xl font-semibold mb-4 ">Comments ({fetchedComments.length})</h3>
+            <div className="overflow-auto max-h-[500px]">
+            {fetchedComments.map((element, index) => (
+  <motion.div
+    key={index}
+    className="bg-white rounded-lg mb-0 p-1"
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    {/* Main Comment */}
+    <div className="bg-gray-100 rounded-lg p-3 mb-2">
+      <p className="text-black text-md mb-2">{element.comment}</p>
+      <div className="flex justify-between items-center text-xs text-gray-500">
+        <span>
+          Posted on {element.date} by{" "}
+          {currentPost.username === element.commenter
+            ? "Author"
+            : element.commenter}
+        </span>
+      </div>
+      <div className="flex justify-end gap-3 items-center text-xs text-gray-500 mt-2">
+        <button
+          onClick={() => {
+            setShowReplyInput(element.uid);
+            setShowReplies();
+          }}
+          className="text-blue-500 hover:underline focus:outline-none ml-2"
+        >
+          Reply
+        </button>
+        <button
+          onClick={() => {
+            setShowReplyInput();
+            setShowReplies(element.uid);
+          }}
+          className="text-blue-500 hover:underline focus:outline-none ml-2"
+        >
+          Show replies ({element.replies ? element.replies.length : 0})
+        </button>
+      </div>
+    </div>
 
-                      posted on {element.date} by{" "}
-                      {currentPost.username === element.commenter
+    {showReplies === element.uid && element.replies && (
+  <motion.div
+    className="pl-4"
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    {element.replies.map((value, index) => (
+      <div
+        key={index}
+        className="bg-gray-200 rounded-lg p-3 mb-2"
+      >
+        <p className="text-black text-sm">
+          {value.comment}
+        </p>
+        <div className="text-xs text-gray-500">
+          Posted on {value.date} by {value.name}
+        </div>
+      </div>
+    ))}
+  </motion.div>
+)}
+{showReplyInput === element.uid && (
+  <motion.div 
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="mt-3"
+  >
+    <textarea
+      onChange={(e) => setCurrentReply(e.target.value)}
+      value={currentReply}
+      placeholder="Write your reply..."
+      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+    />
+    <button
+      onClick={() => {
+        commentReply(element.uid);
+        setClicked((prev) => !prev);
+      }}
+      className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none transition-colors duration-300 ease-in-out transform hover:scale-105 flex items-center"
+    >
+      <FiSend className="text-xl" /> {/* Replace text with Send icon */}
+    </button>
+  </motion.div>
+)}
 
-                        ? "Author"
-                        : element.commenter}{" "}
-                      {/* Add null check */}
-                    </div>
-                    <button
-                      onClick={() => {
-                        setShowReplyInput(element.uid);
-                        setShowReplies();
-                      }}
-                      className="text-sm text-blue-500 hover:underline focus:outline-none"
-                    >
-                      Reply
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowReplyInput();
-                        setShowReplies(element.uid);
-                      }}
-                      className=" text-sm ml-5 text-blue-500 hover:underline focus:outline-none"
-                    >
-                      Show replies{" "}
-                      {element.replies ? element.replies.length : 0}
-                    </button>
+  </motion.div>
+))}
 
-                    {showReplyInput === element.uid && (
-                      <div>
-                        <textarea
-                          onChange={(e) => setCurrentReply(e.target.value)}
-                          value={currentReply}
-                          placeholder="Write your reply..."
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4"
-                        />
-                        <button
-                          onClick={() => {
-                            commentReply(element.uid);
-                            setClicked((prev) => !prev);
-                          }}
-                          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-                        >
-                          Submit Reply
-                        </button>
-                      </div>
-                    )}
-                    {showReplies === element.uid && element.replies && (
-                      <div>
-                        {element.replies.map((value, index) => (
-                          <div
-                            key={index}
-                            className="ml-5 bg-gray-100 rounded-lg mt-4 mb-4"
-                          >
-                            <p className="text-gray-600 text-sm">
-                              {value.comment}
-                            </p>
-                            <div className="text-xs text-green-500">
-                              posted on {value.date} by {value.name}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 };
 
 export default Postpage;
-
-
-
-              
-
-
-

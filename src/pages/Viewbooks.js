@@ -16,7 +16,7 @@ import {
   FaRegHandPaper,
 } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
-
+import { motion } from "framer-motion";
 const Viewbooks = () => {
   const [loading, setLoading] = useState(true); 
   const [bookDetails, setBookDetails] = useState([]);
@@ -55,7 +55,7 @@ const Viewbooks = () => {
               const requestData = initialBook.current.map((data) => data.uid);
               const updatedFetched = fetched.map((element) => ({
                 ...element,
-                requested: requestData.includes(element.uid),
+                requested: requestData.includes(element.uid)? true : false,
               }));
               initialBook.current = updatedFetched;
               setBookDetails(updatedFetched);
@@ -161,19 +161,19 @@ console.log(bookDetails);
         <div className="bg-white rounded-lg shadow-md p-4">
           <h2 className="text-xl font-medium mb-4">Book Listings</h2>
           <div className="overflow-y-auto lg:h-screen">
-            {bookDetails && bookDetails.map((book) => (
-              <div key={book.uid} className="mb-4">
-                <div
-                  className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-200"
-                  onClick={() => setSelectedBook(book)}
-                >
-                  <div>
-                    {book.title}
-                    <span className="ml-5 text-gray-500">{book.author}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {bookDetails && bookDetails.map((book) => (
+  <div key={book.uid} className="mb-4">
+    <div
+      className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-100 transform transition-transform duration-300 hover:scale-90"
+      onClick={() => setSelectedBook(book)}
+    >
+      <div className="flex items-center">
+        <div className="mr-4">{book.title}</div>
+        <div className="text-gray-500">{book.author}</div>
+      </div>
+    </div>
+  </div>
+))}
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-4">
@@ -213,35 +213,61 @@ console.log(bookDetails);
             </h2>
 
             {selectedBook && (
-              <>
-                <p>Title: {selectedBook.title}</p>
-                <p>Author: {selectedBook.author}</p>
-                <p>Description: {selectedBook.description}</p>
-                <div className="mb-2 mr-2 mt-5">
-                  {selectedBook.requested === false ? (
-                    <button
-                      onClick={() => {
-                        sendReq();
-                        setClicked((prev) => !prev);
-                        setSelectedBook((book) => ({
-                          ...book,
-                          requested: true,
-                        }));
-                      }}
-                      className="text-blue-300 mr-4 hover:text-blue-800 transition-colors duration-300 transform hover:scale-110"
-                    >
-                      <FaRegHandPaper /> Request
-                    </button>
-                  ) : (
-                    <div>You have already requested.</div>
-                  )}
-                  <button className="text-green-300 mr-2 hover:text-green-800 transition-colors duration-300 transform hover:scale-110">
-                    <FaRegComments /> Chat
-                  </button>
-                </div>
-                <h1 className="text-xl">Reviews</h1>
-              </>
-            )}
+ <div>
+<motion.div
+key={selectedBook.title} 
+className="bg-gray-100 p-4 rounded-lg shadow-md mb-8"
+initial={{ opacity: 0, y: -10 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ duration: 0.5 }}
+>
+  <div className="border-b-2 border-gray-500 mb-4 pb-2">
+    <p className="text-lg font-bold mb-2 mt-2">Title</p>
+    <p className="text-md italic">{selectedBook.title}</p>
+  </div>
+  <div className="mb-4 border-b-2 border-gray-500 pb-2">
+    <p className="text-lg font-bold mt-2 mb-2 ">Author</p>
+    <p className="text-md italic">{selectedBook.author}</p>
+  </div>
+  <div className="mb-4 border-b-2 border-gray-500 pb-2">
+    <p className="text-lg font-bold mt-2 mb-2">Description</p>
+    <p className="text-md italic">{selectedBook.description}</p>
+  </div>
+  <div className="mb-4 border-b-2 border-gray-500 pb-2">
+    <p className="text-lg font-bold mb-2 mt-2">Owner</p>
+    <p className="text-md italic">{selectedBook.name}</p>
+  </div>
+
+
+    <div className="flex justify-between mt-4">
+      {!selectedBook.requested ? (
+        <button
+          onClick={() => {
+            sendReq();
+            setClicked((prev) => !prev);
+            setSelectedBook((book) => ({
+              ...book,
+              requested: true,
+            }));
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition-colors duration-300 focus:outline-none"
+        >
+          <FaRegHandPaper className="mr-1" /> Request
+        </button>
+      ) : (
+        <div className="text-lg text-gray-500">You have already requested.</div>
+      )}
+    </div>
+    </motion.div>
+  </div>
+
+)}
+
+<h1 className="text-2xl mt-8 mb-4">Reviews</h1>
+
+     
+    
+
           </div>
         </div>
       </div>

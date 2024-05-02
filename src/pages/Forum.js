@@ -5,6 +5,7 @@ import { FaThumbsUp, FaComment } from "react-icons/fa";
 import { Select, Option } from "@material-tailwind/react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
+import { motion } from "framer-motion";
 import {
   addDoc,
   collection,
@@ -204,8 +205,11 @@ const Forum = () => {
                 let likes = post.likes ? post.likes.length : 0;
                 if (index < 5) {
                   return (
-                    <div
+                    <motion.div
                       key={index}
+                      initial={{ opacity: 0, y: -10 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ duration: 0.5 }}
                       className="relative text-sm mt-5 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer transform transition-transform duration-300 hover:scale-105"
                       onClick={() => nav(`/forum/${post.uid}`, { state: post })}
                     >
@@ -224,7 +228,7 @@ const Forum = () => {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 }
               })}
@@ -264,30 +268,36 @@ const Forum = () => {
         </div>
 
         {fetchedPosts.map((post) => (
-          <div key={post.uid} className="p-2 z-0">
-            <div
-              onClick={() => nav(`/forum/${post.uid}`, { state: post })}
-              className="bg-white shadow-sm rounded-lg p-4 mb-4 cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-90"
-              style={{ zIndex: 1 }}
-            >
-              <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
-              <p className="text-gray-600 mb-2">{post.category}</p>
-              <p className="text-sm text-gray-500 mb-4">
-                Posted by {post.username} on {post.time}.
-              </p>
-              <div className="flex justify-end items-center">
-                <span className="text-gray-500 flex items-center mr-4">
-                  <FaThumbsUp className="text-blue-500 mr-1" />
-                  {post.likes ? post.likes.length : 0}
-                </span>
-                <span className="text-gray-500 flex items-center">
-                  <FaComment className="text-gray-500 mr-1" />
-                  {post.commentsCount}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
+  <motion.div
+    key={post.uid}
+    className="p-2 z-0"
+    initial={{ opacity: 0, y: -10 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ duration: 0.5 }}
+  >
+    <div
+      onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+      className="bg-white shadow-sm rounded-lg p-4 mb-4 cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-90"
+      style={{ zIndex: 1 }}
+    >
+      <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
+      <p className="text-gray-600 mb-2">{post.category}</p>
+      <p className="text-sm text-gray-500 mb-4">
+        Posted by {post.username} on {post.time}.
+      </p>
+      <div className="flex justify-end items-center">
+        <span className="text-gray-500 flex items-center mr-4">
+          <FaThumbsUp className="text-blue-500 mr-1" />
+          {post.likes ? post.likes.length : 0}
+        </span>
+        <span className="text-gray-500 flex items-center">
+          <FaComment className="text-gray-500 mr-1" />
+          {post.commentsCount}
+        </span>
+      </div>
+    </div>
+  </motion.div>
+))}
         <div className="fixed bottom-4 right-4">
           <div className="rounded-full bg-blue-500 p-2">
             <RiPencilLine
@@ -299,7 +309,11 @@ const Forum = () => {
         </div>
 
         {post === true && (
-          <div className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50">
+          <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ duration: 0.5 }}
+          className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50">
             <div className="bg-white p-8 border border-gray-300 rounded-lg w-3/4">
               <h2 className="text-lg font-semibold mb-4">NEW POST</h2>
               <input
@@ -351,7 +365,7 @@ const Forum = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
