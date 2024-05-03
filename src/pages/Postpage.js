@@ -243,7 +243,7 @@ const Postpage = () => {
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
   >
-    {/* Main Comment */}
+  
     <div className="bg-gray-100 rounded-lg p-3 mb-2">
       <p className="text-black text-md mb-2">{element.comment}</p>
       <div className="flex justify-between items-center text-xs text-gray-500">

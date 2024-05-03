@@ -5,6 +5,11 @@ import { FaThumbsUp, FaComment } from "react-icons/fa";
 import { Select, Option } from "@material-tailwind/react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
+import { RiSendPlane2Line, RiCloseLine } from "react-icons/ri";
+import { FaFire } from 'react-icons/fa';
+import { FiFilter } from 'react-icons/fi';
+
+
 import { motion } from "framer-motion";
 import {
   addDoc,
@@ -167,9 +172,13 @@ const Forum = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <div className="hidden lg:flex flex-col w-1/4 bg-white border-r border-gray-300">
+      <div className="hidden lg:flex flex-col w-1/4 mt-3  bg-white border-r border-gray-300">
         <div className="p-4">
-          <h1 className="text-lg font-semibold mb-4">Filters</h1>
+        <div className="flex items-center ml-4 mb-4">
+  <FiFilter className="text-lg mr-2 text-black" size={20} />
+  <span className="text-lg font-medieum ">Filters</span>
+</div>
+<div className="ml-4">
           <Select
             onChange={catFilter}
             label="Select Category"
@@ -197,9 +206,13 @@ const Forum = () => {
               Engineering
             </Option>
           </Select>
+          </div>
 
           <div className="bg-white-200 rounded-lg p-4 mt-4">
-            <h1 className="text-lg font-semibold mb-2">Trending Posts</h1>
+          <div className="flex items-center mb-2">
+  <FaFire className="text-lg text-red-600 mr-2"  />
+  <span className="text-lg font-medieum">Trending </span>
+</div>
             {fetchedPosts.length > 0 &&
               fetchedPosts.map((post, index) => {
                 let likes = post.likes ? post.likes.length : 0;
@@ -208,17 +221,18 @@ const Forum = () => {
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, y: -10 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ duration: 0.5 }}
-                      className="relative text-sm mt-5 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.1 }}
+                      whileHover={{ scale: 1.05 }}
+                      className="relative text-sm mt-5 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer"
                       onClick={() => nav(`/forum/${post.uid}`, { state: post })}
                     >
                       <div className="absolute left-0 top-0 h-full bg-blue-500 text-white rounded-l-lg px-2  py-1">
                         #{index + 1}
                       </div>
                       <div className="ml-10">
-                        <span className="font-bold">{post.title}</span>
-                        <div className="flex mt-1">
+                        <span className="font-medieum">{post.title}</span>
+                        <div className="flex mt-2">
                           <span>
                             <FaThumbsUp className="text-blue-500" /> {likes}
                           </span>
@@ -268,36 +282,36 @@ transition={{ duration: 0.5 }}
         </div>
 
         {fetchedPosts.map((post) => (
-  <motion.div
-    key={post.uid}
-    className="p-2 z-0"
-    initial={{ opacity: 0, y: -10 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ duration: 0.5 }}
-  >
-    <div
-      onClick={() => nav(`/forum/${post.uid}`, { state: post })}
-      className="bg-white shadow-sm rounded-lg p-4 mb-4 cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-90"
-      style={{ zIndex: 1 }}
-    >
-      <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
-      <p className="text-gray-600 mb-2">{post.category}</p>
-      <p className="text-sm text-gray-500 mb-4">
-        Posted by {post.username} on {post.time}.
-      </p>
-      <div className="flex justify-end items-center">
-        <span className="text-gray-500 flex items-center mr-4">
-          <FaThumbsUp className="text-blue-500 mr-1" />
-          {post.likes ? post.likes.length : 0}
-        </span>
-        <span className="text-gray-500 flex items-center">
-          <FaComment className="text-gray-500 mr-1" />
-          {post.commentsCount}
-        </span>
-      </div>
-    </div>
-  </motion.div>
-))}
+          <motion.div
+            key={post.uid}
+            className="p-2 z-0"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div
+              onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+              className="bg-white shadow-sm rounded-lg p-4 mb-4 cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-90"
+              style={{ zIndex: 1 }}
+            >
+              <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
+              <p className="text-gray-600 mb-2">{post.category}</p>
+              <p className="text-sm text-gray-500 mb-4">
+                Posted by {post.username} on {post.time}.
+              </p>
+              <div className="flex justify-end items-center">
+                <span className="text-gray-500 flex items-center mr-4">
+                  <FaThumbsUp className="text-blue-500 mr-1" />
+                  {post.likes ? post.likes.length : 0}
+                </span>
+                <span className="text-gray-500 flex items-center">
+                  <FaComment className="text-gray-500 mr-1" />
+                  {post.commentsCount}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
         <div className="fixed bottom-4 right-4">
           <div className="rounded-full bg-blue-500 p-2">
             <RiPencilLine
@@ -309,11 +323,12 @@ transition={{ duration: 0.5 }}
         </div>
 
         {post === true && (
-          <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ duration: 0.5 }}
-          className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50"
+          >
             <div className="bg-white p-8 border border-gray-300 rounded-lg w-3/4">
               <h2 className="text-lg font-semibold mb-4">NEW POST</h2>
               <input
@@ -322,7 +337,7 @@ transition={{ duration: 0.5 }}
                 value={postDetails.title}
                 onChange={setInput}
                 placeholder="Title"
-                className="w-full border border-gray-300 rounded p-2 mb-4"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
               />
               <textarea
                 name="description"
@@ -330,7 +345,7 @@ transition={{ duration: 0.5 }}
                 onChange={setInput}
                 placeholder="What's on your mind?"
                 rows="4"
-                className="w-full border border-gray-300 rounded p-2 mb-4 resize-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
               ></textarea>
 
               <Select
@@ -346,7 +361,7 @@ transition={{ duration: 0.5 }}
               <div className="flex justify-end mt-4">
                 <button
                   onClick={createPost}
-                  className={`bg-blue-500 text-white py-2 px-4 rounded mr-2 ${
+                  className={`bg-blue-500 text-white py-2 px-4 rounded mr-2 flex items-center ${
                     !postDetails.title || !postDetails.description || !cat
                       ? "bg-blue-500 opacity-50 cursor-not-allowed"
                       : "hover:bg-blue-600"
@@ -355,13 +370,13 @@ transition={{ duration: 0.5 }}
                     !postDetails.title || !postDetails.description || !cat
                   }
                 >
-                  POST
+                  <RiSendPlane2Line size={20} />
                 </button>
                 <button
                   onClick={() => setPost(false)}
-                  className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+                  className="bg-red-400 text-white py-2 px-4 rounded hover:bg-red-600 flex items-center"
                 >
-                  Cancel
+                  <RiCloseLine />
                 </button>
               </div>
             </div>
