@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { db } from "../firebase/Firebase";
 import { getUserByEmail } from "../utils/Search";
@@ -17,7 +17,9 @@ import {
 } from "firebase/firestore";
 import { auth } from "../firebase/Firebase";
 import { motion } from "framer-motion";
+import { set } from "firebase/database";
 const Postpage = () => {
+  const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
   const [currentPost, setCurrentPost] = useState(null);
   const location = useLocation();
@@ -48,8 +50,11 @@ const Postpage = () => {
             where("postid", "==", currentPost.uid)
           );
           const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const fetched = querySnapshot.docs.map((doc) => doc.data());
+            const fetched = querySnapshot.docs.map((doc) => doc.data()).sort((a, b) => { 
+              return new Date(b.date) - new Date(a.date);
+            });
             setFetchedComments(fetched);
+            
           });
           return unsubscribe;
         }
@@ -101,6 +106,7 @@ const Postpage = () => {
         uid: ids,
         date: formattedDate,
       });
+
     } catch (error) {
       console.log(error);
     }
@@ -213,7 +219,7 @@ const Postpage = () => {
             </motion.div>
           </div>
 
-          <div className=" lg:mt lg:w-1/4 lg:pl-4 border-l lg:border-gray-200 ">
+          <div className=" lg:mt lg:w-1/4 lg:pl-4 lg:border-l lg:border-gray-200 ">
             <div className="mb-8">
               <textarea
                 value={currentComment}
@@ -244,7 +250,7 @@ const Postpage = () => {
     transition={{ duration: 0.5 }}
   >
   
-    <div className="bg-gray-100 rounded-lg p-3 mb-2">
+    <div ref={scrollTo} className="bg-gray-100 rounded-lg p-3 mb-2">
       <p className="text-black text-md mb-2">{element.comment}</p>
       <div className="flex justify-between items-center text-xs text-gray-500">
         <span>

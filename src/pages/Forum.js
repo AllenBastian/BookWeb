@@ -371,12 +371,14 @@ const Forum = () => {
                   }
                 >
                   <RiSendPlane2Line size={20} />
+                  Post
                 </button>
                 <button
                   onClick={() => setPost(false)}
                   className="bg-red-400 text-white py-2 px-4 rounded hover:bg-red-600 flex items-center"
                 >
                   <RiCloseLine />
+                  Cancel
                 </button>
               </div>
             </div>
