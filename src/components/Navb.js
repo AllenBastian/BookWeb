@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { IsSignedUpContext } from "../context/Context";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { IoNotificationsOutline } from "react-icons/io5";
+import SignUpForm from "../pages/Signup";
+import { Link } from "react-router-dom";
 
 import { db } from "../firebase/Firebase";
 import { css } from "@emotion/react";
@@ -25,62 +27,76 @@ import { SlLogin, SlLogout } from "react-icons/sl"; // Importing SlLogin and SlL
 import { HiOutlineUserCircle } from "react-icons/hi2";
 import { IoIosNotificationsOutline } from "react-icons/io5";
 import { Tooltip } from "@material-tailwind/react";
+import { set } from "firebase/database";
 
 function NavList() {
-  const { isSignedUp, setIsSignedUp } = useContext(IsSignedUpContext);
   const nav = useNavigate();
   const provider = new GoogleAuthProvider();
-  const [user, setUser] = useState(false);
   const [loading, setLoading] = useState(true);
+ const {isSignedUp, setIsSignedUp} = useContext(IsSignedUpContext);
+  const [ user, setUser ] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+
+    const storedIsSignedUp = localStorage.getItem("isSignedUp");
+    if (storedIsSignedUp !== null) {
+      setIsSignedUp(JSON.parse(storedIsSignedUp));
+    }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(true);
-        const email = user.email;
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('email', '==', email));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.docs.length > 0) {
-          setIsSignedUp(true);
-        } else {
-          setIsSignedUp(false);
-        }
+        setLoading(false);
       } else {
         setUser(false);
-        setIsSignedUp(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
+
     return () => unsubscribe();
-  }, [auth]);
+  },[])
+
 
   const logout = () => {
     signOut(auth).then(() => {
       setUser(false);
+      setIsSignedUp(false)
+      localStorage.setItem("isSignedUp", JSON.stringify(false));
       nav("/");
     }).catch((error) => {
       console.error("Sign out error:", error);
     });
   };
-
-  const login = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-      }).catch((error) => {
-        console.error("Sign in error:", error);
-      });
+  const login = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      const email = result.user.email; 
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      const isUserSignedUp = querySnapshot.docs.length > 0;
+      localStorage.setItem("isSignedUp", JSON.stringify(isUserSignedUp));
+      setIsSignedUp(isUserSignedUp);
+     
+      if(isUserSignedUp===false)
+        nav("/Signup");
+      else  
+       nav("/"); 
+    } catch (error) {
+      console.error("Sign in error:", error);
+    }
   };
+  
+  console.log(isSignedUp);
+
 
   if (loading)
     return <div></div>;
 
   return (
     <ul className="my-2 flex flex-col mx-4 gap-5 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-    {user && (
+    {user && isSignedUp===true&& (
       <>
         <Typography
           as="li"
@@ -89,12 +105,12 @@ function NavList() {
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
           <Tooltip placement="bottom" content="Forum">
-            <a href="/forum">
+            <Link to="/forum">
               <div className="flex">
               <IoPeopleOutline size={23} />
               <span className="lg:hidden ml-4">Forum</span>
               </div>
-            </a>
+            </Link>
           </Tooltip>
          
         </Typography>
@@ -105,12 +121,12 @@ function NavList() {
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
           <Tooltip placement="bottom" content="Dashboard">
-            <a href="/dashboard">
+            <Link to="/dashboard">
               <div className="flex">
               <LuLayoutDashboard size={20} />
               <span className="lg:hidden ml-4">Dashboard</span>
               </div>
-            </a>
+            </Link>
           </Tooltip>
           
         </Typography>
@@ -121,12 +137,12 @@ function NavList() {
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
           <Tooltip placement="bottom" content="User Profile">
-            <a href="/userprofile">
+            <Link to="/userprofile">
               <div className="flex">
               <HiOutlineUserCircle size={25} />
               <span className="lg:hidden ml-4">User Profile</span>
               </div>
-            </a>
+            </Link>
           </Tooltip>
         
         </Typography>
@@ -137,12 +153,12 @@ function NavList() {
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
           <Tooltip placement="bottom" content="View Books">
-            <a href="/viewbooks">
+            <Link to="/viewbooks">
               <div className="flex">
               <IoBookOutline size={25} />
               <span className="lg:hidden ml-4">View Books</span>
               </div>
-            </a>
+            </Link>
           </Tooltip>
         
         </Typography>
@@ -153,12 +169,12 @@ function NavList() {
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
           <Tooltip placement="bottom" content="Inbox">
-            <a href="/inbox">
+            <Link to="/inbox">
               <div className="flex">
               <IoNotificationsOutline size={25} />
               <span className="lg:hidden ml-4">Inbox</span>
               </div>
-            </a>
+            </Link>
           </Tooltip>
          
         </Typography>
@@ -182,18 +198,7 @@ function NavList() {
       )}
     </Typography>
   
-    {isSignedUp === false && user === true && (
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="p-1 font-medium"
-      >
-        <a href="/signup" className="flex items-center">
-          Sign Up
-        </a>
-      </Typography>
-    )}
+    
   </ul>
   
   
@@ -202,7 +207,6 @@ function NavList() {
 
 export function NavbarSimple() {
   const [openNav, setOpenNav] = React.useState(false);
-
   const handleWindowResize = () =>
     window.innerWidth >= 960 && setOpenNav(false);
 
@@ -217,13 +221,9 @@ export function NavbarSimple() {
   return (
     <Navbar className="mx-auto max-w-screen-xl px-6 py-3">
       <div className="flex items-center justify-between text-blue-gray-900">
-        <Typography
-          as="a"
-          href="/"
-          className="mr-4 ml-4 cursor-pointer py-1.5 text-2xl font-bold"
-        >
-          BOOKWEB
-        </Typography>
+      <Link to="/" className="mr-4 ml-4 cursor-pointer py-1.5 text-2xl font-bold">
+  <Typography variant="h2">BOOKWEB</Typography>
+</Link>
         <div className="hidden lg:block">
           <NavList />
         </div>
@@ -246,3 +246,5 @@ export function NavbarSimple() {
     </Navbar>
   );
 }
+
+export default NavbarSimple;

@@ -6,7 +6,7 @@ import { Button } from "@material-tailwind/react";
 import { ClipLoader } from "react-spinners";
 
 const UserProfilePage = () => {
-  const [loading, setLoading] = useState(true); // State to manage loading
+  const [loading, setLoading] = useState(true); 
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({});
   const [editing, setEditing] = useState(false);

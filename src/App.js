@@ -9,19 +9,19 @@ import UserProfile from "./pages/userprofile";
 import Forum from "./pages/Forum";
 import Chat from "./pages/Chat";
 import { BrowserRouter,Route,Routes } from "react-router-dom";
-
-
-
 import { IsSignedUpProvider } from "./context/Context";
+
 import "./App.css";
 import Inbox from "./pages/inbox";
 
 function App() {
+  console.log("render")
   return (
+  
+    <IsSignedUpProvider>
     <BrowserRouter>
-      <IsSignedUpProvider>
+   
         <div className="App">
-
          <NavbarSimple/>
         <Routes>
           <Route path="/" element={<Homepage/>}/>
@@ -35,8 +35,12 @@ function App() {
           <Route path="/inbox" element={<Protected><Inbox/></Protected>}/>
         </Routes>
         </div>
-      </IsSignedUpProvider>
-    </BrowserRouter>
+    
+  </BrowserRouter>
+  </IsSignedUpProvider>
+
+    
+
   );
 }
 

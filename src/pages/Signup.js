@@ -5,13 +5,17 @@ import { IsSignedUpContext } from '../context/Context';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@material-tailwind/react';
+import { motion } from 'framer-motion';
+import { FaUserPlus } from 'react-icons/fa';
 
 const SignUpForm = () => {
 
   const [user, setUser] = useState();
+  const [disableButton,setDisableButton] = useState(false);
+  const [hide,setHide] = useState(false);
   const nav = useNavigate();
   const auth = getAuth();
-  const { setIsSignedUp } = useContext(IsSignedUpContext);
+  const { IsSignedUp,setIsSignedUp } = useContext(IsSignedUpContext);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -30,11 +34,12 @@ const SignUpForm = () => {
     batch: '',
     college: '',
     contact: '',
-    email: '' // Add email field to userInfo state
   });
 
+
+
   useEffect(() => {
-    // Pre-fill email field with user's email if available
+ 
     if (user) {
       setUserInfo(prevState => ({
         ...prevState,
@@ -49,11 +54,20 @@ const SignUpForm = () => {
       ...prevState,
       [name]: value
     }));
+
   };
 
   const handleSignUp = async () => {
+
+    setHide(true);
+    if (Object.values(userInfo).some((item) => item.trim() === "")){
+      setDisableButton(true);
+      setHide(false);
+    }
+    else
+    {
     try {
-      const userRef = await addDoc(collection(db, 'users'), userInfo);
+      const userRef = await addDoc(collection(db, 'users'),{ ...userInfo,email:user.email});
       console.log('User signed up successfully! User ID:', userRef.id);
 
       setUserInfo({
@@ -67,19 +81,33 @@ const SignUpForm = () => {
       });
 
       setIsSignedUp(true);
+      localStorage.setItem("isSignedUp", JSON.stringify(true));
       nav("/");
     } catch (error) {
       console.error('Error signing up:', error);
     }
   };
+  if(IsSignedUp===true){
+    nav("/");
+  }
+}
 
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
       
       <img src="images/brownbooks.jpg" alt="Background" className="absolute inset-0 w-full h-full object-cover" />
      
-      <div className="absolute bg-offwhite p-7 rounded-md shadow-md" style={{ zIndex: 1 }}>
-        <h2 className="text-2xl font-semibold mb-4">Welcome to BOOKWEB!</h2>
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="absolute bg-offwhite p-7 rounded-md shadow-md w-96"
+        style={{ zIndex: 1 }}
+      >
+        <h2 className="text-2xl font-medium mb-4">
+  <FaUserPlus className="inline-block mr-2" />
+  Sign Up to continue
+</h2>
         <div className="mb-4">
           <input
             type="text"
@@ -151,8 +179,11 @@ const SignUpForm = () => {
             readOnly
           />
         </div>
-        <button onClick={handleSignUp} className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500">Sign Up</button>
-      </div>
+        {hide ?( <p className="text-gray-500">Signing up...</p>):(
+        <button onClick={handleSignUp} className={`w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500  `}>Sign Up</button>
+        )}
+        {disableButton && <p className="text-red-500 text-sm mt-2">Please fill all the fields</p>}
+      </motion.div>
     </div>
   );
 };
