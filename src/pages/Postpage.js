@@ -1,10 +1,12 @@
-import { useEffect, useState,useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { db } from "../firebase/Firebase";
 import { getUserByEmail } from "../utils/Search";
 import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
-import { FiSend } from 'react-icons/fi'
+import { FiSend } from "react-icons/fi";
 import { ClipLoader } from "react-spinners";
+import { IoCloseOutline } from "react-icons/io5";
+import { AnimatePresence } from "framer-motion";
 import {
   addDoc,
   collection,
@@ -34,6 +36,8 @@ const Postpage = () => {
   const [showReplies, setShowReplies] = useState(null);
   const [liked, setLiked] = useState(false);
   const [noOfLikes, setNoOfLikes] = useState(0);
+  const [mylikes, setMyLikes] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     setUser(auth.currentUser);
@@ -51,11 +55,12 @@ const Postpage = () => {
             where("postid", "==", currentPost.uid)
           );
           const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const fetched = querySnapshot.docs.map((doc) => doc.data()).sort((a, b) => { 
-              return new Date(b.date) - new Date(a.date);
-            });
+            const fetched = querySnapshot.docs
+              .map((doc) => doc.data())
+              .sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+              });
             setFetchedComments(fetched);
-            
           });
           return unsubscribe;
         }
@@ -81,6 +86,7 @@ const Postpage = () => {
           const hasLiked = likes.some(
             (element) => element === currentUser.name
           );
+          setMyLikes(likes);
           setLiked(hasLiked);
           setNoOfLikes(likes.length);
         }
@@ -107,7 +113,6 @@ const Postpage = () => {
         uid: ids,
         date: formattedDate,
       });
-
     } catch (error) {
       console.log(error);
     }
@@ -170,13 +175,40 @@ const Postpage = () => {
   };
 
   if (loading) {
-    return (
-      <Loader loading={loading} />
-    );
+    return <Loader loading={loading} />;
   }
 
   return (
     <div>
+      {isOpen && (
+  <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+
+    className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 background bg-black bg-opacity-50"
+  >
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      className="bg-white shadow-md p-4 rounded-md"
+    >
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-lg font-semibold">Likes</h3>
+        <motion.button whileHover={{scale:1.5}} onClick={() => setIsOpen(false)} className="focus:outline-none">
+          <IoCloseOutline size={20} />
+        </motion.button>
+      </div>
+      <ul>
+        {mylikes.map((user, index) => (
+          <li key={index} className="text-gray-800">{user}</li>
+        ))}
+      </ul>
+    </motion.div>
+  </motion.div>
+)}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row">
           <div className="lg:w-3/4 lg:pr-4">
@@ -198,7 +230,7 @@ const Postpage = () => {
 
               <div className="flex items-center justify-start">
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.3 }}
                   whileTap={{ scale: 1.1 }}
                   className={`flex items-center ${
                     liked
@@ -212,7 +244,19 @@ const Postpage = () => {
                   }}
                 >
                   <FaThumbsUp className="mr-1" size={20} />
-                  <span className="text-black text-2xl">{noOfLikes}</span>
+                </motion.button>
+                <motion.button
+                   whileHover={{ scale: 1.3 }}
+                  whileTap={{ scale: 1.1 }}
+                  className="cursor-pointer flex items-center"
+                  onClick={() => {
+                    setIsOpen(true);
+                    console.log(isOpen);
+                  }}
+                >
+                  <span className="ml-1 text-black text-2xl ">{noOfLikes}</span>
+
+               
                 </motion.button>
               </div>
             </motion.div>
@@ -230,107 +274,108 @@ const Postpage = () => {
               <button
                 onClick={() => {
                   postComment();
-                  setClicked((prev) => !prev);
                 }}
                 className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
               >
-                 <FiSend className="text-xl" />
+                <FiSend className="text-xl" />
               </button>
             </div>
 
-            <h3 className="text-xl font-semibold mb-4 ">Comments ({fetchedComments.length})</h3>
+            <h3 className="text-xl font-semibold mb-4 ">
+              Comments ({fetchedComments.length})
+            </h3>
             <div className="overflow-auto max-h-[500px]">
-            {fetchedComments.map((element, index) => (
-  <motion.div
-    key={index}
-    className="bg-white rounded-lg mb-0 p-1"
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-  
-    <div ref={scrollTo} className="bg-gray-100 rounded-lg p-3 mb-2">
-      <p className="text-black text-md mb-2">{element.comment}</p>
-      <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>
-          Posted on {element.date} by{" "}
-          {currentPost.username === element.commenter
-            ? "Author"
-            : element.commenter}
-        </span>
-      </div>
-      <div className="flex justify-end gap-3 items-center text-xs text-gray-500 mt-2">
-        <button
-          onClick={() => {
-            setShowReplyInput(element.uid);
-            setShowReplies();
-          }}
-          className="text-blue-500 hover:underline focus:outline-none ml-2"
-        >
-          Reply
-        </button>
-        <button
-          onClick={() => {
-            setShowReplyInput();
-            setShowReplies(element.uid);
-          }}
-          className="text-blue-500 hover:underline focus:outline-none ml-2"
-        >
-          Show replies ({element.replies ? element.replies.length : 0})
-        </button>
-      </div>
-    </div>
+              {fetchedComments.map((element, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-white rounded-lg mb-0 p-1"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div
+                    ref={scrollTo}
+                    className="bg-gray-100 rounded-lg p-3 mb-2"
+                  >
+                    <p className="text-black text-md mb-2">{element.comment}</p>
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                      <span>
+                        Posted on {element.date} by{" "}
+                        {currentPost.username === element.commenter
+                          ? "Author"
+                          : element.commenter}
+                      </span>
+                    </div>
+                    <div className="flex justify-end gap-3 items-center text-xs text-gray-500 mt-2">
+                      <button
+                        onClick={() => {
+                          setShowReplyInput(element.uid);
+                          setShowReplies();
+                        }}
+                        className="text-blue-500 hover:underline focus:outline-none ml-2"
+                      >
+                        Reply
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowReplyInput();
+                          setShowReplies(element.uid);
+                        }}
+                        className="text-blue-500 hover:underline focus:outline-none ml-2"
+                      >
+                        Show replies (
+                        {element.replies ? element.replies.length : 0})
+                      </button>
+                    </div>
+                  </div>
 
-    {showReplies === element.uid && element.replies && (
-  <motion.div
-    className="pl-4"
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    {element.replies.map((value, index) => (
-      <div
-        key={index}
-        className="bg-gray-200 rounded-lg p-3 mb-2"
-      >
-        <p className="text-black text-sm">
-          {value.comment}
-        </p>
-        <div className="text-xs text-gray-500">
-          Posted on {value.date} by {value.name}
-        </div>
-      </div>
-    ))}
-  </motion.div>
-)}
-{showReplyInput === element.uid && (
-  <motion.div 
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-    className="mt-3"
-  >
-    <textarea
-      onChange={(e) => setCurrentReply(e.target.value)}
-      value={currentReply}
-      placeholder="Write your reply..."
-      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
-    />
-    <button
-      onClick={() => {
-        commentReply(element.uid);
-        setClicked((prev) => !prev);
-      }}
-      className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none transition-colors duration-300 ease-in-out transform hover:scale-105 flex items-center"
-    >
-      <FiSend className="text-xl" /> {/* Replace text with Send icon */}
-    </button>
-  </motion.div>
-)}
-
-  </motion.div>
-))}
-
+                  {showReplies === element.uid && element.replies && (
+                    <motion.div
+                      className="pl-4"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {element.replies.map((value, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-200 rounded-lg p-3 mb-2"
+                        >
+                          <p className="text-black text-sm">{value.comment}</p>
+                          <div className="text-xs text-gray-500">
+                            Posted on {value.date} by {value.name}
+                          </div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                  {showReplyInput === element.uid && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="mt-3"
+                    >
+                      <textarea
+                        onChange={(e) => setCurrentReply(e.target.value)}
+                        value={currentReply}
+                        placeholder="Write your reply..."
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                      />
+                      <button
+                        onClick={() => {
+                          commentReply(element.uid);
+                          setClicked((prev) => !prev);
+                        }}
+                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none transition-colors duration-300 ease-in-out transform hover:scale-105 flex items-center"
+                      >
+                        <FiSend className="text-xl" />{" "}
+                        {/* Replace text with Send icon */}
+                      </button>
+                    </motion.div>
+                  )}
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
