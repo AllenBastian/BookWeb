@@ -170,7 +170,7 @@ export function NavbarSimple() {
         <Typography
             as="a"
             href="/"
-            className="mr-4 cursor-pointer py-1.5 text-3xl font-bold" // Increase text size to text-3xl
+            className="mr-4 cursor-pointer py-1.5 text-4xl font-bold" // Increase text size to text-3xl
           >
             BOOKWEB
         </Typography>
