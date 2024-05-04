@@ -2,6 +2,7 @@ import React from "react";
 import Carousel from "react-multi-carousel";                          
 import "react-multi-carousel/lib/styles.css";
 import "../pages/styles.css";
+
 const responsive = {
   desktop: {
     breakpoint: { max: 3000, min: 1024 },
@@ -19,34 +20,26 @@ const responsive = {
     slidesToSlide: 1 // optional, default to 1.
   }
 };
+
 const sliderImageUrl = [
-  //First image url
   {
-    url:
-      "https://m.media-amazon.com/images/I/81PjadeEG4L._AC_UF1000,1000_QL80_.jpg"
+    // Example Open Library Covers API URL
+    url: "https://covers.openlibrary.org/b/ISBN/978-0-141-34565-9-L.jpg" // Replace ISBN and value with actual book information
   },
   {
-    url:
-      "https://m.media-amazon.com/images/I/81xtUuRY3ML._AC_UF1000,1000_QL80_.jpg"
+    url: "https://covers.openlibrary.org/b/ISBN/1-55597-164-4-L.jpg" // Example cover URL
   },
-  //Second image url
   {
-    url:
-      "https://m.media-amazon.com/images/I/41XSxPwoL3L.jpg"
+    url: "https://covers.openlibrary.org/b/ISBN/978-1-77338-012-4-L.jpg" // Example cover URL
   },
-  //Third image url
   {
-    url:
-      "https://upload.wikimedia.org/wikipedia/en/b/b5/Adujivitam.jpg"
+    url: "https://covers.openlibrary.org/b/978-0-141-34565-9-L.jpg" // Example cover URL
   },
-
-  //Fourth image url
-
   {
-    url:
-      "https://m.media-amazon.com/images/I/81vXvTYUPvL._AC_UF1000,1000_QL80_.jpg"
+    url: "https://covers.openlibrary.org/b/ISBN/978-2-89377-571-5-L.jpg" // Example cover URL
   }
 ];
+
 const Carouselc = () => {
   return (
     <div className="parent">
@@ -63,7 +56,7 @@ const Carouselc = () => {
         {sliderImageUrl.map((imageUrl, index) => {
           return (
             <div className="slider" key={index}>
-              <img src={imageUrl.url} alt="movie" />
+              <img src={imageUrl.url} alt="book cover" />
             </div>
           );
         })}
@@ -71,4 +64,5 @@ const Carouselc = () => {
     </div>
   );
 };
+
 export default Carouselc;
