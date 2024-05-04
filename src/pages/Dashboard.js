@@ -2,6 +2,7 @@ import { auth } from "../firebase/Firebase";
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
 import { Select, Option } from "@material-tailwind/react";
+import Loader from "../components/Loader";
 import {
   FaPlusCircle,
   FaChevronDown,
@@ -51,6 +52,7 @@ const Dashboard = () => {
   const [temp, setTemp] = useState([]);
   const [temp2, setTemp2] = useState([]);
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const q = query(
@@ -61,9 +63,11 @@ const Dashboard = () => {
         const r = query(collection(db, "requests"));
 
         const unsubscribeBooks = onSnapshot(
+          
           q,
           (snapshot) => {
             const fetched = snapshot.docs.map((doc) => doc.data());
+           
             setBookDetails(fetched);
           },
           (error) => {
@@ -267,9 +271,7 @@ const Dashboard = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader color={"#123abc"} loading={loading} size={50} />
-      </div>
+      <Loader loading={loading}/>
     );
 
   return (

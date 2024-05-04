@@ -8,7 +8,7 @@ import { auth } from "../firebase/Firebase";
 import { RiSendPlane2Line, RiCloseLine } from "react-icons/ri";
 import { FaFire } from 'react-icons/fa';
 import { FiFilter } from 'react-icons/fi';
-
+import Loader from "../components/Loader";
 
 import { motion } from "framer-motion";
 import {
@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 
 const Forum = () => {
   const nav = useNavigate();
-  const [loading, setLoading] = useState(true); // State to manage loading
+  const [loading, setLoading] = useState(true); 
   const [post, setPost] = useState(false);
   const [cat, setCat] = useState();
   const [user, setUser] = useState();
@@ -164,9 +164,7 @@ const Forum = () => {
   };
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader color={"#123abc"} loading={loading} size={50} />
-      </div>
+      <Loader loading={loading} />
     );
   }
 

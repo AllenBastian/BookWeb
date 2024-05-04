@@ -7,6 +7,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { IoNotificationsOutline } from "react-icons/io5";
 import SignUpForm from "../pages/Signup";
 import { Link } from "react-router-dom";
+import Loader from "./Loader";
 
 import { db } from "../firebase/Firebase";
 import { css } from "@emotion/react";
@@ -23,7 +24,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { IoPeopleOutline } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { IoBookOutline } from "react-icons/io5";
-import { SlLogin, SlLogout } from "react-icons/sl"; // Importing SlLogin and SlLogout icons for login and logout
+import { SlLogin, SlLogout } from "react-icons/sl"; 
 import { HiOutlineUserCircle } from "react-icons/hi2";
 import { IoIosNotificationsOutline } from "react-icons/io5";
 import { Tooltip } from "@material-tailwind/react";
@@ -91,11 +92,14 @@ function NavList() {
   console.log(isSignedUp);
 
 
-  if (loading)
-    return <div></div>;
+
 
   return (
     <ul className="my-2 flex flex-col mx-4 gap-5 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
+      {loading ?(   
+          <ClipLoader color={"#123abc"} loading={loading} size={20} />
+        ):(
+        <>
     {user && isSignedUp===true&& (
       <>
         <Typography
@@ -180,7 +184,8 @@ function NavList() {
         </Typography>
       </>
     )}
-  
+    </>
+      )}
     <Typography
       as="li"
       variant="small"

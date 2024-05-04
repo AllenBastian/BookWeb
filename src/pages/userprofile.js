@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { db, storage } from "../firebase/Firebase";
 import { collection, getDocs, query, where, doc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { Button } from "@material-tailwind/react";
+import { Button } from "@material-tailwind/react"
+import Loader from "../components/Loader";
 import { ClipLoader } from "react-spinners";
 
 const UserProfilePage = () => {
@@ -69,9 +70,7 @@ const UserProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader color={"#123abc"} loading={loading} size={50} />
-      </div>
+    <Loader loading={loading}/>
     );
   }
 

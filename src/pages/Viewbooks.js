@@ -23,6 +23,7 @@ import {
 import { FiFilter } from "react-icons/fi";
 import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
+import Loader from "../components/Loader";
 const Viewbooks = () => {
   const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -158,9 +159,7 @@ const Viewbooks = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader color={"#123abc"} loading={loading} size={50} />
-      </div>
+      <Loader loading={loading} />
     );
   }
   console.log(bookDetails);
@@ -191,7 +190,7 @@ const Viewbooks = () => {
               ))}
           </div>
         </div>
-        <div ref={scrollTo} className="bg-white rounded-lg shadow-md p-4">
+        <div  className="bg-white rounded-lg shadow-md p-4">
           <div className="flex items-center  mb-4">
             <FiFilter className="text-lg mr-2 text-black" size={20} />
             <span className="text-xl font-medieum ">Filters</span>
@@ -226,7 +225,7 @@ const Viewbooks = () => {
           </div>
           <div className="mb-4"></div>
           <div>
-            <div className="flex  text-black text-xl font-medium mt-5 mb-2">
+            <div ref={scrollTo} className="flex  text-black text-xl font-medium mt-5 mb-2">
               <FaBook className="mr-2 mt-1 text-black" size={20} />
               Book Info
             </div>

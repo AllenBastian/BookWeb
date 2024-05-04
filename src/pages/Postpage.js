@@ -18,6 +18,7 @@ import {
 import { auth } from "../firebase/Firebase";
 import { motion } from "framer-motion";
 import { set } from "firebase/database";
+import Loader from "../components/Loader";
 const Postpage = () => {
   const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -170,9 +171,7 @@ const Postpage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <ClipLoader color={"#123abc"} loading={loading} size={50} />
-      </div>
+      <Loader loading={loading} />
     );
   }
 
