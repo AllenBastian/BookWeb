@@ -15,10 +15,11 @@ const SignUpForm = () => {
   const [hide,setHide] = useState(false);
   const nav = useNavigate();
   const auth = getAuth();
-  const { IsSignedUp,setIsSignedUp } = useContext(IsSignedUpContext);
+  const { isSignedUp,setIsSignedUp } = useContext(IsSignedUpContext);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("sjdnsklndjsnd");
       if (user) {
         setUser(user);
       }
@@ -87,11 +88,18 @@ const SignUpForm = () => {
       console.error('Error signing up:', error);
     }
   };
-  if(IsSignedUp===true){
-    nav("/");
-  }
+
+
+
+  console.log("heooknkhskhk")
+  
+
 }
 
+if(isSignedUp===true){
+  nav("/");
+}
+console.log(isSignedUp);
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
       

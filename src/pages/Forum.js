@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
+import {toast} from "sonner"
 
 const Forum = () => {
   const nav = useNavigate();
@@ -33,6 +34,7 @@ const Forum = () => {
   const allPosts = useRef([]);
   const [fetchedPosts, setFetchedPosts] = useState([]);
   const [clicked, setClicked] = useState(false);
+
   const [postDetails, setPostDetails] = useState({
     title: "",
     description: "",
@@ -145,7 +147,8 @@ const Forum = () => {
         description: "",
         category: "",
       });
-      setClicked((prev) => !prev);
+      
+      toast.success("Post created successfully");
     } catch (error) {
       console.error("Error creating post: ", error);
     }

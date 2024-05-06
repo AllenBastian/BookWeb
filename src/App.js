@@ -10,6 +10,9 @@ import Forum from "./pages/Forum";
 import Chat from "./pages/Chat";
 import { BrowserRouter,Route,Routes } from "react-router-dom";
 import { IsSignedUpProvider } from "./context/Context";
+import { Toaster } from 'sonner'
+import Notifyer from "./components/Notifyer";
+import { NotificationCountProvider } from "./context/Context";
 
 import "./App.css";
 import Inbox from "./pages/inbox";
@@ -22,7 +25,21 @@ function App() {
     <BrowserRouter>
    
         <div className="App">
-         <NavbarSimple/>
+          <NotificationCountProvider>
+                <Notifyer/>
+              <NavbarSimple/>
+         </NotificationCountProvider>
+         <Toaster richColors
+        position="top-right"
+        toastOptions={{
+          style: {
+            width: '300px',
+            height: '50px', 
+            fontSize: '1.2rem', 
+          },
+    
+        }}
+/>
         <Routes>
           <Route path="/" element={<Homepage/>}/>
           <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>

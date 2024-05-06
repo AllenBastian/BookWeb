@@ -28,10 +28,13 @@ import { SlLogin, SlLogout } from "react-icons/sl";
 import { HiOutlineUserCircle } from "react-icons/hi2";
 import { IoIosNotificationsOutline } from "react-icons/io5";
 import { Tooltip } from "@material-tailwind/react";
-import { set } from "firebase/database";
+
+import { NotificationCountContext } from "../context/Context";
 
 function NavList() {
   const nav = useNavigate();
+  const {notificationCount} = useContext(NotificationCountContext);
+ 
   const provider = new GoogleAuthProvider();
   const [loading, setLoading] = useState(true);
  const {isSignedUp, setIsSignedUp} = useContext(IsSignedUpContext);
@@ -39,6 +42,7 @@ function NavList() {
 
   useEffect(() => {
 
+    
     const storedIsSignedUp = localStorage.getItem("isSignedUp");
     if (storedIsSignedUp !== null) {
       setIsSignedUp(JSON.parse(storedIsSignedUp));
@@ -88,11 +92,8 @@ function NavList() {
       console.error("Sign in error:", error);
     }
   };
-  
-  console.log(isSignedUp);
 
-
-
+  console.log("yesbpi")
 
   return (
     <ul className="my-2 flex flex-col mx-4 gap-5 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
@@ -172,14 +173,22 @@ function NavList() {
           color="blue-gray"
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
-          <Tooltip placement="bottom" content="Inbox">
-            <Link to="/inbox">
-              <div className="flex">
-              <IoNotificationsOutline size={25} />
-              <span className="lg:hidden ml-4">Inbox</span>
-              </div>
-            </Link>
-          </Tooltip>
+          
+          
+      <Tooltip placement="bottom" content="Inbox">
+        <Link to="/inbox">
+          <div className="flex">
+       
+            <IoNotificationsOutline size={25} />
+            {notificationCount > 0 && 
+        <span className="text-red-900 rounded">{notificationCount}</span>
+      }
+            <span className="lg:hidden ml-4 mb">Inbox</span>
+          </div>
+        </Link>
+      </Tooltip>
+     
+
          
         </Typography>
       </>

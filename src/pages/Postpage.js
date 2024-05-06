@@ -20,7 +20,11 @@ import {
 import { auth } from "../firebase/Firebase";
 import { motion } from "framer-motion";
 import { set } from "firebase/database";
+import {toast} from "sonner"
 import Loader from "../components/Loader";
+
+
+
 const Postpage = () => {
   const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -108,11 +112,14 @@ const Postpage = () => {
       const userRef = await addDoc(collection(db, "comments"), {
         comment: currentComment,
         postid: currentPost.uid,
+        postowner: currentPost.owner,
         commenter: currentUser.name,
         email: user.email,
         uid: ids,
         date: formattedDate,
+        timestamp: new Date(),
       });
+      
     } catch (error) {
       console.log(error);
     }

@@ -25,6 +25,7 @@ import { useState } from "react";
 import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import { db } from "../firebase/Firebase";
+
 import {
   collection,
   addDoc,
@@ -40,6 +41,8 @@ import { useNavigate } from "react-router-dom";
 import { FaListCheck } from "react-icons/fa6";
 
 const Dashboard = () => {
+
+  
   const user = auth.currentUser;
   const nav = useNavigate();
   const { isSignedUp } = useContext(IsSignedUpContext);
@@ -51,6 +54,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [temp, setTemp] = useState([]);
   const [temp2, setTemp2] = useState([]);
+ 
   useEffect(() => {
 
     const fetchData = async () => {
@@ -273,6 +277,11 @@ const Dashboard = () => {
     return (
       <Loader loading={loading}/>
     );
+
+
+    if(isSignedUp===false)
+      console.log("user not signed upsjbdjwbdkjwd");
+
 
   return (
     <>
