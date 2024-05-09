@@ -19,6 +19,7 @@ import {
   FaClone,
   FaBook,
   FaPlus,
+  FaExchangeAlt,
   FaLanguage,
 } from "react-icons/fa";
 import { useState } from "react";
@@ -40,10 +41,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { FaListCheck } from "react-icons/fa6";
 import { toast } from "sonner";
+import CustomButton from "../components/CustomButton";
+import CustomPopup from "../components/CustomPopup";
 
 const Dashboard = () => {
-
-  
   const user = auth.currentUser;
   const nav = useNavigate();
   const { isSignedUp } = useContext(IsSignedUpContext);
@@ -55,10 +56,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [temp, setTemp] = useState([]);
   const [temp2, setTemp2] = useState([]);
- 
- 
-  useEffect(() => {
 
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const q = query(
@@ -69,11 +68,10 @@ const Dashboard = () => {
         const r = query(collection(db, "requests"));
 
         const unsubscribeBooks = onSnapshot(
-          
           q,
           (snapshot) => {
             const fetched = snapshot.docs.map((doc) => doc.data());
-           
+
             setBookDetails(fetched);
           },
           (error) => {
@@ -239,8 +237,7 @@ const Dashboard = () => {
     }));
   };
   const handleSubmit = async (event) => {
-
-    if(Object.values(newBookInfo).some((item) => item.trim() === "")){
+    if (Object.values(newBookInfo).some((item) => item.trim() === "")) {
       toast.error("Please fill all the fields");
       return;
     }
@@ -280,15 +277,9 @@ const Dashboard = () => {
     });
   };
 
-  if (loading)
-    return (
-      <Loader loading={loading}/>
-    );
+  if (loading) return <Loader loading={loading} />;
 
-
-    if(isSignedUp===false)
-      console.log("user not signed upsjbdjwbdkjwd");
-
+  if (isSignedUp === false) console.log("user not signed upsjbdjwbdkjwd");
 
   return (
     <>
@@ -384,75 +375,56 @@ const Dashboard = () => {
                           </div>
 
                           <div className="flex justify-end">
-                            <motion.button
-                              onClick={() => handleDisable(book.title)}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className={`flex items-center px-3 py-1 ${
-                                !book.disabled ? "bg-gray-500" : "bg-green-500"
-                              } text-white rounded-md mr-2 mt-2 hover:bg-gray-600 transition-colors duration-300 focus:outline-none`}
-                            >
-                              {book.disabled ? (
-                                <>
-                                  <span className="mr-1">Enable</span>
-                                  <FaCheck className="text-xl" />
-                                </>
-                              ) : (
-                                <>
-                                  <span className="mr-1">Disable</span>
-                                  <FaBan className="text-xl" />
-                                </>
-                              )}
-                            </motion.button>
-                            <motion.button
+                            {book.disabled ? (
+                              <CustomButton
+                                className="mr-2"
+                                text={"Enable"}
+                                color={"green"}
+                                onClick={() => handleDisable(book.title)}
+                                icon={<FaCheck className="text-xl" />}
+                              />
+                            ) : (
+                              <CustomButton
+                                className="mr-2"
+                                text={"Disable"}
+                                color={"orange"}
+                                onClick={() => handleDisable(book.title)}
+                                icon={<FaBan className="text-xl" />}
+                              />
+                            )}
+
+                            <CustomButton
+                              text={"Delete"}
+                              color={"red"}
                               onClick={() => setDeletePop(true)}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="flex items-center px-3 py-1 bg-red-500 text-white rounded-md mt-2 hover:bg-red-600 transition-colors duration-300 focus:outline-none"
-                            >
-                              <span className="mr-1">Delete</span>
-                              <FaTrashAlt className="text-xl" />
-                            </motion.button>
+                              icon={<FaTrashAlt className="text-xl" />}
+                            />
                           </div>
                         </motion.div>
 
                         {deletePop === true && (
                           <>
-                            <motion.div
-                              className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                            >
-                              <motion.div
-                                className="bg-white p-4 border border-gray-300 rounded"
-                                initial={{ scale: 0.5 }}
-                                animate={{ scale: 1 }}
-                                exit={{ scale: 0 }}
-                              >
-                                <h2 className="text-lg font-semibold mb-2">
-                                  Are you Sure you want to delete?
-                                </h2>
-                                <div className="flex justify-center">
-                                  <button
-                                    onClick={() => {
-                                      handleDelete(book.title);
-                                    }}
-                                    className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors duration-300 mr-2"
-                                  >
-                                    Yes
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setDeletePop(false);
-                                    }}
-                                    className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition-colors duration-300"
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              </motion.div>
-                            </motion.div>
+                            <CustomPopup
+                              message={
+                                "Are you sure you want to delete this book?"
+                              }
+                              button1={
+                                <CustomButton
+                                  text={"Yes"}
+                                  color={"red"}
+                                  onClick={() => handleDelete(book.title)}
+                                  icon={<FaCheck />}
+                                />
+                              }
+                              button2={
+                                <CustomButton
+                                  text={"No"}
+                                  color={"blue"}
+                                  onClick={() => setDeletePop(false)}
+                                  icon={<FaTimes />}
+                                />
+                              }
+                            />
                           </>
                         )}
                       </>
@@ -464,7 +436,7 @@ const Dashboard = () => {
           </div>
           <div>
             <div className="flex items-center justify-between p-4 bg-black rounded-t-lg shadow-md">
-            <div className="flex justify-start">
+              <div className="flex justify-start">
                 <FaPaperPlane className="text-2xl mr-2 text-white" />
                 <div className="text-white">REQUESTS</div>
               </div>
@@ -526,8 +498,8 @@ const Dashboard = () => {
           </div>
           <div>
             <div className="flex items-center justify-between p-4 bg-black rounded-t-lg shadow-md">
-            <div className="flex justify-start">
-                <FaListCheck className="text-2xl mr-2 text-white" />
+              <div className="flex justify-start">
+                <FaExchangeAlt className="text-2xl mr-2 text-white" />
                 <div className="text-white">STATUS</div>
               </div>
             </div>
@@ -546,9 +518,12 @@ const Dashboard = () => {
                         key={req.ruid}
                         className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                       >
-                        <span className="font-medieum text-black">
+                        <span className="font-medium text-black">
                           {req.booktitile}
                         </span>
+                        <div className="rounded-full bg-gray-400 text-white px-2 py-1">
+                          {req.type === "lended" ? "Lended" : "Borrowed"}
+                        </div>
                         <motion.div className="flex items-center justify-center w-8 h-8 bg-blue-400 rounded-full cursor-pointer hover:bg-blue-800 transition-colors">
                           <FaCommentAlt
                             className="w-4 h-4 text-white"
@@ -626,25 +601,19 @@ const Dashboard = () => {
               <Option value="Non-Fiction">Non-Fiction</Option>
             </Select>
 
-            <div className="flex mt-4 justify-end gap-4">
-              <motion.button
+            <div className="flex mt-4 justify-end ">
+              <CustomButton
+                text={"Add Book"}
+                color={"blue"}
+                icon={<FaPlus />}
                 onClick={handleSubmit}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 flex items-center space-x-2 `}
-              >
-                <FaPlus />
-                <span>Add Book</span>
-              </motion.button>
-              <motion.button
+              />
+              <CustomButton
+                text={"Cancel"}
+                color={"red"}
+                icon={<FaTimes />}
                 onClick={() => setIsDialogOpen(false)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 flex items-center space-x-2"
-              >
-                <FaTimes />
-                <span>Cancel</span>
-              </motion.button>
+              />
             </div>
           </div>
         </motion.div>

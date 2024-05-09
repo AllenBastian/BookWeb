@@ -25,6 +25,7 @@ import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Loader from "../components/Loader";
 import { toast } from "sonner";
+import CustomButton from "../components/CustomButton";
 const Viewbooks = () => {
   const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -118,7 +119,7 @@ const Viewbooks = () => {
       let ids = doc(collection(db, "books")).id;
       await addDoc(collection(db, "requests"), {
         requestfrom: user.email,
-        requsername: selectedBook.name,
+        reqtousername: selectedBook.name,
         requestto: selectedBook.owner,
         booktitile: selectedBook.title,
         bookuid: selectedBook.uid,
@@ -274,19 +275,15 @@ const Viewbooks = () => {
 
                     <div className="flex justify-between mt-4">
                       {!selectedBook.requested ? (
-                        <button
-                          onClick={() => {
-                            sendReq();
-                            setClicked((prev) => !prev);
-                            setSelectedBook((book) => ({
-                              ...book,
-                              requested: true,
-                            }));
-                          }}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition-colors duration-300 focus:outline-none"
-                        >
-                          <FaRegHandPaper className="mr-1" /> Request
-                        </button>
+                         <CustomButton color={"blue"} text={"request"} onClick={() => {
+                          sendReq();
+                          setClicked((prev) => !prev);
+                          setSelectedBook((book) => ({
+                            ...book,
+                            requested: true,
+                          }));
+                        }} icon={<FaRegHandPaper className="mr-1"/>}/>
+                       
                       ) : (
                         <div className="text-lg text-gray-500">
                           You have already requested.
