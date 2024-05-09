@@ -11,7 +11,7 @@ import Chat from "./pages/Chat";
 import { BrowserRouter,Route,Routes } from "react-router-dom";
 import { IsSignedUpProvider } from "./context/Context";
 import { Toaster } from 'sonner'
-import Notifyer from "./components/Notifyer";
+
 import { NotificationCountProvider } from "./context/Context";
 
 import "./App.css";
@@ -26,7 +26,6 @@ function App() {
    
         <div className="App">
           <NotificationCountProvider>
-                <Notifyer/>
               <NavbarSimple/>
          </NotificationCountProvider>
          <Toaster richColors
