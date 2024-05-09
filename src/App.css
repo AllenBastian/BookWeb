@@ -5,7 +5,9 @@ html {
 }
 *{
     margin: 0;
-    padding: 0;
+    padding: 2;
+
+    /* font-family: 'Reddit Sans', sans-serif; */
     @apply font-myfont2
    
 }

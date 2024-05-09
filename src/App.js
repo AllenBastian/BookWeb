@@ -30,15 +30,9 @@ function App() {
               <NavbarSimple/>
          </NotificationCountProvider>
          <Toaster richColors
-        position="top-right"
-        toastOptions={{
-          style: {
-            width: '300px',
-            height: '50px', 
-            fontSize: '1.2rem', 
-          },
-    
-        }}
+        position="bottom-left"
+    gap={20}
+       
 />
         <Routes>
           <Route path="/" element={<Homepage/>}/>

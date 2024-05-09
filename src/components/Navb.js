@@ -236,7 +236,7 @@ export function NavbarSimple() {
     <Navbar className="mx-auto max-w-screen-xl px-6 py-3">
       <div className="flex items-center justify-between text-blue-gray-900">
       <Link to="/" className="mr-4 ml-4 cursor-pointer py-1.5 text-2xl font-bold">
-  <Typography variant="h2">BOOKWEB</Typography>
+  <Typography variant="h4">BOOKWEB</Typography>
 </Link>
         <div className="hidden lg:block">
           <NavList />

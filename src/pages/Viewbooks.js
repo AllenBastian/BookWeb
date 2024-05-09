@@ -24,6 +24,7 @@ import { FiFilter } from "react-icons/fi";
 import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
 const Viewbooks = () => {
   const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -125,7 +126,7 @@ const Viewbooks = () => {
         accepted: false,
       });
 
-      alert("Request sent successfully");
+      toast.success("Request sent successfully");
     } catch (e) {
       console.error("Error adding document: ", e);
     }

@@ -19,7 +19,6 @@ const Notifyer = () => {
   const { notificationCount, setNotificationCount } = useContext(NotificationCountContext);
 
 
- 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -36,6 +35,7 @@ const Notifyer = () => {
   useEffect(() => {
   if(email === null) return;
     
+  //comment listener
     const q = query(collection(db,"comments"), where("timestamp", ">=", Timestamp.fromMillis(Date.now())));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         querySnapshot.docChanges().forEach((change) => {
@@ -47,7 +47,7 @@ const Notifyer = () => {
             change.type === "added" &&
             change.doc.data().postowner === email
           ) {
-            toast.success("You have a new comment on your post");
+            toast.info(`${change.doc.data().commenter} commented, "${change.doc.data().comment}" on your post` );
             setNotificationCount((prev) => prev + 1);
           }
         });

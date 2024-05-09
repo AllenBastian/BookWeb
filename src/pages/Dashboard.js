@@ -39,6 +39,7 @@ import {
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaListCheck } from "react-icons/fa6";
+import { toast } from "sonner";
 
 const Dashboard = () => {
 
@@ -54,6 +55,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [temp, setTemp] = useState([]);
   const [temp2, setTemp2] = useState([]);
+ 
  
   useEffect(() => {
 
@@ -237,6 +239,11 @@ const Dashboard = () => {
     }));
   };
   const handleSubmit = async (event) => {
+
+    if(Object.values(newBookInfo).some((item) => item.trim() === "")){
+      toast.error("Please fill all the fields");
+      return;
+    }
     setIsDialogOpen(false);
     setExpandedBook(null);
     setBookDetails((prev) => [...prev, newBookInfo]);
@@ -624,7 +631,7 @@ const Dashboard = () => {
                 onClick={handleSubmit}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 flex items-center space-x-2"
+                className={`bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 flex items-center space-x-2 `}
               >
                 <FaPlus />
                 <span>Add Book</span>
