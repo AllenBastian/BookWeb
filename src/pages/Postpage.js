@@ -7,6 +7,7 @@ import { FiSend } from "react-icons/fi";
 import { ClipLoader } from "react-spinners";
 import { IoCloseOutline } from "react-icons/io5";
 import { AnimatePresence } from "framer-motion";
+import CustomButton from "../components/CustomButton";
 import {
   addDoc,
   collection,
@@ -278,14 +279,8 @@ const Postpage = () => {
                 placeholder="Write your comment..."
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
               />
-              <button
-                onClick={() => {
-                  postComment();
-                }}
-                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-              >
-                <FiSend className="text-xl" />
-              </button>
+              <CustomButton icon={<FiSend/>} color={"blue"} text="comment" onClick={postComment} />
+            
             </div>
 
             <h3 className="text-xl font-semibold mb-4 ">
@@ -369,16 +364,8 @@ const Postpage = () => {
                         placeholder="Write your reply..."
                         className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
                       />
-                      <button
-                        onClick={() => {
-                          commentReply(element.uid);
-                          setClicked((prev) => !prev);
-                        }}
-                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none transition-colors duration-300 ease-in-out transform hover:scale-105 flex items-center"
-                      >
-                        <FiSend className="text-xl" />{" "}
-                        {/* Replace text with Send icon */}
-                      </button>
+                      <CustomButton icon={<FiSend/>} color={"blue"} text="reply" onClick={() => { commentReply(element.uid);  setClicked((prev) => !prev);}}/>
+
                     </motion.div>
                   )}
                 </motion.div>
