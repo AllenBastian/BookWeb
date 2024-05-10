@@ -470,24 +470,9 @@ const Dashboard = () => {
                             exit={{ opacity: 0 }}
                             className="mt-2 flex  sm:flex-row justify-end gap-6 items-center"
                           >
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleDecline(req.ruid)}
-                              className="flex items-center bg-red-500 text-white rounded-md px-3 py-1 cursor-pointer"
-                            >
-                              <FaTimes className="text-white mr-2" />
-                              <span>Decline</span>
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleAccept(req.ruid)}
-                              className="flex items-center bg-green-500 text-white rounded-md px-3 py-1 cursor-pointer"
-                            >
-                              <FaCheck className="text-white mr-2" />
-                              <span>Accept</span>
-                            </motion.button>
+                            <CustomButton icon={<FaTimes/>} text={"Accept"} color={"green"} onClick={()=>handleAccept(req.ruid)}/>
+                            <CustomButton icon={<FaCheck/>} text={"Decline"} color={"red"} onClick={()=>handleDecline(req.ruid)}/>
+      
                           </motion.div>
                         )}
                       </div>
@@ -518,12 +503,13 @@ const Dashboard = () => {
                         key={req.ruid}
                         className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                       >
+                         <div className="w-1/3 rounded-full bg-gray-400 text-white px-2 py-1">
+                          {req.requestto === user.email ? "Lended" : "Borrowed"}
+                        </div>
                         <span className="font-medium text-black">
                           {req.booktitile}
                         </span>
-                        <div className="rounded-full bg-gray-400 text-white px-2 py-1">
-                          {req.type === "lended" ? "Lended" : "Borrowed"}
-                        </div>
+                       
                         <motion.div className="flex items-center justify-center w-8 h-8 bg-blue-400 rounded-full cursor-pointer hover:bg-blue-800 transition-colors">
                           <FaCommentAlt
                             className="w-4 h-4 text-white"

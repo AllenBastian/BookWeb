@@ -6,6 +6,8 @@ import { db } from "../firebase/Firebase";
 import { motion } from "framer-motion";
 import { FaBookOpen, FaCheck, FaTimes } from "react-icons/fa";
 import { MdCheck, MdClose } from "react-icons/md";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import CustomButton from "../components/CustomButton";
 import {
   collection,
@@ -13,6 +15,10 @@ import {
   addDoc,
   query,
   where,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
   orderBy,
 } from "firebase/firestore";
 
@@ -23,10 +29,26 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const location = useLocation();
   const messagesEndRef = useRef(null);
+  const nav = useNavigate();
 
   useEffect(() => {
     setCurrentChat(location.state);
     if (currentChat) {
+      const unsubscribe1 = onSnapshot(
+        query(
+          collection(db, "requests"),
+          where("ruid", "==", currentChat.ruid)
+        ),
+        (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "removed" && change.doc.data().requestfrom === user.email) {
+              nav("/dashboard");
+              toast.error("Transaction rejected by the other party!");
+              console.log("Removed document: ", change.doc.data());
+            }
+          });
+        }
+      );
       const unsubscribe = onSnapshot(
         query(
           collection(db, "messages"),
@@ -53,7 +75,9 @@ const Chat = () => {
         }
       );
 
-      return () => unsubscribe();
+      return () => {unsubscribe();
+      unsubscribe1();
+      }
     }
   }, [location.state, currentChat]);
 
@@ -93,6 +117,29 @@ const Chat = () => {
     }
   };
 
+  const handleMarkBorrowed = async (flag) => {
+    try {
+      const r = query(
+        collection(db, "requests"),
+        where("ruid", "==", currentChat.ruid)
+      );
+      const querySnapshot2 = await getDocs(r);
+      if (!querySnapshot2.empty) {
+        const doc = querySnapshot2.docs[0].ref; 
+        if (flag) {
+          await updateDoc(doc, { borrowed: true });
+          toast.success("Transaction marked as borrowed!");
+        } else {
+          await deleteDoc(doc);
+          toast.success("Transaction rejected!");
+          nav("/dashboard");
+        }
+      }
+    } catch (error) {
+      console.error("Error marking as borrowed:", error);
+    }
+  };
+  
   if (currentChat === null) return null;
   return (
     <>
@@ -110,15 +157,42 @@ const Chat = () => {
                 {currentChat.booktitile}
               </h1>
             </div>
-           
+
             <motion.div
               className="flex justify-end sm:justify-start items-center mt-4 sm:mt-0 space-x-2 sm:space-x-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-                <CustomButton color="blue" icon={<FaCheck />} text="Complete Transaction" />
-                <CustomButton color="red" icon={<FaTimes />} text="Stop" />
+              {currentChat.requestto===user.email && (
+                <>
+              {currentChat.borrowed ? (
+                <>
+                  <CustomButton
+                    color="blue"
+                    icon={<FaCheck />}
+                    text="Complete Transaction"
+                  />
+                  <CustomButton color="red" icon={<FaTimes />} text="Stop" />
+                </>
+              ) : (
+                <>
+                  <CustomButton
+                    color="green"
+                    icon={<FaCheck />}
+                    text="Mark as borrowed"
+                    onClick={() => handleMarkBorrowed(true)}
+                  />
+                  <CustomButton
+                    color="red"
+                    icon={<FaTimes />}
+                    text="Reject"
+                    onClick={() => handleMarkBorrowed(false)}
+                  />
+                </>
+              )}
+              </>
+            )}
             </motion.div>
           </div>
         </motion.div>
