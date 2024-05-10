@@ -490,7 +490,7 @@ const Dashboard = () => {
             </div>
             <div className="p-4 bg-white rounded-lg shadow-md mt-2 md:h-screen lg:h-screen overflow-auto">
               {temp2.length === 0 ? (
-                <div className="text-center text-gray-500">
+                <div className="text-center text-2xl text-gray-500">
                   No accepted requests
                 </div>
               ) : (
@@ -503,9 +503,11 @@ const Dashboard = () => {
                         key={req.ruid}
                         className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                       >
-                         <div className="w-1/3 rounded-full bg-gray-400 text-white px-2 py-1">
+                        {req.borrowed && (                         
+                        <div className="w-1/3 font-semibold py-2 px-4 rounded-full bg-blue-200  text-blue-900 shadow-md">
                           {req.requestto === user.email ? "Lended" : "Borrowed"}
                         </div>
+                        )}
                         <span className="font-medium text-black">
                           {req.booktitile}
                         </span>

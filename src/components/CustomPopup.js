@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-const CustomPopup = ({ message, button1, button2 }) => {
+const CustomPopup = ({ message, button1, button2,subtext}) => {
   return (
     <motion.div
       className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
@@ -15,6 +15,7 @@ const CustomPopup = ({ message, button1, button2 }) => {
         exit={{ scale: 0 }}
       >
         <h2 className="text-lg font-semibold mb-4">{message}</h2>
+        <p className="text-md text-gray-600 mb-4">{subtext}</p>
         <div className="flex justify-center space-x-4">
           {button1}
           {button2}
