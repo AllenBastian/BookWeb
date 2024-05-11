@@ -15,7 +15,7 @@ const CustomPopup = ({ message, button1, button2,subtext}) => {
         exit={{ scale: 0 }}
       >
         <h2 className="text-lg font-semibold mb-4">{message}</h2>
-        <p className="text-md text-gray-600 mb-4">{subtext}</p>
+        <p className="text-md font-semibold text-gray-600 mb-4">{subtext}</p>
         <div className="flex justify-center space-x-4">
           {button1}
           {button2}

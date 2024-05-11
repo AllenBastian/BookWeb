@@ -151,8 +151,15 @@ const Postpage = () => {
   };
 
   const likePost = async (newliked) => {
-    if (newliked === false) setNoOfLikes(noOfLikes - 1);
-    else setNoOfLikes(noOfLikes + 1);
+    if (newliked === false)
+      { setNoOfLikes(noOfLikes - 1);
+        setMyLikes(mylikes.filter((like) => like !== currentUser.name));
+      }
+    else
+    { setNoOfLikes(noOfLikes + 1);
+      setMyLikes([...mylikes, currentUser.name]);
+    }
+
 
     try {
       const querySnapshot = await getDocs(

@@ -504,7 +504,7 @@ const Dashboard = () => {
                         className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                       >
                         {req.borrowed && (                         
-                        <div className="w-1/3 font-semibold py-2 px-4 rounded-full bg-blue-200  text-blue-900 shadow-md">
+                        <div className="w-1/3 font-semibold py-2 px-4 rounded-full bg-blue-200 hover:bg-blue-300 text-blue-900 shadow-md">
                           {req.requestto === user.email ? "Lended" : "Borrowed"}
                         </div>
                         )}
