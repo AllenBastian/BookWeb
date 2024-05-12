@@ -181,42 +181,42 @@ const UserProfilePage = () => {
               <FaUserCog className="mr-2 text-black" /> Profile Settings
             </h2>
             <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
-              <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <div className="bg-white rounded-lg  border-2 p-2  shadow-lg">
                 <p className="text-sm flex font-semibold mb-2 mt-2">
                   <FaUser className="mr-2 mt-1 text-black" />
                   Name
                 </p>
                 <p className="text-md ">{formData.name}</p>
               </div>
-              <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <div className="bg-white rounded-lg  border-2 p-2  shadow-lg">
                 <p className="text-sm flex font-semibold mb-2 mt-2">
                   <FaEnvelope className="mr-2 mt-1 text-black" />
                   Email
                 </p>
                 <p className="text-md ">{formData.email}</p>
               </div>
-              <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <div className="bg-white rounded-lg  border-2 p-2  shadow-lg">
                 <p className="text-sm flex font-semibold mb-2 mt-2">
                   <FaPhoneAlt className="mr-2 mt-1 text-black" />
                   Contact
                 </p>
                 <p className="text-md ">{formData.contact}</p>
               </div>
-              <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <div className="bg-white rounded-lg  border-2 p-2  shadow-lg">
                 <p className="text-sm flex font-semibold mb-2 mt-2">
                   <FaUniversity className="mr-2 mt-1 text-black" />
                   College
                 </p>
                 <p className="text-md ">{formData.college}</p>
               </div>
-              <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <div className="bg-white rounded-lg  border-2 p-2  shadow-lg">
                 <p className="text-sm flex font-semibold mb-2 mt-2">
                   <FaBuilding className="mr-2 mt-1 text-black" />
                   Department
                 </p>
                 <p className="text-md ">{formData.department}</p>
               </div>
-              <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <div className="bg-white rounded-lg  border-2 p-2  shadow-lg">
                 <p className="text-sm flex font-semibold mb-2 mt-2">
                   <FaCalendar className="mr-2 mt-1 text-black" />
                   Semester
@@ -324,7 +324,7 @@ const UserProfilePage = () => {
     exit={{ opacity: 0 }}
     className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
   >
-    <div className="bg-white p-4 md:p-8 w-3/4 lg:w-1/2 mx-auto rounded-lg shadow-md">
+    <div className="bg-white p-4 md:p-8 w-full lg:w-1/2 mx-auto rounded-lg shadow-md">
       <div className="border-gray-500 border-b mb-4 md:mb-2">
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <FaUserCog className="mr-2 mt-1 text-black" />
