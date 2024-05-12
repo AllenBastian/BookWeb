@@ -318,99 +318,102 @@ const UserProfilePage = () => {
         </motion.div>
 
         {editing && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
-          >
-            <div className="bg-white p-8 w-1/2 mx-auto rounded-lg shadow-md">
-              <div className="flex border-gray-500 border-b mb-2 ">
-                <FaUserCog className="mr-2  mt-2 text-black" />
-                <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
-              </div>
-              <div className="mb-4 mt-5">
-                <p className="text-sm flex font-semibold mb-2">
-                  <FaUser className="mr-2 mt-1 text-black" />
-                  Name
-                </p>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <p className="text-sm flex font-semibold mb-2">
-                  <FaPhoneAlt className="mr-2 mt-1 text-black" />
-                  Contact
-                </p>
-                <input
-                  type="text"
-                  name="contact"
-                  value={formData.contact}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <p className="text-sm flex font-semibold mb-2">
-                  <FaUniversity className="mr-2 mt-1 text-black" />
-                  College
-                </p>
-                <input
-                  type="text"
-                  name="college"
-                  value={formData.college}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <p className="text-sm flex font-semibold mb-2">
-                  <FaBuilding className="mr-2 mt-1 text-black" />
-                  Department
-                </p>
-                <input
-                  type="text"
-                  name="department"
-                  value={formData.department}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <p className="text-sm flex font-semibold mb-2">
-                  <FaCalendar className="mr-2 mt-1 text-black" />
-                  Semester
-                </p>
-                <input
-                  type="text"
-                  name="semester"
-                  value={formData.semester}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
-                />
-              </div>
-              <div className="flex mt-4 justify-end">
-                <CustomButton
-                  text={"Save"}
-                  color={"blue"}
-                  icon={<FaCheck className="mr-2" />}
-                  onClick={handleSaveClick}
-                />
-                <CustomButton
-                  text={"Cancel"}
-                  color={"red"}
-                  icon={<FaTimes className="mr-2" />}
-                  onClick={() => setEditing(false)}
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
+  >
+    <div className="bg-white p-4 md:p-8 w-3/4 lg:w-1/2 mx-auto rounded-lg shadow-md">
+      <div className="border-gray-500 border-b mb-4 md:mb-2">
+        <h2 className="text-xl font-semibold mb-4 flex items-center">
+          <FaUserCog className="mr-2 mt-1 text-black" />
+          Edit Profile
+        </h2>
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-semibold mb-2 flex items-center">
+          <FaUser className="mr-2 mt-1 text-black" />
+          Name
+        </p>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-semibold mb-2 flex items-center">
+          <FaPhoneAlt className="mr-2 mt-1 text-black" />
+          Contact
+        </p>
+        <input
+          type="text"
+          name="contact"
+          value={formData.contact}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-semibold mb-2 flex items-center">
+          <FaUniversity className="mr-2 mt-1 text-black" />
+          College
+        </p>
+        <input
+          type="text"
+          name="college"
+          value={formData.college}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-semibold mb-2 flex items-center">
+          <FaBuilding className="mr-2 mt-1 text-black" />
+          Department
+        </p>
+        <input
+          type="text"
+          name="department"
+          value={formData.department}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-semibold mb-2 flex items-center">
+          <FaCalendar className="mr-2 mt-1 text-black" />
+          Semester
+        </p>
+        <input
+          type="text"
+          name="semester"
+          value={formData.semester}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="flex mt-4 justify-end">
+        <CustomButton
+          text={"Save"}
+          color={"blue"}
+          icon={<FaCheck className="mr-2" />}
+          onClick={handleSaveClick}
+        />
+        <CustomButton
+          text={"Cancel"}
+          color={"red"}
+          icon={<FaTimes className="mr-2" />}
+          onClick={() => setEditing(false)}
+        />
+      </div>
+    </div>
+  </motion.div>
+)}
+
       </div>
       {deleting && (
         <CustomPopup
