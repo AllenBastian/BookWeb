@@ -99,12 +99,10 @@ const Dashboard = () => {
           (error) => {
             console.error("Error fetching requests: ", error);
           }
+          
         );
 
-        return () => {
-          unsubscribeBooks();
-          unsubscribeRequests();
-        };
+    
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {

@@ -30,6 +30,7 @@ import { IoIosNotificationsOutline } from "react-icons/io5";
 import { Tooltip } from "@material-tailwind/react";
 
 import { NotificationCountContext } from "../context/Context";
+import { FaSign, FaSignInAlt } from "react-icons/fa";
 
 function NavList() {
   const nav = useNavigate();
@@ -101,6 +102,25 @@ function NavList() {
           <ClipLoader color={"#123abc"} loading={loading} size={20} />
         ):(
         <>
+        {user && isSignedUp===false && (
+          <>
+          <Typography
+            as="li"
+            variant="small"
+            color="blue-gray"
+            className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+          >
+            <Tooltip placement="bottom" content="Signup">
+              <Link to="/Signup">
+                <div className="flex">
+                <FaSignInAlt size={25} />  
+                <span className="lg:hidden ml-4">Forum</span>
+                </div>
+              </Link>
+            </Tooltip>
+            </Typography>
+            </>
+            )}
     {user && isSignedUp===true&& (
       <>
         <Typography

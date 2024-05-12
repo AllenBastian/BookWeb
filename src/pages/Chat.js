@@ -25,6 +25,7 @@ import {
 import { set } from "firebase/database";
 import CustomPopup from "../components/CustomPopup";
 import { getUserName } from "../utils/Search";
+import { Deleter } from "../utils/Deleter";
 
 const Chat = () => {
   const user = auth.currentUser;
@@ -193,6 +194,8 @@ const Chat = () => {
     setLoading(true);
     setTransactionComplete(false);
     try {
+
+      
       const q = query(
         collection(db, "books"),
         where("title", "==", info.booktitile)
@@ -210,15 +213,8 @@ const Chat = () => {
         timestamp: new Date(),
       });
 
-      const r = query(
-        collection(db, "requests"),
-        where("ruid", "==", currentChat.ruid)
-      );
-      const querySnapshot2 = await getDocs(r);
-      if (!querySnapshot2.empty) {
-        const doc = querySnapshot2.docs[0].ref;
-        await deleteDoc(doc);
-      }
+      await Deleter("messages", "chatid", currentChat.ruid);
+      await Deleter("requests", "ruid", currentChat.ruid);
 
       nav("/dashboard");
       toast.success("Transaction completed!");

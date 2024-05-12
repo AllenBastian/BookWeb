@@ -1,87 +1,99 @@
 import React, { useState, useEffect } from "react";
-import { db, storage } from "../firebase/Firebase";
-import { collection, getDocs, query, where, doc, updateDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { Button } from "@material-tailwind/react"
+import { db } from "../firebase/Firebase";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+
+import { getAuth,signOut } from "firebase/auth";
+import { motion } from "framer-motion";
+import { FaUserCog, FaUser, FaEnvelope, FaPhoneAlt, FaUniversity, FaBuilding, FaCalendar, FaEdit, FaTrash, FaCheck, FaTimes } from "react-icons/fa";
+import CustomButton from "../components/CustomButton";
+import { isEditable } from "@testing-library/user-event/dist/utils";
+import { toast } from "sonner";
+import { set } from "firebase/database";
 import Loader from "../components/Loader";
-import { ClipLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
+import { GiEvilWings } from "react-icons/gi";
+import CustomPopup from "../components/CustomPopup";
+import { Deleter } from "../utils/Deleter";
 
 const UserProfilePage = () => {
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({});
   const [editing, setEditing] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(null);
-  const [selectedOption, setSelectedOption] = useState("Post");
   const [userPosts, setUserPosts] = useState([]);
+  const [deleting,setDeleting] = useState(false);
+  const nav = useNavigate();
   const auth = getAuth();
 
   useEffect(() => {
+
     const fetchUserData = async () => {
       try {
         const currentUser = auth.currentUser;
 
         if (currentUser) {
-          const userCollectionRef = collection(db, 'users');
-          const q = query(userCollectionRef, where('email', '==', currentUser.email));
+          const userCollectionRef = collection(db, "users");
+          const q = query(
+            userCollectionRef,
+            where("email", "==", currentUser.email)
+          );
           const querySnapshot = await getDocs(q);
-          console.log(querySnapshot)
+          console.log(querySnapshot);
 
           if (!querySnapshot.empty) {
             const userDataFromSignup = querySnapshot.docs[0].data();
             setUserData(userDataFromSignup);
             setFormData(userDataFromSignup);
-            if (userDataFromSignup.profilePicture) {
-              setProfilePicture(userDataFromSignup.profilePicture);
-            }
           }
-          setLoading(false); // Set loading to false after data fetching is completed
+    
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error("Error fetching user data:", error);
       }
+      setLoading(false);
     };
 
     fetchUserData();
   }, [auth]);
-
-  useEffect(() => {
-    const fetchUserPosts = async () => {
-      try {
-        const currentUser = auth.currentUser;
-  
-        if (currentUser) {
-          const postsCollectionRef = collection(db, 'posts');
-          const q = query(postsCollectionRef, where('owner', '==', currentUser.email)); // Query posts based on user's email
-          const querySnapshot = await getDocs(q);
-  
-          if (!querySnapshot.empty) {
-            const posts = querySnapshot.docs.map(doc => doc.data());
-            setUserPosts(posts);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user posts:', error);
-      }
-    };
-  
-    fetchUserPosts();
-  }, [auth]);
-
-  if (loading) {
-    return (
-    <Loader loading={loading}/>
-    );
-  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleEditClick = () => {
-    setEditing(true);
-  };
+const handleDelete = async () => {
+  setLoading(true);
+  try {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await Deleter("users", "email", currentUser.email);
+      await Deleter("books", "owner", currentUser.email);
+      await Deleter("requests", "requestto", currentUser.email);
+      await Deleter("messages", "sender", currentUser.email);
+      await Deleter("messages", "receiver", currentUser.email);
+      // await Deleter("messages", "", currentUser.email);
+      // await Deleter("comments", "owner", currentUser.email);
+        toast.warning("User deleted successfully");
+        signOut(auth).then(() => {
+          localStorage.setItem("isSignedUp", JSON.stringify(false));
+          nav("/");
+        }).catch((error) => {
+          console.error("Sign out error:", error);
+        })
+      
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+  }
+};
 
   const handleSaveClick = async () => {
     setEditing(false);
@@ -93,162 +105,235 @@ const UserProfilePage = () => {
         department: formData.department,
         batch: formData.batch,
         college: formData.college,
-        contact: formData.contact
+        contact: formData.contact,
       };
 
       const currentUser = auth.currentUser;
       if (currentUser) {
-        const userCollectionRef = collection(db, 'users');
-        const q = query(userCollectionRef, where('email', '==', currentUser.email));
+        const userCollectionRef = collection(db, "users");
+        const q = query(
+          userCollectionRef,
+          where("email", "==", currentUser.email)
+        );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0];
-          const userRef = doc(db, 'users', userDoc.id);
+          const userRef = doc(db, "users", userDoc.id);
           await updateDoc(userRef, updatedUserData);
 
           console.log("Updated user data in Firestore:", updatedUserData);
-
           setUserData(updatedUserData);
-
+          toast.success("User data updated successfully");
         } else {
-          console.error('User document not found');
+          console.error("User document not found");
         }
       } else {
-        console.error('Current user not found');
+        console.error("Current user not found");
       }
     } catch (error) {
-      console.error('Error saving user data:', error);
+      console.error("Error saving user data:", error);
     }
   };
 
-  const handleProfilePictureChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const storageRef = storage.ref();
-      const fileRef = storageRef.child(`${auth.currentUser.uid}/profilePicture/${file.name}`);
-      fileRef.put(file).then((snapshot) => {
-        fileRef.getDownloadURL().then((url) => {
-          setProfilePicture(url);
-          const updatedUserData = {
-            ...userData,
-            profilePicture: url
-          };
-          setUserData(updatedUserData);
-          updateDoc(doc(db, 'users', auth.currentUser.uid), updatedUserData);
-        });
-      }).catch((error) => {
-        console.error('Error uploading file:', error);
-      });
-    }
-  };
+  if (loading) {
+    return (
 
-  const openFileInput = () => {
-    document.getElementById("profilePictureInput").click();
-  };
-
-  const closeModal = () => {
-    setEditing(false);
-  };
-
-  const handleOptionChange = (option) => {
-    setSelectedOption(option);
-  };
-
+     <Loader loading={loading}/>
+    );
+  }
   return (
-    <div className="container mx-auto mt-8 flex flex-wrap">
-      <div className="w-full md:w-1/2 lg:w-1/2 xl:w-1/2 p-4">
-        <div className="bg-white shadow-md rounded-lg p-4 mb-4 flex flex-col items-center justify-center">
-          <label htmlFor="profilePictureInput" className="cursor-pointer mb-4" onClick={openFileInput}>
-            {profilePicture ? (
-              <img src={profilePicture} alt="Profile" className="w-24 h-24 rounded-full mb-4" />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-300 mb-4"></div>
-            )}
-            <div className="text-blue-500">Change Profile Picture</div>
-          </label>
-          <input
-            id="profilePictureInput"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleProfilePictureChange}
-          />
-          <div>
-            <h2 className="text-xl font-semibold">{userData && userData.name}</h2>
-            <p className="text-gray-500">Email: {userData && userData.email}</p>
-            <p className="text-gray-500">Semester: {userData && userData.semester}</p>
-            <p className="text-gray-500">Department: {userData && userData.department}</p>
-            <p className="text-gray-500">Batch: {userData && userData.batch}</p>
-            <p className="text-gray-500">College: {userData && userData.college}</p>
-            <p className="text-gray-500">Contact: {userData && userData.contact}</p>
+    <>
+    <div className="grid grid-cols-2 gap-4 md:p-9 p-4 ">
+      <motion.div
+        className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg shadow-md"
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <div>
+          <h2 className="text-xl font-semibold mb-4 flex items-center">
+            <FaUserCog className="mr-2 text-black" /> Profile Settings
+          </h2>
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+            <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <p className="text-sm flex font-semibold mb-2 mt-2">
+                <FaUser className="mr-2 mt-1 text-black" />
+                Name
+              </p>
+              <p className="text-md ">{formData.name}</p>
+            </div>
+            <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <p className="text-sm flex font-semibold mb-2 mt-2">
+                <FaEnvelope className="mr-2 mt-1 text-black" />
+                Email
+              </p>
+              <p className="text-md ">{formData.email}</p>
+            </div>
+            <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <p className="text-sm flex font-semibold mb-2 mt-2">
+                <FaPhoneAlt className="mr-2 mt-1 text-black" />
+                Contact
+              </p>
+              <p className="text-md ">{formData.contact}</p>
+            </div>
+            <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <p className="text-sm flex font-semibold mb-2 mt-2">
+                <FaUniversity className="mr-2 mt-1 text-black" />
+                College
+              </p>
+              <p className="text-md ">{formData.college}</p>
+            </div>
+            <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <p className="text-sm flex font-semibold mb-2 mt-2">
+                <FaBuilding className="mr-2 mt-1 text-black" />
+                Department
+              </p>
+              <p className="text-md ">{formData.department}</p>
+            </div>
+            <div className="border-gray-300 border-2 p-2 rounded-sm">
+              <p className="text-sm flex font-semibold mb-2 mt-2">
+                <FaCalendar className="mr-2 mt-1 text-black" />
+                Semester
+              </p>
+              <p className="text-md ">{formData.semester}</p>
+            </div>
           </div>
-          <div>
-            <Button color="blue" onClick={handleEditClick}>Edit</Button>
+          <div className="flex justify-end mt-5">
+            <CustomButton
+              icon={<FaEdit/>}
+              color={"blue"}
+              text={"Edit"}
+              onClick={() => setEditing(true)}
+            />
+            <CustomButton
+              icon={<FaTrash/>}
+              color={"red"}
+              text={"Delete"}
+              onClick={() => setDeleting(true)}
+            />
           </div>
         </div>
+      </motion.div>
+      <motion.div
+        className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg shadow-md"
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        Second Column
+      </motion.div>
+      <motion.div
+        className="col-span-2 bg-gray-200 rounded-md  flex items-center justify-center text-lg  font-semibold"
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        Special Section
+      </motion.div>
+     
+      {editing && (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
+  >
+    <div className="bg-white p-8 w-1/2 mx-auto rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold mb-4">
+        <FaUserCog className="mr-2 text-black" /> Edit Profile
+      </h2>
+      <div className="mb-4">
+        <p className="text-sm flex font-semibold mb-2">
+          <FaUser className="mr-2 mt-1 text-black" />
+          Name
+        </p>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
       </div>
-      <div className="w-full md:w-1/2 lg:w-1/2 xl:w-1/2 p-4">
-        <div className="bg-white shadow-md rounded-lg p-4 mb-4">
-          <h1 className="text-3xl font-bold mb-4">History</h1>
-          <div className="mb-4">
-            <label className="mr-2">Select:</label>
-            <select onChange={(e) => handleOptionChange(e.target.value)} value={selectedOption}>
-              <option value="Post">Post</option>
-              <option value="Exchange">Exchange</option>
-            </select>
-          </div>
-          {selectedOption === "Post" && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Your Posts</h2>
-              {userPosts.length > 0 ? (
-  <div className="flex flex-wrap">
-    {userPosts.map((post, index) => (
-      <div key={index} className="bg-white rounded-lg shadow-md p-4 m-2 flex-grow">
-        <h3 className="text-lg font-semibold">{post.title}</h3>
-        <p className="text-gray-500">Category: {post.category}</p>
-        <p className="text-gray-500">Description: {post.description}</p>
+      <div className="mb-4">
+        <p className="text-sm flex font-semibold mb-2">
+          <FaPhoneAlt className="mr-2 mt-1 text-black" />
+          Contact
+        </p>
+        <input
+          type="text"
+          name="contact"
+          value={formData.contact}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
       </div>
-    ))}
-  </div>
-) : (
-  <p className="text-gray-500">You haven't made any posts yet.</p>
+      <div className="mb-4">
+        <p className="text-sm flex font-semibold mb-2">
+          <FaUniversity className="mr-2 mt-1 text-black" />
+          College
+        </p>
+        <input
+          type="text"
+          name="college"
+          value={formData.college}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <p className="text-sm flex font-semibold mb-2">
+          <FaBuilding className="mr-2 mt-1 text-black" />
+          Department
+        </p>
+        <input
+          type="text"
+          name="department"
+          value={formData.department}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <p className="text-sm flex font-semibold mb-2">
+          <FaCalendar className="mr-2 mt-1 text-black" />
+          Semester
+        </p>
+        <input
+          type="text"
+          name="semester"
+          value={formData.semester}
+          onChange={handleInputChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
+        />
+      </div>
+      <div className="flex mt-4 justify-end">
+        <CustomButton
+          text={"Save"}
+          color={"blue"}
+          icon={<FaCheck className="mr-2" />}
+          onClick={handleSaveClick}
+        />
+        <CustomButton
+          text={"Cancel"}
+          color={"red"}
+          icon={<FaTimes className="mr-2" />}
+          onClick={() => setEditing(false)}
+        />
+      </div>
+    </div>
+  </motion.div>
+  
 )}
 
-            </div>
-          )}
-          {selectedOption === "Exchange" && (
-            <div>
-              {/* Content for "Exchange" option */}
-            </div>
-          )}
-        </div>
-      </div>
-      {editing && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-          <div className="bg-white p-8 rounded-lg max-w-lg w-full">
-            <h2 className="text-2xl font-semibold mb-4">Edit Profile</h2>
-            <form>
-              {['name', 'semester', 'department', 'batch', 'college', 'contact'].map((key) => (
-                <div className="mb-2" key={key}>
-                  <label htmlFor={key} className="block font-semibold capitalize">{key}</label>
-                  <input
-                    type="text"
-                    id={key}
-                    name={key}
-                    value={formData[key]}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              ))}
-              <Button color="blue" onClick={handleSaveClick}>Save</Button>
-              <Button color="red" onClick={closeModal} className="ml-2">Cancel</Button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
+    {deleting && (
+    <CustomPopup message={"Are you sure you want to delete your account?"} 
+    subtext={"This action cannot be redone, all data will be lost."}
+    button1={<CustomButton text={"yes"} color={"red"} onClick={()=>handleDelete()} icon={<FaTrash/>}/>}
+    button2={<CustomButton text={"no"} color={"green"} onClick={()=>setDeleting(false)} icon={<FaTimes/>}/>}
+    />
+  )}
+    </>
   );
-};
+
+}
 
 export default UserProfilePage;

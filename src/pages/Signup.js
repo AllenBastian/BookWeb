@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@material-tailwind/react';
 import { motion } from 'framer-motion';
 import { FaUserPlus } from 'react-icons/fa';
-import CustomButton from '../components/CustomButton';
 
 const SignUpForm = () => {
 
@@ -189,7 +188,7 @@ console.log(isSignedUp);
           />
         </div>
         {hide ?( <p className="text-gray-500">Signing up...</p>):(
-        <CustomButton color="green" text="Sign Up" onClick={handleSignUp} />
+        <button onClick={handleSignUp} className={`w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500  `}>Sign Up</button>
         )}
         {disableButton && <p className="text-red-500 text-sm mt-2">Please fill all the fields</p>}
       </motion.div>

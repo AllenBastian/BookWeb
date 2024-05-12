@@ -24,15 +24,7 @@ export const Protected=({children})=>{
         return () => unsubscribe();
       }, []);
       
-    // // switch(isLogged){
-    // //     case true:
-    // //         return children
-    // //     case false:
-    // //          nav("/");
-    // //     case null:
-    // //         return
-                
-    // }
+
     useEffect(() => {
       if (isLogged && !isSignedUp) {
           nav("/Signup");
