@@ -154,6 +154,8 @@ const Chat = () => {
     }
   };
 
+  console.log("Current chat: ", currentChat);
+
   const handleMarkBorrowed = async (flag) => {
     setPopup(false);
     setLoading(true);
@@ -206,11 +208,21 @@ const Chat = () => {
         const doc = querySnapshot.docs[0].ref;
         await updateDoc(doc, { isBorrowed: false });
       }
-      const t = addDoc(collection(db, "transactions"), {
+
+      const borrowerName = await getUserName(currentChat.requestfrom);
+      const lenderName = await getUserName(currentChat.requestto);
+      console.log("Borrower name: ", borrowerName);
+      console.log("Lender name: ", lenderName);
+    
+      const t = await addDoc(collection(db, "transactions"), {
         booktitle: currentChat.booktitile,
+        bookid: currentChat.bookuid,
         borrower: currentChat.requestfrom,
         lender: currentChat.requestto,
+        borrowerName: borrowerName,
+        lenderName: lenderName,
         timestamp: new Date(),
+        reviewed: false,
       });
 
       await Deleter("messages", "chatid", currentChat.ruid);
