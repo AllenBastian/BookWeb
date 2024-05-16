@@ -13,6 +13,7 @@ const SignUpForm = () => {
   const [user, setUser] = useState();
   const [disableButton,setDisableButton] = useState(false);
   const [hide,setHide] = useState(false);
+  const [clicked,setClicked] = useState(false);
   const nav = useNavigate();
   const auth = getAuth();
   const { isSignedUp,setIsSignedUp } = useContext(IsSignedUpContext);
@@ -51,6 +52,13 @@ const SignUpForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    if(name === "contact" || name === "semester"){
+      const isValidPhoneNumber = /^\+?\d*$/.test(value);
+      if(!isValidPhoneNumber){
+        return;
+      }
+    }
     setUserInfo(prevState => ({
       ...prevState,
       [name]: value
@@ -59,9 +67,9 @@ const SignUpForm = () => {
   };
 
   const handleSignUp = async () => {
-
+    setClicked(true);
     setHide(true);
-    if (Object.values(userInfo).some((item) => item.trim() === "")){
+    if (Object.values(userInfo).some((item) => item.trim() === "") || userInfo.contact.length !== 10){
       setDisableButton(true);
       setHide(false);
     }
@@ -167,6 +175,7 @@ console.log(isSignedUp);
           />
         </div>
         <div className="mb-4">
+          {clicked && userInfo.contact.length !== 10 && <p className="text-red-500 text-sm">Contact number should be of 10 digits</p>}
           <input
             type="text"
             placeholder="Contact"

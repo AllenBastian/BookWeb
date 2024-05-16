@@ -8,6 +8,8 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  addDoc,
+  onSnapshot,
 } from "firebase/firestore";
 
 import { getAuth, signOut } from "firebase/auth";
@@ -35,19 +37,25 @@ import { isEditable } from "@testing-library/user-event/dist/utils";
 import { toast } from "sonner";
 import { set } from "firebase/database";
 import Loader from "../components/Loader";
+import Rating from "@mui/material/Rating";
+import Stack from "@mui/material/Stack";
 import { useNavigate } from "react-router-dom";
-import { GiEvilWings } from "react-icons/gi";
+
 import CustomPopup from "../components/CustomPopup";
 import { Deleter } from "../utils/Deleter";
-import { getUserByEmail } from "../utils/Search";
+import { getUserByEmail, getUserName } from "../utils/Search";
 
 const UserProfilePage = () => {
+  const [username, setUsername] = useState(); // [ { email: "", name: "" }
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({});
   const [editing, setEditing] = useState(false);
-  const [userPosts, setUserPosts] = useState([]);
+  const [star, setStar] = useState(0);
+  const [reviewMessage, setReviewMessage] = useState();
+  const [selectedReview, setSelectedReview] = useState();
   const [deleting, setDeleting] = useState(false);
+  const [reviewBox, setReviewBox] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const nav = useNavigate();
   const auth = getAuth();
@@ -56,33 +64,28 @@ const UserProfilePage = () => {
     const fetchUserData = async () => {
       try {
         const currentUser = auth.currentUser;
+        const name = await getUserName(currentUser.email);
+        setUsername(name);
 
         if (currentUser) {
-          //get completed transactions
           const transactionCollectionRef = collection(db, "transactions");
           const q1 = query(transactionCollectionRef);
-          const querySnapshot1 = await getDocs(q1);
-          const transactionData = [];
-          querySnapshot1.forEach((doc) => {
-            transactionData.push(doc.data());
+
+          const unsubscribe = onSnapshot(q1, (snapshot) => {
+            const transactionData = [];
+            snapshot.forEach((doc) => {
+              transactionData.push(doc.data());
+            });
+            console.log("Transactions:", transactionData);
+            setTransactions(transactionData);
           });
-          console.log("Transactions:", transactionData);
-
-          setTransactions(transactionData);
-          const userCollectionRef = collection(db, "users");
-          const q = query(
-            userCollectionRef,
-            where("email", "==", currentUser.email)
-          );
-          const querySnapshot = await getDocs(q);
-          console.log(querySnapshot);
-
-          if (!querySnapshot.empty) {
-            const userDataFromSignup = querySnapshot.docs[0].data();
-            setUserData(userDataFromSignup);
-            setFormData(userDataFromSignup);
+          const user = await getUserByEmail(currentUser.email);
+          if (user) {
+            setUserData(user);
+            setFormData(user);
           }
         }
+       
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -90,6 +93,7 @@ const UserProfilePage = () => {
     };
 
     fetchUserData();
+
   }, [auth]);
 
   const handleInputChange = (e) => {
@@ -165,19 +169,52 @@ const UserProfilePage = () => {
     }
   };
 
+  const handleReview = async () => {
+    setReviewBox(false);
+    console.log(selectedReview);
+    console.log(username)
+    console.log(star);
+    try {
+      await addDoc(collection(db, "reviews"), {
+        bookid: selectedReview.bookid,
+        reviewer: username,
+        comment: reviewMessage,
+        rating: star,
+      });
+
+      const r = query(
+        collection(db, "transactions"),
+        where("uid", "==", selectedReview.uid)
+      );
+
+      const querySnapshot = await getDocs(r);
+
+      const mydoc = querySnapshot.docs[0].ref;
+      await updateDoc(mydoc, { reviewed: true,stars:star});
+
+      toast.success("Review added successfully");
+    } catch (error) {
+      console.error("Error adding review:", error);
+    }
+  };
+
+  const handleStarChange = (event, newValue) => {
+    setStar(newValue);
+  };
+
   if (loading) {
     return <Loader loading={loading} />;
   }
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 md:p-9 p-4 ">
+      <div className="grid grid-cols-2 gap-4 md:p-9 p-4 h-[300px] ">
         <motion.div
-          className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg shadow-md"
+          className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg  shadow-md"
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.95 }}
         >
           <div>
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
+            <h2 className="text-xl font-semibold mb-4 flex items-center ">
               <FaUserCog className="mr-2 text-black" /> Profile Settings
             </h2>
             <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
@@ -241,71 +278,103 @@ const UserProfilePage = () => {
           </div>
         </motion.div>
         <motion.div
-          className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg shadow-md"
+          className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg shadow-md "
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.95 }}
         >
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <FaHistory className="mr-2 text-black" /> History
           </h2>
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 h-[300px] overflow-auto ">
             {transactions.length > 0 ? (
               transactions.map((transaction, index) => {
-               
-                
-             
-              
-           
-                  return (
-                    (transaction.lender === formData.email || transaction.borrower === formData.email) && (
-                      <div key={index} className="bg-white rounded-lg shadow-md p-4 mb-4">
-                        <div className="flex flex-col md:flex-row items-center justify-between">
-                          <div className="flex items-center">
-                            <FaBook className="text-2xl mr-2 text-gray-800" />
-                            <h2 className="text-lg text-gray-800">{transaction.booktitle}</h2>
-                          </div>
-                          
-                          <div className={`font-semibold py-1 px-3 rounded-full ${
-                            transaction.lender === formData.email ? 'bg-green-200 text-green-900' : 'bg-blue-200 text-blue-900'
-                          }`}>
-                            {transaction.lender === formData.email ? 'Lended' : 'Borrowed'}
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center mt-3">
-                          <div>
-                            {transaction.lender === formData.email ? (
-                              <div className="flex items-center">
-                                <FaArrowRight className="text-lg mr-2 text-gray-800" />
-                                <h1 className="text-gray-800">{transaction.lenderName}</h1>
-                              </div>
-                            ) : (
-                              <div className="flex items-center">
-                                <FaArrowLeft className="text-lg mr-2 text-gray-800" />
-                                <h1 className="text-gray-800">{transaction.borrowerName}</h1>
-                              </div>
-                            )}
-                          </div>
-                          <div className="hidden md:flex items-center">
-                            <FaClock className="text-gray-800" size={20} />
-                            <div className="text-sm text-gray-600">
-                              {transaction.timestamp.toDate().toLocaleDateString()}
+                return (
+                  (transaction.lender === formData.email ||
+                    transaction.borrower === formData.email) && (
+                    <div
+                      key={index}
+                      className="bg-white rounded-lg shadow-md p-4 mb-4 relative"
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr",
+                        gridTemplateRows: "auto auto",
+                      }}
+                    >
+                  
+                      <div className="flex justify-start">
+                        <FaBook className="text-2xl mr-2 text-gray-800" />
+                        <h2 className="text-lg text-gray-800">
+                          {transaction.booktitle}
+                        </h2>
+                      </div>
+
+                      <div className="flex justify-between items-center mt-3">
+                        <div>
+                          {transaction.lender === formData.email ? (
+                            <div className="flex items-center">
+                              <FaArrowRight className="text-lg mr-2 text-gray-800" />
+                              <h1 className="text-gray-800">
+                                {transaction.borrowerName}
+                              </h1>
                             </div>
-                          </div>
-                          <div className="md:hidden text-md text-gray-600">
-                            {transaction.timestamp.toDate().toLocaleDateString()}
-                          </div>
+                          ) : (
+                            <div className="flex items-center">
+                              <FaArrowLeft className="text-lg mr-2 text-gray-800" />
+                              <h1 className="text-gray-800">
+                                {transaction.lenderName}
+                              </h1>
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          className={`font-semibold py-1 px-3 rounded-full ${
+                            transaction.lender === formData.email
+                              ? "bg-green-200 text-green-900"
+                              : "bg-blue-200 text-blue-900"
+                          }`}
+                        >
+                          {transaction.lender === formData.email
+                            ? "Lended"
+                            : "Borrowed"}
                         </div>
                       </div>
-                    )
-                  );
-              
-                
-                  
-                    
+
+                      <div className="flex absolute top-0 right-0 mt-2 mr-2 text-sm text-gray-500   items-center">
+                        <FaClock className="text-gray-800" size={20} />
+                        <div className="text-sm text-gray-600">
+                          {transaction.timestamp.toDate().toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      {transaction.reviewed===false && transaction.borrower=== formData.email? (
+                      <div className="flex justify-between items-center mt-3">
+                        <CustomButton
+                          color={"blue"}
+                          text={"Review"}
+                          onClick={() => {
+                            setReviewBox(true);
+                            setSelectedReview(transaction);
+                          }}
+                        />
+                      </div>
+                      ) : (
+                        <div className="flex justify-between items-center mt-3">
+                          <Stack spacing={1}>
+                            <Rating
+                              name="size-large"
+                              readOnly
+                              defaultValue={transaction.stars}
+                              size="large"
+                            />
+                            </Stack>
+                        </div>
+                      )}
+                    </div>
+                  )
+                );
               })
             ) : (
-              
-              <div className="text-xl flex justify-center mt-10">No transactions found</div>
+              <p>No transactions found.</p>
             )}
           </div>
         </motion.div>
@@ -318,102 +387,101 @@ const UserProfilePage = () => {
         </motion.div>
 
         {editing && (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
-  >
-    <div className="bg-white p-4 md:p-8 w-full lg:w-1/2 mx-auto rounded-lg shadow-md">
-      <div className="border-gray-500 border-b mb-4 md:mb-2">
-        <h2 className="text-xl font-semibold mb-4 flex items-center">
-          <FaUserCog className="mr-2 mt-1 text-black" />
-          Edit Profile
-        </h2>
-      </div>
-      <div className="mb-4">
-        <p className="text-sm font-semibold mb-2 flex items-center">
-          <FaUser className="mr-2 mt-1 text-black" />
-          Name
-        </p>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
-        />
-      </div>
-      <div className="mb-4">
-        <p className="text-sm font-semibold mb-2 flex items-center">
-          <FaPhoneAlt className="mr-2 mt-1 text-black" />
-          Contact
-        </p>
-        <input
-          type="text"
-          name="contact"
-          value={formData.contact}
-          onChange={handleInputChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
-        />
-      </div>
-      <div className="mb-4">
-        <p className="text-sm font-semibold mb-2 flex items-center">
-          <FaUniversity className="mr-2 mt-1 text-black" />
-          College
-        </p>
-        <input
-          type="text"
-          name="college"
-          value={formData.college}
-          onChange={handleInputChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
-        />
-      </div>
-      <div className="mb-4">
-        <p className="text-sm font-semibold mb-2 flex items-center">
-          <FaBuilding className="mr-2 mt-1 text-black" />
-          Department
-        </p>
-        <input
-          type="text"
-          name="department"
-          value={formData.department}
-          onChange={handleInputChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
-        />
-      </div>
-      <div className="mb-4">
-        <p className="text-sm font-semibold mb-2 flex items-center">
-          <FaCalendar className="mr-2 mt-1 text-black" />
-          Semester
-        </p>
-        <input
-          type="text"
-          name="semester"
-          value={formData.semester}
-          onChange={handleInputChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
-        />
-      </div>
-      <div className="flex mt-4 justify-end">
-        <CustomButton
-          text={"Save"}
-          color={"blue"}
-          icon={<FaCheck className="mr-2" />}
-          onClick={handleSaveClick}
-        />
-        <CustomButton
-          text={"Cancel"}
-          color={"red"}
-          icon={<FaTimes className="mr-2" />}
-          onClick={() => setEditing(false)}
-        />
-      </div>
-    </div>
-  </motion.div>
-)}
-
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
+          >
+            <div className="bg-white p-4 md:p-8 w-full lg:w-1/2 mx-auto rounded-lg shadow-md">
+              <div className="border-gray-500 border-b mb-4 md:mb-2">
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <FaUserCog className="mr-2 mt-1 text-black" />
+                  Edit Profile
+                </h2>
+              </div>
+              <div className="mb-4">
+                <p className="text-sm font-semibold mb-2 flex items-center">
+                  <FaUser className="mr-2 mt-1 text-black" />
+                  Name
+                </p>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <p className="text-sm font-semibold mb-2 flex items-center">
+                  <FaPhoneAlt className="mr-2 mt-1 text-black" />
+                  Contact
+                </p>
+                <input
+                  type="text"
+                  name="contact"
+                  value={formData.contact}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <p className="text-sm font-semibold mb-2 flex items-center">
+                  <FaUniversity className="mr-2 mt-1 text-black" />
+                  College
+                </p>
+                <input
+                  type="text"
+                  name="college"
+                  value={formData.college}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <p className="text-sm font-semibold mb-2 flex items-center">
+                  <FaBuilding className="mr-2 mt-1 text-black" />
+                  Department
+                </p>
+                <input
+                  type="text"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <p className="text-sm font-semibold mb-2 flex items-center">
+                  <FaCalendar className="mr-2 mt-1 text-black" />
+                  Semester
+                </p>
+                <input
+                  type="text"
+                  name="semester"
+                  value={formData.semester}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                />
+              </div>
+              <div className="flex mt-4 justify-end">
+                <CustomButton
+                  text={"Save"}
+                  color={"blue"}
+                  icon={<FaCheck className="mr-2" />}
+                  onClick={handleSaveClick}
+                />
+                <CustomButton
+                  text={"Cancel"}
+                  color={"red"}
+                  icon={<FaTimes className="mr-2" />}
+                  onClick={() => setEditing(false)}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
       {deleting && (
         <CustomPopup
@@ -436,6 +504,52 @@ const UserProfilePage = () => {
             />
           }
         />
+      )}
+
+      {reviewBox && (
+        <div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
+          >
+            <div className="bg-white p-4 md:p-8 w-full lg:w-1/2 mx-auto rounded-lg shadow-md">
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-xl font-semibold">Give your review</h1>
+
+                <button
+                  onClick={() => setReviewBox(false)}
+                  className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <div className="flex flex-col justify-center items-center gap-4">
+                <Stack spacing={1}>
+                  <Rating
+                    name="size-large"
+                    defaultValue={star}
+                    onChange={handleStarChange}
+                    size="large"
+                  />
+                </Stack>
+                <textarea
+                  className="border-2 border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
+                  placeholder="Write your review here"
+                  onChange={(e) => setReviewMessage(e.target.value)}
+                />
+              </div>
+              <CustomButton
+                color={"green"}
+                icon={<FaCheck />}
+                text={"Submit"}
+                className="mt-5"
+                onClick={() => handleReview()}
+              />
+            </div>
+          </motion.div>
+        </div>
       )}
     </>
   );

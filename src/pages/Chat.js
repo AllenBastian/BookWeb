@@ -214,6 +214,7 @@ const Chat = () => {
       console.log("Borrower name: ", borrowerName);
       console.log("Lender name: ", lenderName);
     
+      const ids = doc(collection(db, "transactions")).id;
       const t = await addDoc(collection(db, "transactions"), {
         booktitle: currentChat.booktitile,
         bookid: currentChat.bookuid,
@@ -223,6 +224,7 @@ const Chat = () => {
         lenderName: lenderName,
         timestamp: new Date(),
         reviewed: false,
+        uid: ids
       });
 
       await Deleter("messages", "chatid", currentChat.ruid);
