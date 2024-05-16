@@ -9,6 +9,7 @@ import { RiSendPlane2Line, RiCloseLine } from "react-icons/ri";
 import { FaFire } from 'react-icons/fa';
 import { FiFilter } from 'react-icons/fi';
 import Loader from "../components/Loader";
+import { getUserName } from "../utils/Search";
 
 import { motion } from "framer-motion";
 import {
@@ -22,6 +23,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
+import {toast} from "sonner"
+import CustomButton from "../components/CustomButton";
 
 const Forum = () => {
   const nav = useNavigate();
@@ -33,10 +36,10 @@ const Forum = () => {
   const allPosts = useRef([]);
   const [fetchedPosts, setFetchedPosts] = useState([]);
   const [clicked, setClicked] = useState(false);
+
   const [postDetails, setPostDetails] = useState({
     title: "",
     description: "",
-    category: "",
   });
 
   useEffect(() => {
@@ -94,16 +97,9 @@ const Forum = () => {
             };
           });
 
-          const userQuery = query(
-            collection(db, "users"),
-            where("email", "==", user.email)
-          );
-          const querySnapshot = await getDocs(userQuery);
-
-          if (!querySnapshot.empty) {
-            const username = querySnapshot.docs[0].data().name;
-            setName(username);
-          }
+          
+          const username = await getUserName(user.email);
+          setName(username);
 
           setLoading(false);
 
@@ -124,7 +120,14 @@ const Forum = () => {
     setPostDetails((prev) => ({ ...prev, [name]: value }));
   };
 
+  console.log(postDetails);
+
   const createPost = async () => {
+
+    if (Object.values(postDetails).some((item) => item.trim() === "") ) {
+      toast.error("Please fill all fields");
+      return;
+    }
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-US", options);
@@ -145,7 +148,8 @@ const Forum = () => {
         description: "",
         category: "",
       });
-      setClicked((prev) => !prev);
+      
+      toast.success("Post created successfully");
     } catch (error) {
       console.error("Error creating post: ", error);
     }
@@ -351,33 +355,16 @@ const Forum = () => {
                 label="Choose category"
                 onChange={(selectedOption) => setCat(selectedOption)}
               >
+  
                 <Option value="fiction">fiction</Option>
                 <Option value="non-fiction">non-fiction</Option>
                 <Option value="engineering">Engineering</Option>
               </Select>
 
               <div className="flex justify-end mt-4">
-                <button
-                  onClick={createPost}
-                  className={`bg-blue-500 text-white py-2 px-4 rounded mr-2 flex items-center ${
-                    !postDetails.title || !postDetails.description || !cat
-                      ? "bg-blue-500 opacity-50 cursor-not-allowed"
-                      : "hover:bg-blue-600"
-                  }`}
-                  disabled={
-                    !postDetails.title || !postDetails.description || !cat
-                  }
-                >
-                  <RiSendPlane2Line size={20} />
-                  Post
-                </button>
-                <button
-                  onClick={() => setPost(false)}
-                  className="bg-red-400 text-white py-2 px-4 rounded hover:bg-red-600 flex items-center"
-                >
-                  <RiCloseLine />
-                  Cancel
-                </button>
+                <CustomButton icon={<RiSendPlane2Line size={20}/>} className="mr-2" color="blue" text="Post" onClick={createPost} />
+          
+               <CustomButton icon={<RiCloseLine size={20}/>} color="red" text="Cancel" onClick={() => setPost(false)} />
               </div>
             </div>
           </motion.div>

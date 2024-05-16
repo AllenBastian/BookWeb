@@ -10,6 +10,9 @@ import Forum from "./pages/Forum";
 import Chat from "./pages/Chat";
 import { BrowserRouter,Route,Routes } from "react-router-dom";
 import { IsSignedUpProvider } from "./context/Context";
+import { Toaster } from 'sonner'
+
+import { NotificationCountProvider } from "./context/Context";
 
 import "./App.css";
 import Inbox from "./pages/inbox";
@@ -22,7 +25,14 @@ function App() {
     <BrowserRouter>
    
         <div className="App">
-         <NavbarSimple/>
+          <NotificationCountProvider>
+              <NavbarSimple/>
+         </NotificationCountProvider>
+         <Toaster richColors
+        position="bottom-left"
+    gap={20}
+       
+/>
         <Routes>
           <Route path="/" element={<Homepage/>}/>
           <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>

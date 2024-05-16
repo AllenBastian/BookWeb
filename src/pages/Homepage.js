@@ -2,7 +2,12 @@ import React from 'react';
 import Carouselc from '../components/Carousel'; 
 import { User, Search, MessageCircle, BookOpen } from 'react-feather';
 
+
 const Homepage = () => {
+
+
+
+
   return (
     <div className="container mx-auto p-4">
       <header className="text-center mb-8">

@@ -21,14 +21,21 @@ import {
   FaList,
 } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
-import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Loader from "../components/Loader";
+import { toast } from "sonner";
+import CustomButton from "../components/CustomButton";
+import { getUserName } from "../utils/Search";
+import { FaRankingStar } from "react-icons/fa6";
+import { Rating, Stack } from "@mui/material";
+import { set } from "firebase/database";
 const Viewbooks = () => {
   const scrollTo = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   const [bookDetails, setBookDetails] = useState([]);
   const [user, setUser] = useState("");
+  const [currentReviews, setCurrentReviews] = useState([]);
   const [searchCat, setSearchCat] = useState("all");
   const [searchBook, setSearchBook] = useState("");
   const [clicked, setClicked] = useState(false);
@@ -117,15 +124,16 @@ const Viewbooks = () => {
       let ids = doc(collection(db, "books")).id;
       await addDoc(collection(db, "requests"), {
         requestfrom: user.email,
-        requsername: selectedBook.name,
+        reqtousername: selectedBook.name,
         requestto: selectedBook.owner,
         booktitile: selectedBook.title,
         bookuid: selectedBook.uid,
         ruid: ids,
         accepted: false,
+        borrowed: false,
       });
 
-      alert("Request sent successfully");
+      toast.success("Request sent successfully");
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -157,10 +165,23 @@ const Viewbooks = () => {
     }
   };
 
+  const getReviews = async (uid) => {
+    setLoadingReviews(true);
+    try {
+      const reviews = await getDocs(
+        query(collection(db, "reviews"), where("bookid", "==", uid))
+      );
+      const fetchedReviews = reviews.docs.map((doc) => doc.data());
+      setCurrentReviews(fetchedReviews);
+      console.log(fetchedReviews);
+    } catch (error) {
+      console.error("Error fetching reviews: ", error);
+    }
+    setLoadingReviews(false);
+  };
+
   if (loading) {
-    return (
-      <Loader loading={loading} />
-    );
+    return <Loader loading={loading} />;
   }
   console.log(bookDetails);
   return (
@@ -179,6 +200,7 @@ const Viewbooks = () => {
                     className="flex justify-between items-center cursor-pointer rounded-lg p-2 hover:bg-gray-100 transform transition-transform duration-300 hover:scale-90"
                     onClick={() => {
                       setSelectedBook(book);
+                      getReviews(book.uid);
                     }}
                   >
                     <div className="flex items-center">
@@ -190,7 +212,7 @@ const Viewbooks = () => {
               ))}
           </div>
         </div>
-        <div  className="bg-white rounded-lg shadow-md p-4">
+        <div className="bg-white rounded-lg shadow-md p-4">
           <div className="flex items-center  mb-4">
             <FiFilter className="text-lg mr-2 text-black" size={20} />
             <span className="text-xl font-medieum ">Filters</span>
@@ -225,7 +247,10 @@ const Viewbooks = () => {
           </div>
           <div className="mb-4"></div>
           <div>
-            <div ref={scrollTo} className="flex  text-black text-xl font-medium mt-5 mb-2">
+            <div
+              ref={scrollTo}
+              className="flex  text-black text-xl font-medium mt-5 mb-2"
+            >
               <FaBook className="mr-2 mt-1 text-black" size={20} />
               Book Info
             </div>
@@ -273,7 +298,9 @@ const Viewbooks = () => {
 
                     <div className="flex justify-between mt-4">
                       {!selectedBook.requested ? (
-                        <button
+                        <CustomButton
+                          color={"blue"}
+                          text={"request"}
                           onClick={() => {
                             sendReq();
                             setClicked((prev) => !prev);
@@ -282,10 +309,8 @@ const Viewbooks = () => {
                               requested: true,
                             }));
                           }}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition-colors duration-300 focus:outline-none"
-                        >
-                          <FaRegHandPaper className="mr-1" /> Request
-                        </button>
+                          icon={<FaRegHandPaper className="mr-1" />}
+                        />
                       ) : (
                         <div className="text-lg text-gray-500">
                           You have already requested.
@@ -299,6 +324,57 @@ const Viewbooks = () => {
                   </div>
                 )}
               </motion.div>
+              <div className="flex  text-black text-xl font-medium mt-5 mb-2">
+                <FaRankingStar className="mr-2   text-black" size={30} />
+                Reviews
+              </div>
+
+              {loadingReviews===false? (
+              <motion.div
+                className="bg-gray-100 p-4 rounded-lg shadow-md mb-8 h-80 overflow-auto"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                
+                {selectedBook ? (
+                  <>
+                    {currentReviews.length > 0 ? (
+                      currentReviews.map((review, index) => (
+                        <div key={index} className="mb-8">
+                          <div className="border bg-white rounded-lg shadow-md p-4">
+                            <Rating
+                              name="size-large"
+                              value={review.rating}
+                              readOnly
+                            />
+                            <div className="text-lg font-semibold mb-2">
+                              {review.comment}
+                            </div>
+                            <div className="text-gray-700 mb-2">
+                              {review.review}
+                            </div>
+                            <div className="text-gray-500">
+                              {review.reviewer}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className=" flex text-xl text-gray-400 font-medium justify-center items-center lg:h-60">
+                        No reviews available
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex text-xl text-gray-400 font-medium justify-center items-center lg:h-96">
+                    Select a book to display info
+                  </div>
+                )}
+              </motion.div>
+              ):(
+                <Loader loading={loadingReviews} />
+              )}
             </div>
           </div>
         </div>
