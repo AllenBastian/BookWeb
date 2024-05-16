@@ -342,7 +342,7 @@ const Viewbooks = () => {
                     {currentReviews.length > 0 ? (
                       currentReviews.map((review, index) => (
                         <div key={index} className="mb-8">
-                          <div className="border border-gray-300 rounded-lg p-4">
+                          <div className="border bg-white rounded-lg shadow-md p-4">
                             <Rating
                               name="size-large"
                               value={review.rating}
