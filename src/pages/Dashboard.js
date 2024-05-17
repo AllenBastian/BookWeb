@@ -236,6 +236,8 @@ const Dashboard = () => {
     }));
   };
   const handleSubmit = async (event) => {
+
+    console.log(newBookInfo);
     if (Object.values(newBookInfo).some((item) => item.trim() === "")) 
       {
         toast.error("Please fill all the fields");
@@ -272,7 +274,6 @@ const Dashboard = () => {
       title: "",
       author: "",
       description: "",
-      borrowPeriod: "",
       language: "",
       category: "",
     });

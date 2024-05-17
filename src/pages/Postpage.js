@@ -104,6 +104,10 @@ const Postpage = () => {
   }, [currentUser, currentPost]);
 
   const postComment = async () => {
+    if (currentComment === "") {
+      toast.error("Please enter a valid comment");
+      return;
+    }
     setCurrentComment("");
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
@@ -127,6 +131,10 @@ const Postpage = () => {
   };
 
   const commentReply = async (uid) => {
+    if (currentReply==="") {
+      toast.error("Please enter a valid reply");
+      return;
+    }
     setCurrentReply("");
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };

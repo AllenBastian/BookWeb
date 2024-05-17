@@ -150,11 +150,14 @@ const UserProfilePage = () => {
   console.log(transactions);
 
   const handleSaveClick = async () => {
-    if (Object.values(formData).some((item) => item.trim() === "")) 
+    if (Object.values(formData).some((item) => item.trim() === "")||formData.contact.length !== 10) 
       {
+
+        setDisableButton(true);
         toast.error("Please fill all the fields");
         return;
       }
+      setDisableButton(false);
     setEditing(false);
     try {
       const updatedUserData = {
@@ -497,7 +500,7 @@ const UserProfilePage = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
                 />
               </div>
-              {disableButton && <p className="text-red-500 text-sm mt-2">Please fill all the fields</p>}
+              {disableButton && <p className="text-red-500 text-sm mt-2">Please Enter a valid number</p>}
               <div className="flex mt-4 justify-end">
               
                 <CustomButton
