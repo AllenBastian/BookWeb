@@ -37,6 +37,7 @@ import {
   deleteDoc,
   updateDoc,
   onSnapshot,
+  count,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaListCheck } from "react-icons/fa6";
@@ -182,7 +183,6 @@ const Dashboard = () => {
     description: "",
     language: "",
     category: "",
-    borrowPeriod: "",
   });
   console.log(newBookInfo);
 
@@ -229,16 +229,18 @@ const Dashboard = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+  
     setNewBookInfo((prevInfo) => ({
       ...prevInfo,
       [name]: value,
     }));
   };
   const handleSubmit = async (event) => {
-    if (Object.values(newBookInfo).some((item) => item.trim() === "")) {
-      toast.error("Please fill all the fields");
-      return;
-    }
+    if (Object.values(newBookInfo).some((item) => item.trim() === "")) 
+      {
+        toast.error("Please fill all the fields");
+        return;
+      }
     setIsDialogOpen(false);
     setExpandedBook(null);
     setBookDetails((prev) => [...prev, newBookInfo]);
@@ -259,6 +261,7 @@ const Dashboard = () => {
         owner: user.email,
         uid: ids,
         name: docu.name,
+        rating: 0,
       });
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
@@ -566,14 +569,7 @@ const Dashboard = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
             />
 
-            <input
-              type="text"
-              name="borrowPeriod"
-              value={newBookInfo.borrowPeriod}
-              onChange={handleChange}
-              placeholder="Borrow Period"
-              className="w-full border  border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4 transition-colors duration-300 ease-in-out hover:border-blue-500"
-            />
+         
 
             <Select
               name="category"
@@ -585,6 +581,7 @@ const Dashboard = () => {
               <Option value="">Select category</Option>
               <Option value="Fiction">Fiction</Option>
               <Option value="Non-Fiction">Non-Fiction</Option>
+              <Option value="Education">Education</Option>
             </Select>
 
             <div className="flex mt-4 justify-end ">

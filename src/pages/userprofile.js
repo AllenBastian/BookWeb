@@ -44,9 +44,11 @@ import { useNavigate } from "react-router-dom";
 import CustomPopup from "../components/CustomPopup";
 import { Deleter } from "../utils/Deleter";
 import { getUserByEmail, getUserName } from "../utils/Search";
+import { reviewer } from "../utils/Reviewer";
 
 const UserProfilePage = () => {
-  const [username, setUsername] = useState(); // [ { email: "", name: "" }
+  const [disableButton,setDisableButton] = useState(false);
+  const [username, setUsername] = useState(); 
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({});
@@ -71,10 +73,13 @@ const UserProfilePage = () => {
           const transactionCollectionRef = collection(db, "transactions");
           const q1 = query(transactionCollectionRef);
 
+  
+
           const unsubscribe = onSnapshot(q1, (snapshot) => {
             const transactionData = [];
             snapshot.forEach((doc) => {
-              transactionData.push(doc.data());
+              if(doc.data().lender === currentUser.email || doc.data().borrower === currentUser.email)
+                 transactionData.push(doc.data());
             });
             console.log("Transactions:", transactionData);
             setTransactions(transactionData);
@@ -98,6 +103,19 @@ const UserProfilePage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if(name !== "contact" && name !== "semester" && name !== "batch"){
+      const isValidName = /^[a-zA-Z\s]*$/.test(value);
+      if(!isValidName){
+        return;
+      }
+    }
+
+    if(name === "contact" || name === "semester"){
+      const isValidPhoneNumber = /^\+?\d*$/.test(value);
+      if(!isValidPhoneNumber){
+        return;
+      }
+    }
     setFormData({ ...formData, [name]: value });
   };
 
@@ -111,6 +129,8 @@ const UserProfilePage = () => {
         await Deleter("requests", "requestto", currentUser.email);
         await Deleter("messages", "sender", currentUser.email);
         await Deleter("messages", "receiver", currentUser.email);
+        await Deleter("transactions", "lender", currentUser.email);
+        await Deleter("transactions", "borrower", currentUser.email);
 
         toast.warning("User deleted successfully");
         signOut(auth)
@@ -130,6 +150,11 @@ const UserProfilePage = () => {
   console.log(transactions);
 
   const handleSaveClick = async () => {
+    if (Object.values(formData).some((item) => item.trim() === "")) 
+      {
+        toast.error("Please fill all the fields");
+        return;
+      }
     setEditing(false);
     try {
       const updatedUserData = {
@@ -175,12 +200,16 @@ const UserProfilePage = () => {
     console.log(username)
     console.log(star);
     try {
+
+    
       await addDoc(collection(db, "reviews"), {
         bookid: selectedReview.bookid,
         reviewer: username,
         comment: reviewMessage,
         rating: star,
       });
+
+     
 
       const r = query(
         collection(db, "transactions"),
@@ -191,6 +220,7 @@ const UserProfilePage = () => {
 
       const mydoc = querySnapshot.docs[0].ref;
       await updateDoc(mydoc, { reviewed: true,stars:star});
+      await reviewer(selectedReview.bookid, star);
 
       toast.success("Review added successfully");
     } catch (error) {
@@ -374,7 +404,9 @@ const UserProfilePage = () => {
                 );
               })
             ) : (
+              <div className="flex flex-col justify-center items-center h-full">
               <p>No transactions found.</p>
+            </div>
             )}
           </div>
         </motion.div>
@@ -465,13 +497,17 @@ const UserProfilePage = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
                 />
               </div>
+              {disableButton && <p className="text-red-500 text-sm mt-2">Please fill all the fields</p>}
               <div className="flex mt-4 justify-end">
+              
                 <CustomButton
                   text={"Save"}
                   color={"blue"}
                   icon={<FaCheck className="mr-2" />}
                   onClick={handleSaveClick}
                 />
+     
+
                 <CustomButton
                   text={"Cancel"}
                   color={"red"}

@@ -224,6 +224,7 @@ const Chat = () => {
         lenderName: lenderName,
         timestamp: new Date(),
         reviewed: false,
+        stars: 0,
         uid: ids
       });
 
