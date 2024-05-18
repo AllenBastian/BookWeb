@@ -1,5 +1,5 @@
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/Firebase';
+import { db } from '../Firebase/Firebase';
 
 export const getUserByEmail = async (email) => {
     try {

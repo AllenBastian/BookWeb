@@ -1,4 +1,6 @@
+
 import { auth } from "../firebase/Firebase";
+
 import { IsSignedUpContext } from "../context/Context";
 import { useContext, useEffect } from "react";
 import { Select, Option } from "@material-tailwind/react";
@@ -24,8 +26,10 @@ import {
 } from "react-icons/fa";
 import { useState } from "react";
 import { ClipLoader } from "react-spinners";
+
 import { motion } from "framer-motion";
 import { db } from "../firebase/Firebase";
+
 
 import {
   collection,
@@ -293,6 +297,7 @@ const Dashboard = () => {
   if (loading) return <Loader loading={loading} />;
 
   if (isSignedUp === false) console.log("user not signed upsjbdjwbdkjwd");
+
 
   return (
     <>

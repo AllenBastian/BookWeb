@@ -4,6 +4,7 @@ import { RiPencilLine } from "react-icons/ri";
 import { FaThumbsUp, FaComment } from "react-icons/fa";
 import { Select, Option } from "@material-tailwind/react";
 import { onAuthStateChanged } from "firebase/auth";
+
 import { auth } from "../firebase/Firebase";
 import { RiSendPlane2Line, RiCloseLine } from "react-icons/ri";
 import { FaFire } from 'react-icons/fa';
@@ -25,6 +26,7 @@ import { db } from "../firebase/Firebase";
 import { useNavigate } from "react-router-dom";
 import {toast} from "sonner"
 import CustomButton from "../components/CustomButton";
+
 
 const Forum = () => {
   const nav = useNavigate();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { db } from "../firebase/Firebase";
+import { db } from "../Firebase/Firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { IsSignedUpContext } from '../context/Context';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
@@ -119,6 +119,7 @@ if(isSignedUp===true){
 console.log(isSignedUp);
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
+
       
       <img src="images/brownbooks.jpg" alt="Background" className="absolute inset-0 w-full h-full object-cover" />
      
@@ -133,6 +134,7 @@ console.log(isSignedUp);
   <FaUserPlus className="inline-block mr-2" />
   Sign Up to continue
 </h2>
+
         <div className="mb-4">
           <input
             type="text"
