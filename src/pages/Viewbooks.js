@@ -134,7 +134,9 @@ const Viewbooks = () => {
         borrowed: false,
       });
 
-      toast.success("Request sent successfully");
+      toast.success("Request sent successfully" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (e) {
       console.error("Error adding document: ", e);
     }
