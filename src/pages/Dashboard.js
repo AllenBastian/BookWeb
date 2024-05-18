@@ -82,7 +82,7 @@ const Dashboard = () => {
 
         const unsubscribeRequests = onSnapshot(
           r,
-          (snapshot) => {
+          async (snapshot) => {
             const reqfetched = snapshot.docs.map((doc) => doc.data());
             const filtered = reqfetched.filter(
               (req) => req.requestto === user.email
@@ -93,8 +93,16 @@ const Dashboard = () => {
                   req.requestfrom === user.email) &&
                 req.accepted === true
             );
+            const emails = reqfetched.map(req => req.requestfrom);
+            const userNames = await fetchUserNames(emails);
+            const reqDetailsWithNames = reqfetched.map(req => ({
+              ...req,
+              requesterName: userNames[req.requestfrom] || req.requestfrom,
+            }));
+    
+  
             setTemp(filtered);
-            setReqDetails(reqfetched);
+            setReqDetails(reqDetailsWithNames);
             setTemp2(filtered2);
           },
           (error) => {
@@ -160,6 +168,20 @@ const Dashboard = () => {
       console.error("Error deleting document: ", error);
     }
   };
+
+  const fetchUserNames = async (emails) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "in", emails));
+    const querySnapshot = await getDocs(q);
+  
+    let userNames = {};
+    querySnapshot.forEach((doc) => {
+      userNames[doc.data().email] = doc.data().name;
+    });
+  
+    return userNames;
+  };
+  
 
   const handleDecline = async (id) => {
     setReqDetails(reqDetails.filter((req) => req.ruid !== id));
@@ -467,7 +489,7 @@ const Dashboard = () => {
                           className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                           onClick={() => handleExpand(req.ruid)}
                         >
-                          <span>{req.requsername}</span>
+                          <span>{req.requesterName}</span>
                           <span className="ml-5">{req.booktitile}</span>
                           {expandedReq === req.ruid ? (
                             <FaChevronUp />
