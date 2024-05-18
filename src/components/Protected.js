@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState,useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import { auth } from "../Firebase/Firebase";
+
+import { auth } from "../firebase/Firebase";
+import { IsSignedUpContext } from "../context/Context";
+
 
 
 
 export const Protected=({children})=>{
 
     const nav = useNavigate();
+    const {isSignedUp, setIsSignedUp} = useContext(IsSignedUpContext);
     const [isLogged,setLogged] = useState(null);
 
+    console.log(isSignedUp);
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
           if (user) {
@@ -21,16 +26,13 @@ export const Protected=({children})=>{
         return () => unsubscribe();
       }, []);
       
-    switch(isLogged){
-        case true:
-            return children
-        case false:
-             nav("/");
-        case null:
-            return ( <div className="flex justify-center items-center h-screen">
-            <h1>Loading</h1>
-          </div>)
-                
-    }
+
+    useEffect(() => {
+      if (isLogged && !isSignedUp) {
+          nav("/Signup");
+      }
+  }, [isLogged, isSignedUp]);
+
+  return isLogged && (isSignedUp || window.location.pathname.includes("/Signup")) ? children : null;
 
 }

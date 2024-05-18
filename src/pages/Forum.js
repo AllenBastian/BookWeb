@@ -1,20 +1,48 @@
+import React, { useState, useEffect, useRef } from "react";
+import { ClipLoader } from "react-spinners";
 import { RiPencilLine } from "react-icons/ri";
+import { FaThumbsUp, FaComment } from "react-icons/fa";
 import { Select, Option } from "@material-tailwind/react";
-import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../Firebase/Firebase";
-import { addDoc, collection, doc, query, getDocs,where } from "firebase/firestore";
-import { db } from "../Firebase/Firebase";
-import { useNavigate } from 'react-router-dom';
+
+import { auth } from "../firebase/Firebase";
+import { RiSendPlane2Line, RiCloseLine } from "react-icons/ri";
+import { FaFire } from 'react-icons/fa';
+import { FiFilter } from 'react-icons/fi';
+import Loader from "../components/Loader";
+import { getUserName } from "../utils/Search";
+
+import { motion } from "framer-motion";
+import {
+  addDoc,
+  collection,
+  query,
+  getDocs,
+  where,
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
+import { db } from "../firebase/Firebase";
+import { useNavigate } from "react-router-dom";
+import {toast} from "sonner"
+import CustomButton from "../components/CustomButton";
+
 
 const Forum = () => {
   const nav = useNavigate();
+  const [loading, setLoading] = useState(true); 
   const [post, setPost] = useState(false);
   const [cat, setCat] = useState();
   const [user, setUser] = useState();
-  const [name,setName] = useState();
-  const [fetchedPosts,setFetchedPosts] = useState([])
-  const [clicked,setClicked] = useState(false)
+  const [name, setName] = useState();
+  const allPosts = useRef([]);
+  const [fetchedPosts, setFetchedPosts] = useState([]);
+  const [clicked, setClicked] = useState(false);
+
+  const [postDetails, setPostDetails] = useState({
+    title: "",
+    description: "",
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -31,46 +59,80 @@ const Forum = () => {
     const fetchData = async () => {
       try {
         if (user) {
-          let q;
+          const postsQuery = query(collection(db, "posts"));
+          const unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
+            const fetchedPosts = snapshot.docs.map((doc) => doc.data());
 
-          q = query(collection(db, "posts"));
-          const querySnapshot = await getDocs(q);
-          const fetched = querySnapshot.docs.map((doc) => doc.data());
-          console.log("hello");
-          setFetchedPosts(fetched)
+            const commentsQuery = query(collection(db, "comments"));
+            const unsubscribeComments = onSnapshot(
+              commentsQuery,
+              (commentsSnapshot) => {
+                const allComments = commentsSnapshot.docs.map((doc) =>
+                  doc.data()
+                );
 
-          let r = query(collection(db,"users"),where("email","==",user.email))
-          const querySnapshot2 = await getDocs(r);
-          const username = querySnapshot2.docs[0].data().name;
-          setName(username)
+                const commentsByPostId = {};
+                allComments.forEach((comment) => {
+                  const postId = comment.postid;
+                  commentsByPostId[postId] = commentsByPostId[postId] || 0;
+                  commentsByPostId[postId]++;
+                });
 
+                const updatedFetchedPosts = fetchedPosts.map((post) => {
+                  const commentsCount = commentsByPostId[post.uid] || 0;
+                  const totalLikesAndComments =
+                    (post.likes ? post.likes.length : 0) + commentsCount;
+                  return { ...post, commentsCount, totalLikesAndComments };
+                });
+
+                updatedFetchedPosts.sort(
+                  (a, b) => b.totalLikesAndComments - a.totalLikesAndComments
+                );
+
+                allPosts.current = updatedFetchedPosts;
+                setFetchedPosts(updatedFetchedPosts);
+              }
+            );
+
+            return () => {
+              unsubscribeComments();
+            };
+          });
+
+          
+          const username = await getUserName(user.email);
+          setName(username);
+
+          setLoading(false);
+
+          return () => {
+            unsubscribePosts();
+          };
         }
       } catch (error) {
-        console.error("Error fetching posts: ", error);
+        console.error("Error fetching data: ", error);
       }
     };
 
     fetchData();
-  }, [user,clicked]);
-  console.log("hello");
-  const [postDetails, setPostDetails] = useState({
-    title: "",
-    description: "",
-    category: "",
-  });
-
-  console.log(fetchedPosts)
+  }, [user]);
 
   const setInput = (event) => {
     const { name, value } = event.target;
     setPostDetails((prev) => ({ ...prev, [name]: value }));
   };
 
+  console.log(postDetails);
+
   const createPost = async () => {
+
+    if (Object.values(postDetails).some((item) => item.trim() === "") ) {
+      toast.error("Please fill all fields");
+      return;
+    }
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-US", options);
-    console.log(formattedDate);
     setPost(false);
     try {
       let ids = doc(collection(db, "posts")).id;
@@ -80,45 +142,181 @@ const Forum = () => {
         owner: user.email,
         username: name,
         uid: ids,
-        time: formattedDate
+        time: formattedDate,
       });
-      console.log("User signed up successfully! User ID:", userRef.id);
+
       setPostDetails({
         title: "",
         description: "",
         category: "",
       });
-    } catch {
-      console.log("error");
+      
+      toast.success("Post created successfully");
+    } catch (error) {
+      console.error("Error creating post: ", error);
     }
   };
-  console.log(clicked);
+
+  const catFilter = (selected) => {
+    console.log(selected);
+    setFetchedPosts(allPosts.current);
+    if (selected === "all") return;
+
+    const newFetch = allPosts.current.filter(
+      (post) => post.category === selected
+    );
+    setFetchedPosts(newFetch);
+    console.log(newFetch);
+  };
+  if (loading) {
+    return (
+      <Loader loading={loading} />
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
-      <div className="hidden lg:flex flex-col w-1/4 bg-white border-r border-gray-300">
+      <div className="hidden lg:flex flex-col w-1/4 mt-3  bg-white border-r border-gray-300">
         <div className="p-4">
-          <h1 className="text-lg font-semibold mb-4">Filters</h1>
-          <Select label="Select Version">
-            <Option value="fiction">fiction</Option>
-            <Option>Material Tailwind React</Option>
-            <Option>Material Tailwind Vue</Option>
-            <Option>Material Tailwind Angular</Option>
-            <Option>Material Tailwind Svelte</Option>
+        <div className="flex items-center ml-4 mb-4">
+  <FiFilter className="text-lg mr-2 text-black" size={20} />
+  <span className="text-lg font-medieum ">Filters</span>
+</div>
+<div className="ml-4">
+          <Select
+            onChange={catFilter}
+            label="Select Category"
+            className="w-full mb-4"
+          >
+            <Option value="all" className="py-2 px-4 block w-full text-left">
+              All
+            </Option>
+            <Option
+              value="fiction"
+              className="py-2 px-4 block w-full text-left"
+            >
+              Fiction
+            </Option>
+            <Option
+              value="non-fiction"
+              className="py-2 px-4 block w-full text-left"
+            >
+              Non-fiction
+            </Option>
+            <Option
+              value="engineering"
+              className="py-2 px-4 block w-full text-left"
+            >
+              Engineering
+            </Option>
           </Select>
-          <h1 className="text-lg font-semibold mt-5">Trending</h1>
+          </div>
+
+          <div className="bg-white-200 rounded-lg p-4 mt-4">
+          <div className="flex items-center mb-2">
+  <FaFire className="text-lg text-red-600 mr-2"  />
+  <span className="text-lg font-medieum">Trending </span>
+</div>
+            {fetchedPosts.length > 0 &&
+              fetchedPosts.map((post, index) => {
+                let likes = post.likes ? post.likes.length : 0;
+                if (index < 5) {
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.1 }}
+                      whileHover={{ scale: 1.05 }}
+                      className="relative text-sm mt-5 p-2 border border-gray-300 rounded-lg post-name hover:bg-gray-200 cursor-pointer"
+                      onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+                    >
+                      <div className="absolute left-0 top-0 h-full bg-blue-500 text-white rounded-l-lg px-2  py-1">
+                        #{index + 1}
+                      </div>
+                      <div className="ml-10">
+                        <span className="font-medieum">{post.title}</span>
+                        <div className="flex mt-2">
+                          <span>
+                            <FaThumbsUp className="text-blue-500" /> {likes}
+                          </span>
+                          <span className="ml-2">
+                            <FaComment className="text-gray-500" />{" "}
+                            {post.commentsCount}{" "}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                }
+              })}
+          </div>
         </div>
       </div>
 
       <div className="flex flex-col flex-grow overflow-y-auto">
         <div className="bg-white border-b border-gray-300 py-4 px-4 lg:hidden">
-          <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500 focus:border-blue-500">
-            <option value="latest">Lastest</option>
-            <option value="top">Top</option>
-            <option value="trending">Trending</option>
-          </select>
+          <Select
+            onChange={catFilter}
+            label="Select Category"
+            className="w-full mb-4"
+          >
+            <Option value="all" className="py-2 px-4 block w-full text-left">
+              All
+            </Option>
+            <Option
+              value="fiction"
+              className="py-2 px-4 block w-full text-left"
+            >
+              Fiction
+            </Option>
+            <Option
+              value="non-fiction"
+              className="py-2 px-4 block w-full text-left"
+            >
+              Non-fiction
+            </Option>
+            <Option
+              value="engineering"
+              className="py-2 px-4 block w-full text-left"
+            >
+              Engineering
+            </Option>
+          </Select>
         </div>
 
-        <div className="fixed bottom-4 right-4 ">
+        {fetchedPosts.map((post) => (
+          <motion.div
+            key={post.uid}
+            className="p-2 z-0"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div
+              onClick={() => nav(`/forum/${post.uid}`, { state: post })}
+              className="bg-white shadow-sm rounded-lg p-4 mb-4 cursor-pointer transition-transform duration-300 ease-in-out transform hover:scale-90"
+              style={{ zIndex: 1 }}
+            >
+              <h2 className="text-lg font-semibold mb-2">{post.title}</h2>
+              <p className="text-gray-600 mb-2">{post.category}</p>
+              <p className="text-sm text-gray-500 mb-4">
+                Posted by {post.username} on {post.time}.
+              </p>
+              <div className="flex justify-end items-center">
+                <span className="text-gray-500 flex items-center mr-4">
+                  <FaThumbsUp className="text-blue-500 mr-1" />
+                  {post.likes ? post.likes.length : 0}
+                </span>
+                <span className="text-gray-500 flex items-center">
+                  <FaComment className="text-gray-500 mr-1" />
+                  {post.commentsCount}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+        <div className="fixed bottom-4 right-4">
           <div className="rounded-full bg-blue-500 p-2">
             <RiPencilLine
               onClick={() => setPost(true)}
@@ -127,8 +325,14 @@ const Forum = () => {
             />
           </div>
         </div>
+
         {post === true && (
-          <div className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed top-0 left-0 flex items-center justify-center w-full h-screen bg-black bg-opacity-50"
+          >
             <div className="bg-white p-8 border border-gray-300 rounded-lg w-3/4">
               <h2 className="text-lg font-semibold mb-4">NEW POST</h2>
               <input
@@ -137,7 +341,7 @@ const Forum = () => {
                 value={postDetails.title}
                 onChange={setInput}
                 placeholder="Title"
-                className="w-full border border-gray-300 rounded p-2 mb-4"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
               />
               <textarea
                 name="description"
@@ -145,7 +349,7 @@ const Forum = () => {
                 onChange={setInput}
                 placeholder="What's on your mind?"
                 rows="4"
-                className="w-full border border-gray-300 rounded p-2 mb-4 resize-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
               ></textarea>
 
               <Select
@@ -153,40 +357,20 @@ const Forum = () => {
                 label="Choose category"
                 onChange={(selectedOption) => setCat(selectedOption)}
               >
+  
                 <Option value="fiction">fiction</Option>
+                <Option value="non-fiction">non-fiction</Option>
+                <Option value="engineering">Engineering</Option>
               </Select>
 
               <div className="flex justify-end mt-4">
-                <button
-                  onClick={() => {createPost(); setClicked(prev=>!prev);}}
-                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-2"
-                >
-                  POST
-                </button>
-                <button
-                  onClick={() => setPost(false)}
-                  className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
+                <CustomButton icon={<RiSendPlane2Line size={20}/>} className="mr-2" color="blue" text="Post" onClick={createPost} />
+          
+               <CustomButton icon={<RiCloseLine size={20}/>} color="red" text="Cancel" onClick={() => setPost(false)} />
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
-
-{fetchedPosts.map((element)=>(
-        <div key={element.uid} className="p-2">
-          <div onClick={()=>{nav(`/forum/${element.uid}`,{state:element})}} className="bg-white shadow rounded-lg p-4 mb-1 cursor-pointer hover:bg-gray-200">
-            <h2 className="text-lg font-semibold mb-2">{element.title}</h2>
-            <p className="text-gray-600 mb-2">
-              {element.category}
-            </p>
-            <p className="text-sm text-gray-500">
-             Posted by {element.username} on {element.time}.
-            </p>
-          </div>
-        </div>
-))}
       </div>
     </div>
   );

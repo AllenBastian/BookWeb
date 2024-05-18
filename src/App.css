@@ -5,8 +5,10 @@ html {
 }
 *{
     margin: 0;
-    padding: 0;
-    @apply font-myfont
+    padding: 2;
+
+    /* font-family: 'Reddit Sans', sans-serif; */
+    @apply font-myfont2
    
 }
 body{
@@ -14,15 +16,40 @@ body{
     
 }
 
-*::-webkit-scrollbar{
-    width: 7px;
-    height: 8px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50px;
-}
-*::-webkit-scrollbar-thumb{
-    background-color: rgba(140, 39, 37,0.7);
-    border-radius: 50px;
-}
+/* Define the scrollbar */
+::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+  }
+  
+  /* Define the track styles */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Background color of the track */
+  }
+  
+  /* Define the thumb styles */
+  ::-webkit-scrollbar-thumb {
+    background: #888; /* Color of the thumb */
+    border-radius: 5px; /* Border radius of the thumb */
+  }
+  
+  /* Define the styles for the scrollbar when hovered */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Color of the thumb on hover */
+  }
+  
+  /* Define the corner styles */
+  ::-webkit-scrollbar-corner {
+    background: #f1f1f1; /* Background color of the scrollbar corner */
+  }
+  
+
+.nav-icon {
+    transition: transform 0.3s ease;
+  }
+  
+  .nav-icon:hover {
+    transform: scale(1.1);
+  }
+  
 
 
