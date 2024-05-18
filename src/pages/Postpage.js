@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { db } from "../Firebase/Firebase";
+import { db } from "../firebase/Firebase";
 import { getUserByEmail } from "../utils/Search";
 import { FaThumbsUp, FaComment } from "react-icons/fa"; // Import icons
 import { FiSend } from "react-icons/fi";
@@ -18,13 +18,11 @@ import {
   updateDoc,
   onSnapshot,
 } from "firebase/firestore";
-
 import { auth } from "../firebase/Firebase";
 import { motion } from "framer-motion";
 import { set } from "firebase/database";
 import {toast} from "sonner"
 import Loader from "../components/Loader";
-
 
 
 
