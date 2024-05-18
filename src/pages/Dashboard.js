@@ -155,6 +155,7 @@ const Dashboard = () => {
         const doc = querySnapshot2.docs[0];
         await deleteDoc(doc.ref);
       }
+      toast.success(`Book "${name}" has been deleted`);
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
@@ -169,6 +170,7 @@ const Dashboard = () => {
         const doc = querySnapshot.docs[0];
         await deleteDoc(doc.ref);
       }
+      toast.success("Request declined");
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
@@ -207,6 +209,7 @@ const Dashboard = () => {
         accepted: true,
       });
       console.log("Document updated successfully");
+      toast.success("Request accepted");
     } catch (error) {
       console.error("Error updating document:", error);
     }
@@ -218,10 +221,17 @@ const Dashboard = () => {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
+        const currentDisabled = doc.data().disabled;
         await updateDoc(doc.ref, {
           disabled: !doc.data().disabled,
         });
+        if (currentDisabled) {
+          toast.success(`"${name}" is now available.`);
+        } else {
+          toast.success(`"${name}" is now disabled.`);
+        }
       }
+      
     } catch (error) {
       console.error("Error updating document: ", error);
     }
@@ -269,6 +279,7 @@ const Dashboard = () => {
     } catch (e) {
       console.error("Error adding document: ", e);
     }
+    toast.success("Book added successfully");
 
     setNewBookInfo({
       title: "",

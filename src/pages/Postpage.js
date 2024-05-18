@@ -124,6 +124,7 @@ const Postpage = () => {
         date: formattedDate,
         timestamp: new Date(),
       });
+      toast.success("Comment added successfully!");
       
     } catch (error) {
       console.log(error);
@@ -153,6 +154,7 @@ const Postpage = () => {
       const updatedReplies = [...(refData.replies || []), newReply];
       const commentRef = doc(db, "comments", refId);
       await updateDoc(commentRef, { replies: updatedReplies });
+      toast.success("Your reply has been posted!");
     } catch {
       console.log("erroreeee");
     }
@@ -192,9 +194,13 @@ const Postpage = () => {
       }
 
       await updateDoc(postRef, { likes: likeToAdd });
-    } catch (error) {
+      toast.success(`You ${newliked ? "liked" : "unliked"} the post!`);
+
+    } 
+    catch (error) {
       console.log(error.message);
     }
+    
   };
 
   if (loading) {
