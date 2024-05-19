@@ -1,5 +1,5 @@
 import React, { useEffect, useState,useContext } from 'react';
-import { db, auth } from '../firebase/Firebase'; // Import the Firebase configuration
+import { db, auth } from '../firebase/Firebase'; 
 import { collection, query, where, onSnapshot, addDoc, doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { Timestamp } from 'firebase/firestore';
@@ -43,6 +43,7 @@ const NotificationListener = () => {
                             timestamp: new Date(),
                             booktitle: bookname,
                             notiffrom: reqfr,
+                            isRead : false,
                         });
                         console.log('Notification added with ID: ', docRef.id);
                         toast.info("Book Requested");
@@ -58,6 +59,7 @@ const NotificationListener = () => {
                                   const message = 'Book Request Accepted';
                                   const bookname = request.booktitile;
                                   const reqfr = request.requestfrom;
+                                
               
                                   try {
                                     
@@ -69,6 +71,7 @@ const NotificationListener = () => {
                                           timestamp: new Date(),
                                           booktitle: bookname,
                                           notiffrom: requestTo,
+                                          isRead : false,
                                       });
                                       console.log('Notification added with ID: ', docRef.id);
                                       toast.info("Book Accepted");
@@ -95,6 +98,7 @@ const NotificationListener = () => {
                                         timestamp: new Date(),
                                         booktitle: bookname,
                                         notiffrom: requestTo,
+                                        isRead : false,
                                     });
                                     console.log('Notification added with ID: ', docRef.id);
                                     toast.info("Book request rejected");
