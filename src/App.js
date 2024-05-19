@@ -7,6 +7,7 @@ import Homepage from './pages/Homepage';
 import Dashboard from './pages/Dashboard';
 import SignUpForm from './pages/Signup';
 import Viewbooks from './pages/Viewbooks';
+import LearnMore from './pages/Learnmore';
 import Postpage from './pages/Postpage';
 import UserProfile from './pages/userprofile';
 import NotificationListener from "./components/NotificationListener"; 
@@ -38,7 +39,7 @@ function App() {
             gap={20}
           />
 
-          <NotificationListener /> {/*  */}
+          <NotificationListener /> 
           <Routes>
             <Route path="/" element={<Homepage/>}/>
             <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>
@@ -49,6 +50,7 @@ function App() {
             <Route path="/forum/:id" element={<Protected><Postpage/></Protected>}/>
             <Route path="/chat" element={<Protected><Chat/></Protected>}/>
             <Route path="/inbox" element={<Protected><Inbox/></Protected>}/>
+            <Route path="/learn-more" element={<LearnMore/>}/>
           </Routes>
         </div>
       </BrowserRouter>
