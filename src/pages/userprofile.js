@@ -132,7 +132,9 @@ const UserProfilePage = () => {
         await Deleter("transactions", "lender", currentUser.email);
         await Deleter("transactions", "borrower", currentUser.email);
 
-        toast.warning("User deleted successfully");
+        toast.warning("User deleted successfully" , {
+          duration: 1500, // Duration in milliseconds
+        });
         signOut(auth)
           .then(() => {
             localStorage.setItem("isSignedUp", JSON.stringify(false));
@@ -154,7 +156,9 @@ const UserProfilePage = () => {
       {
 
         setDisableButton(true);
-        toast.error("Please fill all the fields");
+        toast.error("Please fill all the fields" , {
+          duration: 1500, // Duration in milliseconds
+        });
         return;
       }
       setDisableButton(false);
@@ -185,7 +189,9 @@ const UserProfilePage = () => {
 
           console.log("Updated user data in Firestore:", updatedUserData);
           setUserData(updatedUserData);
-          toast.success("User data updated successfully");
+          toast.success("User data updated successfully" , {
+            duration: 1500, // Duration in milliseconds
+          });
         } else {
           console.error("User document not found");
         }
@@ -225,7 +231,9 @@ const UserProfilePage = () => {
       await updateDoc(mydoc, { reviewed: true,stars:star});
       await reviewer(selectedReview.bookid, star);
 
-      toast.success("Review added successfully");
+      toast.success("Review added successfully" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error adding review:", error);
     }

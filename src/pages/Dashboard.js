@@ -82,7 +82,7 @@ const Dashboard = () => {
 
         const unsubscribeRequests = onSnapshot(
           r,
-          (snapshot) => {
+          async (snapshot) => {
             const reqfetched = snapshot.docs.map((doc) => doc.data());
             const filtered = reqfetched.filter(
               (req) => req.requestto === user.email
@@ -93,8 +93,16 @@ const Dashboard = () => {
                   req.requestfrom === user.email) &&
                 req.accepted === true
             );
+            const emails = reqfetched.map(req => req.requestfrom);
+            const userNames = await fetchUserNames(emails);
+            const reqDetailsWithNames = reqfetched.map(req => ({
+              ...req,
+              requesterName: userNames[req.requestfrom] || req.requestfrom,
+            }));
+    
+  
             setTemp(filtered);
-            setReqDetails(reqfetched);
+            setReqDetails(reqDetailsWithNames);
             setTemp2(filtered2);
           },
           (error) => {
@@ -155,11 +163,27 @@ const Dashboard = () => {
         const doc = querySnapshot2.docs[0];
         await deleteDoc(doc.ref);
       }
-      toast.success(`Book "${name}" has been deleted`);
+      toast.success(`Book "${name}" has been deleted`, {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
   };
+
+  const fetchUserNames = async (emails) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "in", emails));
+    const querySnapshot = await getDocs(q);
+  
+    let userNames = {};
+    querySnapshot.forEach((doc) => {
+      userNames[doc.data().email] = doc.data().name;
+    });
+  
+    return userNames;
+  };
+  
 
   const handleDecline = async (id) => {
     setReqDetails(reqDetails.filter((req) => req.ruid !== id));
@@ -170,7 +194,9 @@ const Dashboard = () => {
         const doc = querySnapshot.docs[0];
         await deleteDoc(doc.ref);
       }
-      toast.success("Request declined");
+      toast.success("Request declined" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
@@ -209,7 +235,9 @@ const Dashboard = () => {
         accepted: true,
       });
       console.log("Document updated successfully");
-      toast.success("Request accepted");
+      toast.success("Request accepted" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error updating document:", error);
     }
@@ -226,9 +254,15 @@ const Dashboard = () => {
           disabled: !doc.data().disabled,
         });
         if (currentDisabled) {
-          toast.success(`"${name}" is now available.`);
+          toast.success(`"${name}" is now available.`, {
+            duration: 1500, // Duration in milliseconds
+          });
+    
         } else {
-          toast.success(`"${name}" is now disabled.`);
+          toast.success(`"${name}" is now disabled.`, {
+            duration: 1500, // Duration in milliseconds
+          });
+    
         }
       }
       
@@ -250,7 +284,9 @@ const Dashboard = () => {
     console.log(newBookInfo);
     if (Object.values(newBookInfo).some((item) => item.trim() === "")) 
       {
-        toast.error("Please fill all the fields");
+        toast.error("Please fill all the fields" , {
+          duration: 1500, // Duration in milliseconds
+        });
         return;
       }
     setIsDialogOpen(false);
@@ -279,7 +315,9 @@ const Dashboard = () => {
     } catch (e) {
       console.error("Error adding document: ", e);
     }
-    toast.success("Book added successfully");
+    toast.success("Book added successfully" , {
+      duration: 1800, // Duration in milliseconds
+    });
 
     setNewBookInfo({
       title: "",
@@ -467,7 +505,7 @@ const Dashboard = () => {
                           className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                           onClick={() => handleExpand(req.ruid)}
                         >
-                          <span>{req.requsername}</span>
+                          <span>{req.requesterName}</span>
                           <span className="ml-5">{req.booktitile}</span>
                           {expandedReq === req.ruid ? (
                             <FaChevronUp />

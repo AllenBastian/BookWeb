@@ -125,7 +125,9 @@ const Forum = () => {
   const createPost = async () => {
 
     if (Object.values(postDetails).some((item) => item.trim() === "") ) {
-      toast.error("Please fill all fields");
+      toast.error("Please fill all fields" , {
+        duration: 1500, // Duration in milliseconds
+      });
       return;
     }
     const date = new Date();
@@ -149,7 +151,9 @@ const Forum = () => {
         category: "",
       });
       
-      toast.success("Post created successfully");
+      toast.success("Post created successfully" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error creating post: ", error);
     }

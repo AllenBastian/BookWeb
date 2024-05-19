@@ -105,7 +105,9 @@ const Postpage = () => {
 
   const postComment = async () => {
     if (currentComment === "") {
-      toast.error("Please enter a valid comment");
+      toast.error("Please enter a valid comment" , {
+        duration: 1500, // Duration in milliseconds
+      });
       return;
     }
     setCurrentComment("");
@@ -124,7 +126,10 @@ const Postpage = () => {
         date: formattedDate,
         timestamp: new Date(),
       });
-      toast.success("Comment added successfully!");
+      toast.success("Comment added successfully!" , {
+        duration: 1500, // Duration in milliseconds
+      });
+
       
     } catch (error) {
       console.log(error);
@@ -133,7 +138,9 @@ const Postpage = () => {
 
   const commentReply = async (uid) => {
     if (currentReply==="") {
-      toast.error("Please enter a valid reply");
+      toast.error("Please enter a valid reply" , {
+        duration: 1500, // Duration in milliseconds
+      });
       return;
     }
     setCurrentReply("");
@@ -154,7 +161,10 @@ const Postpage = () => {
       const updatedReplies = [...(refData.replies || []), newReply];
       const commentRef = doc(db, "comments", refId);
       await updateDoc(commentRef, { replies: updatedReplies });
-      toast.success("Your reply has been posted!");
+      toast.success("Your reply has been posted!", {
+        duration: 1500, // Duration in milliseconds
+      });
+
     } catch {
       console.log("erroreeee");
     }
@@ -194,7 +204,9 @@ const Postpage = () => {
       }
 
       await updateDoc(postRef, { likes: likeToAdd });
-      toast.success(`You ${newliked ? "liked" : "unliked"} the post!`);
+      toast.success(`You ${newliked ? "liked" : "unliked"} the post!`, {
+        duration: 1500, // Duration in milliseconds
+      });
 
     } 
     catch (error) {
