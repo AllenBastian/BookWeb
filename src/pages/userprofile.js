@@ -250,7 +250,8 @@ const UserProfilePage = () => {
   }
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 md:p-9 p-4 h-[300px] ">
+    <div className=" ">
+      <div className="grid grid-cols-2 gap-4 md:p-9 p-4  h-[300px] ">
         <motion.div
           className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg  shadow-md"
           whileHover={{ scale: 1.01 }}
@@ -422,14 +423,10 @@ const UserProfilePage = () => {
             </div>
             )}
           </div>
+         
         </motion.div>
-        <motion.div
-          className="col-span-2 bg-gray-200 rounded-md  flex items-center justify-center text-lg  font-semibold"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Special Section
-        </motion.div>
+        </div>
+       
 
         {editing && (
           <motion.div

@@ -317,7 +317,7 @@ const Dashboard = () => {
       console.error("Error adding document: ", e);
     }
     toast.success("Book added successfully" , {
-      duration: 1800, // Duration in milliseconds
+      duration: 1800, 
     });
 
     setNewBookInfo({

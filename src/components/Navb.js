@@ -155,22 +155,7 @@ function NavList() {
           </Tooltip>
           
         </Typography>
-        <Typography
-          as="li"
-          variant="small"
-          color="blue-gray"
-          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
-        >
-          <Tooltip placement="bottom" content="User Profile">
-            <Link to="/userprofile">
-              <div className="flex">
-              <HiOutlineUserCircle size={25} />
-              <span className="lg:hidden ml-4">User Profile</span>
-              </div>
-            </Link>
-          </Tooltip>
-        
-        </Typography>
+       
         <Typography
           as="li"
           variant="small"
@@ -193,6 +178,23 @@ function NavList() {
           color="blue-gray"
           className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
         >
+          <Tooltip placement="bottom" content="User Profile">
+            <Link to="/userprofile">
+              <div className="flex">
+              <HiOutlineUserCircle size={25} />
+              <span className="lg:hidden ml-4">User Profile</span>
+              </div>
+            </Link>
+          </Tooltip>
+        
+        </Typography>
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="flex items-center p-1 ml-4 font-medium nav-icon hover:text-blue-500 transition-colors border-b-2 lg:border-none"
+        >
+
           
           
       <Tooltip placement="bottom" content="Inbox">
