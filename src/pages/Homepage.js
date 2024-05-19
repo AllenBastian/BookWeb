@@ -1,22 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Search, MessageCircle, BookOpen } from 'react-feather';
-
+import { User, Book, Users, Search, MessageCircle, BookOpen } from 'react-feather';
+import { db } from '../firebase/Firebase'; // Import the Firebase instance
+import { collection, getDocs } from 'firebase/firestore'; // Import required Firestore functions
 
 const Homepage = () => {
-  const availableBooksCount = 9;
-  const usersCount = 3;
+  const [availableBooksCount, setAvailableBooksCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Fetch count of books
+        const booksSnapshot = await getDocs(collection(db, 'books'));
+        const booksCount = booksSnapshot.size;
+        setAvailableBooksCount(booksCount);
+
+        // Fetch count of users
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const usersCount = usersSnapshot.size;
+        setUsersCount(usersCount);
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
 
   return (
     <div className="container mx-auto p-4">
-      {/* Display counts */}
-      <div className="flex justify-between mb-4">
-        <div className="text-gray-600 text-sm">Available Books: {availableBooksCount}</div>
-        <div className="text-gray-600 text-sm">Users Till Date: {usersCount}</div>
-      </div>
-
       {/* Existing content */}
-      <header className="text-center mb-8">
+      <header className="text-center mb-8 mt-20">
         <h1 className="text-3xl md:text-5xl font-bold">BookWeb</h1>
         <p className="text-lg text-grey-600">Connect . Share . Read</p>
       </header>
@@ -56,6 +71,31 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+
+      {/* Available Books and Users Count Banner */}
+      <div className="relative bg-cover bg-center text-white py-20" style={{ backgroundImage: `url(/path/to/banner.png)` }}>
+        <div className="absolute inset-0 bg-black opacity-75"></div>
+        <div className="relative z-10 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold">BookWeb</h1>
+          <p className="text-lg md:text-2xl mt-4">The world's most positive platform for book lovers</p>
+          <div className="flex justify-center mt-8">
+            <div className="mx-4 p-4 bg-white text-purple-900 rounded-lg shadow-lg">
+              <Book className="text-red-500 mb-2" size={50} />
+              <div>
+                <p className="text-lg font-semibold">Available Books</p>
+                <p className="text-2xl">{availableBooksCount}</p>
+              </div>
+            </div>
+            <div className="mx-4 p-4 bg-white text-purple-900 rounded-lg shadow-lg">
+              <Users className="text-red-500 mb-2" size={50} />
+              <div>
+                <p className="text-lg font-semibold">Users Till Date</p>
+                <p className="text-2xl">{usersCount}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Contact Us section */}
       <section>
