@@ -19,6 +19,7 @@ import {
   FaUserCircle,
   FaInfoCircle,
   FaList,
+  FaStar,
 } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 import { motion } from "framer-motion";
@@ -133,7 +134,9 @@ const Viewbooks = () => {
         borrowed: false,
       });
 
-      toast.success("Request sent successfully");
+      toast.success("Request sent successfully" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -142,27 +145,29 @@ const Viewbooks = () => {
   const dynamicSearch = async (searchString, category) => {
     await setSearchBook(searchString);
     console.log(searchString);
-    if (searchString === "" && category === "all")
-      setBookDetails(initialBook.current);
-    else if (searchString === "") {
-      console.log("in here yeah");
-      const filteredSearch = initialBook.current.filter(
-        (book) =>
-          book.category.toLowerCase().trim() === category.toLowerCase().trim()
+  
+    let filteredSearch = initialBook.current;
+  
+    if (searchString !== "") {
+      filteredSearch = filteredSearch.filter((book) =>
+        book.title.toLowerCase().trim().startsWith(searchString.toLowerCase())
       );
-      console.log(filteredSearch);
-      setBookDetails(filteredSearch);
-    } else {
-      const filteredSearch = initialBook.current.filter((book) =>
-        book.title.toLowerCase().trim().startsWith(searchString)
-      );
-      if (category !== "all") {
-        const filteredSearch2 = filteredSearch.filter(
+    }
+  
+    if (category !== "all") {
+      if (category === "least rated" || category === "most rated") {
+        filteredSearch.sort((a, b) => {
+          const comparison = category === "least rated" ? a.rating - b.rating : b.rating - a.rating;
+          return comparison;
+        });
+      } else {
+        filteredSearch = filteredSearch.filter(
           (book) => book.category.toLowerCase() === category.toLowerCase()
         );
-        setBookDetails(filteredSearch2);
-      } else setBookDetails(filteredSearch);
+      }
     }
+  
+    setBookDetails(filteredSearch);
   };
 
   const getReviews = async (uid) => {
@@ -207,6 +212,10 @@ const Viewbooks = () => {
                       <div className="mr-4">{book.title}</div>
                       <div className="text-gray-500">{book.author}</div>
                     </div>
+                    <div className="text-black flex">
+                      <FaStar className="mr-2 text-yellow-800" />
+                      {Math.round(book.rating * 100) / 100}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -231,6 +240,9 @@ const Viewbooks = () => {
                 <Option value="all">All</Option>
                 <Option value="Fiction">Fiction</Option>
                 <Option value="Non-Fiction">Non-Fiction</Option>
+                <Option value="Education">Education</Option>
+                <Option value="least rated">least rated</Option>
+                <Option value="most rated">most rated</Option>
               </Select>
             </div>
             <div className="flex lg:w-1/2">
@@ -239,7 +251,7 @@ const Viewbooks = () => {
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
                 value={searchBook}
                 onChange={(event) =>
-                  dynamicSearch(event.target.value.toLowerCase(), searchCat)
+                  dynamicSearch(event.target.value, searchCat)
                 }
                 placeholder="Search by title"
               />
@@ -329,50 +341,49 @@ const Viewbooks = () => {
                 Reviews
               </div>
 
-              {loadingReviews===false? (
-              <motion.div
-                className="bg-gray-100 p-4 rounded-lg shadow-md mb-8 h-80 overflow-auto"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                
-                {selectedBook ? (
-                  <>
-                    {currentReviews.length > 0 ? (
-                      currentReviews.map((review, index) => (
-                        <div key={index} className="mb-8">
-                          <div className="border bg-white rounded-lg shadow-md p-4">
-                            <Rating
-                              name="size-large"
-                              value={review.rating}
-                              readOnly
-                            />
-                            <div className="text-lg font-semibold mb-2">
-                              {review.comment}
-                            </div>
-                            <div className="text-gray-700 mb-2">
-                              {review.review}
-                            </div>
-                            <div className="text-gray-500">
-                              {review.reviewer}
+              {loadingReviews === false ? (
+                <motion.div
+                  className="bg-gray-100 p-4 rounded-lg shadow-md mb-8 h-80 overflow-auto"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {selectedBook ? (
+                    <>
+                      {currentReviews.length > 0 ? (
+                        currentReviews.map((review, index) => (
+                          <div key={index} className="mb-8">
+                            <div className="border bg-white rounded-lg shadow-md p-4">
+                              <Rating
+                                name="size-large"
+                                value={review.rating}
+                                readOnly
+                              />
+                              <div className="text-lg font-semibold mb-2">
+                                {review.comment}
+                              </div>
+                              <div className="text-gray-700 mb-2">
+                                {review.review}
+                              </div>
+                              <div className="text-gray-500">
+                                {review.reviewer}
+                              </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className=" flex text-xl text-gray-400 font-medium justify-center items-center lg:h-60">
+                          No reviews available
                         </div>
-                      ))
-                    ) : (
-                      <div className=" flex text-xl text-gray-400 font-medium justify-center items-center lg:h-60">
-                        No reviews available
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex text-xl text-gray-400 font-medium justify-center items-center lg:h-96">
-                    Select a book to display info
-                  </div>
-                )}
-              </motion.div>
-              ):(
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex text-xl text-gray-400 font-medium justify-center items-center lg:h-96">
+                      Select a book to display info
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
                 <Loader loading={loadingReviews} />
               )}
             </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 
-
 const teamMembers = [
   {
     name: 'Allen Bastian Joy',
@@ -38,8 +37,10 @@ const LearnMore = () => {
       <div className="flex flex-wrap justify-center gap-8">
         {teamMembers.map((member, index) => (
 
+
+
           <div key={index} className="w-full md:w-1/3 p-4 text-center bg-white rounded-lg shadow-lg">
-            <img src="./ali.jpg" alt={member.name} className="w-32 h-32 mx-auto rounded-full mb-4" />
+            <img src={member.image} alt={member.name} className="w-32 h-32 mx-auto rounded-full mb-4" />
             <h2 className="text-xl font-bold">{member.name}</h2>
             <p className="text-gray-600 mb-2">{member.role}</p>
             <p className="text-lg">{member.description}</p>

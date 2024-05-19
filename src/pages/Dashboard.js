@@ -21,6 +21,7 @@ import {
   FaPlus,
   FaExchangeAlt,
   FaLanguage,
+  FaArrowRight,
 } from "react-icons/fa";
 import { useState } from "react";
 import { ClipLoader } from "react-spinners";
@@ -37,6 +38,7 @@ import {
   deleteDoc,
   updateDoc,
   onSnapshot,
+  count,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaListCheck } from "react-icons/fa6";
@@ -81,7 +83,7 @@ const Dashboard = () => {
 
         const unsubscribeRequests = onSnapshot(
           r,
-          (snapshot) => {
+          async (snapshot) => {
             const reqfetched = snapshot.docs.map((doc) => doc.data());
             const filtered = reqfetched.filter(
               (req) => req.requestto === user.email
@@ -92,8 +94,16 @@ const Dashboard = () => {
                   req.requestfrom === user.email) &&
                 req.accepted === true
             );
+            const emails = reqfetched.map(req => req.requestfrom);
+            const userNames = await fetchUserNames(emails);
+            const reqDetailsWithNames = reqfetched.map(req => ({
+              ...req,
+              requesterName: userNames[req.requestfrom] || req.requestfrom,
+            }));
+    
+  
             setTemp(filtered);
-            setReqDetails(reqfetched);
+            setReqDetails(reqDetailsWithNames);
             setTemp2(filtered2);
           },
           (error) => {
@@ -154,10 +164,27 @@ const Dashboard = () => {
         const doc = querySnapshot2.docs[0];
         await deleteDoc(doc.ref);
       }
+      toast.success(`Book "${name}" has been deleted`, {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
   };
+
+  const fetchUserNames = async (emails) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "in", emails));
+    const querySnapshot = await getDocs(q);
+  
+    let userNames = {};
+    querySnapshot.forEach((doc) => {
+      userNames[doc.data().email] = doc.data().name;
+    });
+  
+    return userNames;
+  };
+  
 
   const handleDecline = async (id) => {
     setReqDetails(reqDetails.filter((req) => req.ruid !== id));
@@ -168,6 +195,9 @@ const Dashboard = () => {
         const doc = querySnapshot.docs[0];
         await deleteDoc(doc.ref);
       }
+      toast.success("Request declined" , {
+        duration: 1500,
+      });
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
@@ -182,7 +212,6 @@ const Dashboard = () => {
     description: "",
     language: "",
     category: "",
-    borrowPeriod: "",
   });
   console.log(newBookInfo);
 
@@ -207,6 +236,9 @@ const Dashboard = () => {
         accepted: true,
       });
       console.log("Document updated successfully");
+      toast.success("Request accepted" , {
+        duration: 1500, 
+      });
     } catch (error) {
       console.error("Error updating document:", error);
     }
@@ -218,10 +250,23 @@ const Dashboard = () => {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
+        const currentDisabled = doc.data().disabled;
         await updateDoc(doc.ref, {
           disabled: !doc.data().disabled,
         });
+        if (currentDisabled) {
+          toast.success(`"${name}" is now available.`, {
+            duration: 1500, 
+          });
+    
+        } else {
+          toast.success(`"${name}" is now disabled.`, {
+            duration: 1500, 
+          });
+    
+        }
       }
+      
     } catch (error) {
       console.error("Error updating document: ", error);
     }
@@ -229,16 +274,22 @@ const Dashboard = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+  
     setNewBookInfo((prevInfo) => ({
       ...prevInfo,
       [name]: value,
     }));
   };
   const handleSubmit = async (event) => {
-    if (Object.values(newBookInfo).some((item) => item.trim() === "")) {
-      toast.error("Please fill all the fields");
-      return;
-    }
+
+    console.log(newBookInfo);
+    if (Object.values(newBookInfo).some((item) => item.trim() === "")) 
+      {
+        toast.error("Please fill all the fields" , {
+          duration: 1500, 
+        });
+        return;
+      }
     setIsDialogOpen(false);
     setExpandedBook(null);
     setBookDetails((prev) => [...prev, newBookInfo]);
@@ -259,17 +310,20 @@ const Dashboard = () => {
         owner: user.email,
         uid: ids,
         name: docu.name,
+        rating: 0,
       });
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
+    toast.success("Book added successfully" , {
+      duration: 1800, 
+    });
 
     setNewBookInfo({
       title: "",
       author: "",
       description: "",
-      borrowPeriod: "",
       language: "",
       category: "",
     });
@@ -452,7 +506,8 @@ const Dashboard = () => {
                           className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                           onClick={() => handleExpand(req.ruid)}
                         >
-                          <span>{req.requsername}</span>
+                          <span>{req.requesterName}</span>
+                          <FaArrowRight className="text-blue-600"/>
                           <span className="ml-5">{req.booktitile}</span>
                           {expandedReq === req.ruid ? (
                             <FaChevronUp />
@@ -566,14 +621,7 @@ const Dashboard = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
             />
 
-            <input
-              type="text"
-              name="borrowPeriod"
-              value={newBookInfo.borrowPeriod}
-              onChange={handleChange}
-              placeholder="Borrow Period"
-              className="w-full border  border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4 transition-colors duration-300 ease-in-out hover:border-blue-500"
-            />
+         
 
             <Select
               name="category"
@@ -585,6 +633,7 @@ const Dashboard = () => {
               <Option value="">Select category</Option>
               <Option value="Fiction">Fiction</Option>
               <Option value="Non-Fiction">Non-Fiction</Option>
+              <Option value="Education">Education</Option>
             </Select>
 
             <div className="flex mt-4 justify-end ">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db } from "../firebase/Firebase";
 import {
   collection,
@@ -44,15 +44,18 @@ import { useNavigate } from "react-router-dom";
 import CustomPopup from "../components/CustomPopup";
 import { Deleter } from "../utils/Deleter";
 import { getUserByEmail, getUserName } from "../utils/Search";
+import { reviewer } from "../utils/Reviewer";
 
 const UserProfilePage = () => {
-  const [username, setUsername] = useState(); // [ { email: "", name: "" }
+  const previous = useRef();
+  const [disableButton,setDisableButton] = useState(false);
+  const [username, setUsername] = useState(); 
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({});
   const [editing, setEditing] = useState(false);
   const [star, setStar] = useState(0);
-  const [reviewMessage, setReviewMessage] = useState();
+  const [reviewMessage, setReviewMessage] = useState("");
   const [selectedReview, setSelectedReview] = useState();
   const [deleting, setDeleting] = useState(false);
   const [reviewBox, setReviewBox] = useState(false);
@@ -71,10 +74,13 @@ const UserProfilePage = () => {
           const transactionCollectionRef = collection(db, "transactions");
           const q1 = query(transactionCollectionRef);
 
+  
+
           const unsubscribe = onSnapshot(q1, (snapshot) => {
             const transactionData = [];
             snapshot.forEach((doc) => {
-              transactionData.push(doc.data());
+              if(doc.data().lender === currentUser.email || doc.data().borrower === currentUser.email)
+                 transactionData.push(doc.data());
             });
             console.log("Transactions:", transactionData);
             setTransactions(transactionData);
@@ -83,6 +89,7 @@ const UserProfilePage = () => {
           if (user) {
             setUserData(user);
             setFormData(user);
+            previous.current = user;
           }
         }
        
@@ -98,6 +105,19 @@ const UserProfilePage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if(name !== "contact" && name !== "semester" && name !== "batch"){
+      const isValidName = /^[a-zA-Z\s]*$/.test(value);
+      if(!isValidName){
+        return;
+      }
+    }
+
+    if(name === "contact" || name === "semester"){
+      const isValidPhoneNumber = /^\+?\d*$/.test(value);
+      if(!isValidPhoneNumber){
+        return;
+      }
+    }
     setFormData({ ...formData, [name]: value });
   };
 
@@ -111,8 +131,12 @@ const UserProfilePage = () => {
         await Deleter("requests", "requestto", currentUser.email);
         await Deleter("messages", "sender", currentUser.email);
         await Deleter("messages", "receiver", currentUser.email);
+        await Deleter("transactions", "lender", currentUser.email);
+        await Deleter("transactions", "borrower", currentUser.email);
 
-        toast.warning("User deleted successfully");
+        toast.warning("User deleted successfully" , {
+          duration: 1500, 
+        });
         signOut(auth)
           .then(() => {
             localStorage.setItem("isSignedUp", JSON.stringify(false));
@@ -130,6 +154,16 @@ const UserProfilePage = () => {
   console.log(transactions);
 
   const handleSaveClick = async () => {
+    if (Object.values(formData).some((item) => item.trim() === "")||formData.contact.length !== 10) 
+      {
+
+        setDisableButton(true);
+        toast.error("Please fill all the fields" , {
+          duration: 1500, 
+        });
+        return;
+      }
+      setDisableButton(false);
     setEditing(false);
     try {
       const updatedUserData = {
@@ -157,7 +191,9 @@ const UserProfilePage = () => {
 
           console.log("Updated user data in Firestore:", updatedUserData);
           setUserData(updatedUserData);
-          toast.success("User data updated successfully");
+          toast.success("User data updated successfully" , {
+            duration: 1500, // Duration in milliseconds
+          });
         } else {
           console.error("User document not found");
         }
@@ -170,17 +206,28 @@ const UserProfilePage = () => {
   };
 
   const handleReview = async () => {
+    if (reviewMessage.trim() === ""||star===0) {
+      toast.error("Please enter a review" , {
+        duration: 1500, 
+      });
+      return;
+    }
     setReviewBox(false);
     console.log(selectedReview);
     console.log(username)
     console.log(star);
+
+
     try {
+
+    
       await addDoc(collection(db, "reviews"), {
         bookid: selectedReview.bookid,
         reviewer: username,
         comment: reviewMessage,
         rating: star,
       });
+     
 
       const r = query(
         collection(db, "transactions"),
@@ -191,8 +238,11 @@ const UserProfilePage = () => {
 
       const mydoc = querySnapshot.docs[0].ref;
       await updateDoc(mydoc, { reviewed: true,stars:star});
+      await reviewer(selectedReview.bookid, star);
 
-      toast.success("Review added successfully");
+      toast.success("Review added successfully" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error adding review:", error);
     }
@@ -207,7 +257,8 @@ const UserProfilePage = () => {
   }
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 md:p-9 p-4 h-[300px] ">
+    <div className=" ">
+      <div className="grid grid-cols-2 gap-4 md:p-9 p-4  lg:h-[300px]">
         <motion.div
           className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg  shadow-md"
           whileHover={{ scale: 1.01 }}
@@ -285,7 +336,7 @@ const UserProfilePage = () => {
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <FaHistory className="mr-2 text-black" /> History
           </h2>
-          <div className="flex flex-col space-y-4 h-[300px] overflow-auto ">
+          <div className="flex flex-col space-y-4 lg:h-[300px] overflow-auto ">
             {transactions.length > 0 ? (
               transactions.map((transaction, index) => {
                 return (
@@ -374,17 +425,15 @@ const UserProfilePage = () => {
                 );
               })
             ) : (
+              <div className="flex flex-col justify-center items-center h-full">
               <p>No transactions found.</p>
+            </div>
             )}
           </div>
+         
         </motion.div>
-        <motion.div
-          className="col-span-2 bg-gray-200 rounded-md  flex items-center justify-center text-lg  font-semibold"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Special Section
-        </motion.div>
+        </div>
+       
 
         {editing && (
           <motion.div
@@ -465,18 +514,22 @@ const UserProfilePage = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
                 />
               </div>
+              {disableButton && <p className="text-red-500 text-sm mt-2">Please Enter a valid number</p>}
               <div className="flex mt-4 justify-end">
+              
                 <CustomButton
                   text={"Save"}
                   color={"blue"}
                   icon={<FaCheck className="mr-2" />}
                   onClick={handleSaveClick}
                 />
+     
+
                 <CustomButton
                   text={"Cancel"}
                   color={"red"}
                   icon={<FaTimes className="mr-2" />}
-                  onClick={() => setEditing(false)}
+                  onClick={() => {setEditing(false); setFormData(previous.current)}}
                 />
               </div>
             </div>

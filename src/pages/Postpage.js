@@ -104,6 +104,12 @@ const Postpage = () => {
   }, [currentUser, currentPost]);
 
   const postComment = async () => {
+    if (currentComment === "") {
+      toast.error("Please enter a valid comment" , {
+        duration: 1500, // Duration in milliseconds
+      });
+      return;
+    }
     setCurrentComment("");
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
@@ -120,6 +126,10 @@ const Postpage = () => {
         date: formattedDate,
         timestamp: new Date(),
       });
+      toast.success("Comment added successfully!" , {
+        duration: 1500, // Duration in milliseconds
+      });
+
       
     } catch (error) {
       console.log(error);
@@ -127,6 +137,12 @@ const Postpage = () => {
   };
 
   const commentReply = async (uid) => {
+    if (currentReply==="") {
+      toast.error("Please enter a valid reply" , {
+        duration: 1500, // Duration in milliseconds
+      });
+      return;
+    }
     setCurrentReply("");
     const date = new Date();
     const options = { month: "long", day: "numeric", year: "numeric" };
@@ -145,6 +161,10 @@ const Postpage = () => {
       const updatedReplies = [...(refData.replies || []), newReply];
       const commentRef = doc(db, "comments", refId);
       await updateDoc(commentRef, { replies: updatedReplies });
+      toast.success("Your reply has been posted!", {
+        duration: 1500, // Duration in milliseconds
+      });
+
     } catch {
       console.log("erroreeee");
     }
@@ -184,9 +204,15 @@ const Postpage = () => {
       }
 
       await updateDoc(postRef, { likes: likeToAdd });
-    } catch (error) {
+      toast.success(`You ${newliked ? "liked" : "unliked"} the post!`, {
+        duration: 1500, // Duration in milliseconds
+      });
+
+    } 
+    catch (error) {
       console.log(error.message);
     }
+    
   };
 
   if (loading) {
