@@ -31,10 +31,10 @@ const Homepage = () => {
   return (
     <div className="container mx-auto p-4">
       {/* Existing content */}
-      <header className="text-center mb-8 mt-20">
+      {/* <header className="text-center mb-8 mt-20">
         <h1 className="text-3xl md:text-5xl font-bold">BookWeb</h1>
         <p className="text-lg text-grey-600">Connect . Share . Read</p>
-      </header>
+      </header> */}
 
       {/* About Us section */}
       <section className="mb-8">
@@ -72,7 +72,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* Available Books and Users Count Banner */}
+     
       <div className="relative bg-cover bg-center text-white py-20" style={{ backgroundImage: `url(/path/to/banner.png)` }}>
         <div className="absolute inset-0 bg-gray-500 opacity-75 rounded-3xl"></div>
         <div className="relative z-10 text-center">

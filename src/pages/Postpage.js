@@ -119,6 +119,7 @@ const Postpage = () => {
       const userRef = await addDoc(collection(db, "comments"), {
         comment: currentComment,
         postid: currentPost.uid,
+        postname : currentPost.title,
         postowner: currentPost.owner,
         commenter: currentUser.name,
         email: user.email,

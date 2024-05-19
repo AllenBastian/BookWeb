@@ -226,6 +226,7 @@ const UserProfilePage = () => {
         reviewer: username,
         comment: reviewMessage,
         rating: star,
+        bookname: selectedReview.booktitle,
       });
      
 
