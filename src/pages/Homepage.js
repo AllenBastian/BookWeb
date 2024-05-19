@@ -74,10 +74,10 @@ const Homepage = () => {
 
       {/* Available Books and Users Count Banner */}
       <div className="relative bg-cover bg-center text-white py-20" style={{ backgroundImage: `url(/path/to/banner.png)` }}>
-        <div className="absolute inset-0 bg-black opacity-75"></div>
+        <div className="absolute inset-0 bg-gray-500 opacity-75 rounded-3xl"></div>
         <div className="relative z-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold">BookWeb</h1>
-          <p className="text-lg md:text-2xl mt-4">The world's most positive platform for book lovers</p>
+          <h1 className="text-4xl text-black md:text-5xl font-bold">BookWeb</h1>
+          <p className="text-lg md:text-2xl text-black mt-4">The world's most positive platform for book lovers</p>
           <div className="flex justify-center mt-8">
             <div className="mx-4 p-4 bg-white text-purple-900 rounded-lg shadow-lg">
               <Book className="text-red-500 mb-2" size={50} />
