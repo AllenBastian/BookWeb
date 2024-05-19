@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db } from "../firebase/Firebase";
 import {
   collection,
@@ -47,6 +47,7 @@ import { getUserByEmail, getUserName } from "../utils/Search";
 import { reviewer } from "../utils/Reviewer";
 
 const UserProfilePage = () => {
+  const previous = useRef();
   const [disableButton,setDisableButton] = useState(false);
   const [username, setUsername] = useState(); 
   const [loading, setLoading] = useState(true);
@@ -88,6 +89,7 @@ const UserProfilePage = () => {
           if (user) {
             setUserData(user);
             setFormData(user);
+            previous.current = user;
           }
         }
        
@@ -133,7 +135,7 @@ const UserProfilePage = () => {
         await Deleter("transactions", "borrower", currentUser.email);
 
         toast.warning("User deleted successfully" , {
-          duration: 1500, // Duration in milliseconds
+          duration: 1500, 
         });
         signOut(auth)
           .then(() => {
@@ -157,7 +159,7 @@ const UserProfilePage = () => {
 
         setDisableButton(true);
         toast.error("Please fill all the fields" , {
-          duration: 1500, // Duration in milliseconds
+          duration: 1500, 
         });
         return;
       }
@@ -523,7 +525,7 @@ const UserProfilePage = () => {
                   text={"Cancel"}
                   color={"red"}
                   icon={<FaTimes className="mr-2" />}
-                  onClick={() => setEditing(false)}
+                  onClick={() => {setEditing(false); setFormData(previous.current)}}
                 />
               </div>
             </div>
