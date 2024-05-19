@@ -42,6 +42,7 @@ const Viewbooks = () => {
   const [clicked, setClicked] = useState(false);
   const [selectedBook, setSelectedBook] = useState("");
   const initialBook = useRef([]);
+  const nameRequest = useRef("");
   const auth = getAuth();
 
   useEffect(() => {
@@ -59,6 +60,7 @@ const Viewbooks = () => {
     const fetchData = async () => {
       try {
         if (user) {
+          nameRequest.current = await getUserName(user.email);
           const unsubscribeBooks = onSnapshot(
             query(
               collection(db, "books"),
@@ -126,13 +128,14 @@ const Viewbooks = () => {
       await addDoc(collection(db, "requests"), {
         requestfrom: user.email,
         reqtousername: selectedBook.name,
+        reqfromusername: nameRequest.current,
         requestto: selectedBook.owner,
         booktitile: selectedBook.title,
         bookuid: selectedBook.uid,
         ruid: ids,
         accepted: false,
         rejected: false,
-        timestamp: new Date()
+        timestamp: new Date(),
         borrowed: false,
 
       });

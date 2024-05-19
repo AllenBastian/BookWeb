@@ -94,16 +94,10 @@ const Dashboard = () => {
                   req.requestfrom === user.email) &&
                 req.accepted === true
             );
-            const emails = reqfetched.map(req => req.requestfrom);
-            const userNames = await fetchUserNames(emails);
-            const reqDetailsWithNames = reqfetched.map(req => ({
-              ...req,
-              requesterName: userNames[req.requestfrom] || req.requestfrom,
-            }));
     
   
             setTemp(filtered);
-            setReqDetails(reqDetailsWithNames);
+            setReqDetails(reqfetched);
             setTemp2(filtered2);
           },
           (error) => {
@@ -513,7 +507,7 @@ const Dashboard = () => {
                           className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                           onClick={() => handleExpand(req.ruid)}
                         >
-                          <span>{req.requesterName}</span>
+                          <span>{req.reqfromusername}</span>
                           <FaArrowRight className="text-blue-600"/>
                           <span className="ml-5">{req.booktitile}</span>
                           {expandedReq === req.ruid ? (

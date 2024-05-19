@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { getFirestore, collection, onSnapshot, query, deleteDoc, doc } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -80,7 +78,7 @@ const Inbox = () => {
           <span>{notification.message}</span>
         </Alert>
       ))}
-      <ToastContainer />
+     
     </div>
   );
 };
