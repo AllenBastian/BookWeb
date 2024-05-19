@@ -187,19 +187,26 @@ const Dashboard = () => {
   
 
   const handleDecline = async (id) => {
-    setReqDetails(reqDetails.filter((req) => req.ruid !== id));
     try {
       const q = query(collection(db, "requests"), where("ruid", "==", id));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
+        // Update the document to set 'rejected' attribute to true
+        await updateDoc(doc.ref, { rejected: true });
+        // Delete the document
         await deleteDoc(doc.ref);
+        // Update the state to remove the request
+        setReqDetails(reqDetails.filter((req) => req.ruid !== id));
+        toast.success("Request declined", {
+          duration: 1500,
+        });
       }
       toast.success("Request declined" , {
         duration: 1500,
       });
     } catch (error) {
-      console.error("Error deleting document: ", error);
+      console.error("Error handling decline: ", error);
     }
   };
 
