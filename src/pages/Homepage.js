@@ -30,11 +30,11 @@ const Homepage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      {/* Existing content */}
-      {/* <header className="text-center mb-8 mt-20">
+      
+      <header className="text-center mb-8 mt-5">
         <h1 className="text-3xl md:text-5xl font-bold">BookWeb</h1>
         <p className="text-lg text-grey-600">Connect . Share . Read</p>
-      </header> */}
+      </header> 
 
       {/* About Us section */}
       <section className="mb-8">
