@@ -21,6 +21,7 @@ import {
   FaPlus,
   FaExchangeAlt,
   FaLanguage,
+  FaArrowRight,
 } from "react-icons/fa";
 import { useState } from "react";
 import { ClipLoader } from "react-spinners";
@@ -506,6 +507,7 @@ const Dashboard = () => {
                           onClick={() => handleExpand(req.ruid)}
                         >
                           <span>{req.requesterName}</span>
+                          <FaArrowRight className="text-blue-600"/>
                           <span className="ml-5">{req.booktitile}</span>
                           {expandedReq === req.ruid ? (
                             <FaChevronUp />
