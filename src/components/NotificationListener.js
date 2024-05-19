@@ -6,6 +6,7 @@ import { Timestamp } from 'firebase/firestore';
 import { NotificationCountContext } from '../context/Context';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "sonner";
+import { duration } from '@mui/material';
 
 const NotificationListener = () => {
     const [user, setUser] = useState(null);
@@ -46,12 +47,12 @@ const NotificationListener = () => {
                             notiffrom: reqfr,
                         });
                         console.log('Notification added with ID: ', docRef.id);
-                        toast.info("Book Requested");
+                        toast.info("Book Requested", {duration:1500});
                     } catch (error) {
                         console.error('Error adding notification: ', error);
                     }
                   }
-                  if (change.type === 'modified' && change.doc.data().requestfrom === user.email && change.doc.data().accepted === true) {
+                  if (change.type === 'modified' && change.doc.data().requestfrom === user.email && change.doc.data().borrowed === true) {
                                  
                                   const request = change.doc.data();
                                   const notificationId = uuidv4();
@@ -72,7 +73,7 @@ const NotificationListener = () => {
                                           notiffrom: requestTo,
                                       });
                                       console.log('Notification added with ID: ', docRef.id);
-                                      toast.info("Book Accepted");
+                                      toast.info("Book has been borrowed");
                                   } catch (error) {
                                       console.error('Error adding notification: ', error);
                                   }
@@ -144,7 +145,7 @@ const NotificationListener = () => {
             snapshot.docChanges().forEach(async (change) => {
               console.log("working isnide snapshot review")
               if(change.type === 'added' && change.doc.data().remail === user.email){
-                console.log("Working inside if review")
+                console.log("Review change:", change.doc.data())
                 const review = change.doc.data();
                 const notificationId = uuidv4();
                 const owner = review.bookowner;
@@ -163,11 +164,15 @@ const NotificationListener = () => {
                         notiffrom: reviewer,
                     });
                     console.log('Notification added with ID: ', docRef.id);
-                    toast.info("review added to your book ");
+                    
                 } catch (error) {
                     console.error('Error adding notification: ', error);
                 }
               }
+              if (change.doc.data().bookowner=== user.email )
+                {
+                  toast.info("Review added to your book");
+                }
             });
         });
 
