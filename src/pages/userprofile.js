@@ -55,7 +55,7 @@ const UserProfilePage = () => {
   const [formData, setFormData] = useState({});
   const [editing, setEditing] = useState(false);
   const [star, setStar] = useState(0);
-  const [reviewMessage, setReviewMessage] = useState();
+  const [reviewMessage, setReviewMessage] = useState("");
   const [selectedReview, setSelectedReview] = useState();
   const [deleting, setDeleting] = useState(false);
   const [reviewBox, setReviewBox] = useState(false);
@@ -206,10 +206,18 @@ const UserProfilePage = () => {
   };
 
   const handleReview = async () => {
+    if (reviewMessage.trim() === ""||star===0) {
+      toast.error("Please enter a review" , {
+        duration: 1500, 
+      });
+      return;
+    }
     setReviewBox(false);
     console.log(selectedReview);
     console.log(username)
     console.log(star);
+
+
     try {
 
     
@@ -219,7 +227,6 @@ const UserProfilePage = () => {
         comment: reviewMessage,
         rating: star,
       });
-
      
 
       const r = query(
