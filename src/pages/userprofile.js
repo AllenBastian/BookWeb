@@ -251,7 +251,7 @@ const UserProfilePage = () => {
   return (
     <>
     <div className=" ">
-      <div className="grid grid-cols-2 gap-4 md:p-9 p-4  h-[300px] ">
+      <div className="grid grid-cols-2 gap-4 md:p-9 p-4  lg:h-[300px]">
         <motion.div
           className="col-span-2 md:col-span-1 p-4 bg-gray-200 rounded-lg  shadow-md"
           whileHover={{ scale: 1.01 }}
@@ -329,7 +329,7 @@ const UserProfilePage = () => {
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <FaHistory className="mr-2 text-black" /> History
           </h2>
-          <div className="flex flex-col space-y-4 h-[300px] overflow-auto ">
+          <div className="flex flex-col space-y-4 lg:h-[300px] overflow-auto ">
             {transactions.length > 0 ? (
               transactions.map((transaction, index) => {
                 return (

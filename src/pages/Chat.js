@@ -25,7 +25,7 @@ import {
 import { set } from "firebase/database";
 import CustomPopup from "../components/CustomPopup";
 import { getUserName } from "../utils/Search";
-import { Deleter } from "../utils/Deleter";
+import { Deleter, MultiDeleter } from "../utils/Deleter";
 
 const Chat = () => {
   const user = auth.currentUser;
@@ -157,6 +157,7 @@ const Chat = () => {
   console.log("Current chat: ", currentChat);
 
   const handleMarkBorrowed = async (flag) => {
+    console.log(info)
     setPopup(false);
     setLoading(true);
     try {
@@ -172,12 +173,14 @@ const Chat = () => {
         collection(db, "requests"),
         where("ruid", "==", currentChat.ruid)
       );
+      
       const querySnapshot2 = await getDocs(r);
       if (!querySnapshot2.empty) {
         const doc = querySnapshot2.docs[0].ref;
         if (flag) {
           await updateDoc(doc, { borrowed: true });
           await updateDoc(mydoc, { isBorrowed: true });
+           await MultiDeleter("requests", "bookuid", "requestfrom", info.bookuid,info.requestfrom);
           toast.success("Transaction marked as borrowed!");
         } else {
           await deleteDoc(doc);

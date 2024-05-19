@@ -196,7 +196,7 @@ const Dashboard = () => {
         await deleteDoc(doc.ref);
       }
       toast.success("Request declined" , {
-        duration: 1500, // Duration in milliseconds
+        duration: 1500,
       });
     } catch (error) {
       console.error("Error deleting document: ", error);
@@ -237,7 +237,7 @@ const Dashboard = () => {
       });
       console.log("Document updated successfully");
       toast.success("Request accepted" , {
-        duration: 1500, // Duration in milliseconds
+        duration: 1500, 
       });
     } catch (error) {
       console.error("Error updating document:", error);
@@ -256,12 +256,12 @@ const Dashboard = () => {
         });
         if (currentDisabled) {
           toast.success(`"${name}" is now available.`, {
-            duration: 1500, // Duration in milliseconds
+            duration: 1500, 
           });
     
         } else {
           toast.success(`"${name}" is now disabled.`, {
-            duration: 1500, // Duration in milliseconds
+            duration: 1500, 
           });
     
         }
@@ -286,7 +286,7 @@ const Dashboard = () => {
     if (Object.values(newBookInfo).some((item) => item.trim() === "")) 
       {
         toast.error("Please fill all the fields" , {
-          duration: 1500, // Duration in milliseconds
+          duration: 1500, 
         });
         return;
       }
