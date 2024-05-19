@@ -19,3 +19,17 @@ export const getUserByEmail = async (email) => {
     }
 };
 
+export const getUserName  = async (email) => {
+    try {
+        const user = await getUserByEmail(email);
+        if (user) {
+            return user.name;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching user name:', error);
+        return null;
+    }
+}
+

@@ -21,6 +21,7 @@ import {
   FaPlus,
   FaExchangeAlt,
   FaLanguage,
+  FaArrowRight,
 } from "react-icons/fa";
 import { useState } from "react";
 import { ClipLoader } from "react-spinners";
@@ -37,6 +38,7 @@ import {
   deleteDoc,
   updateDoc,
   onSnapshot,
+  count,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaListCheck } from "react-icons/fa6";
@@ -81,7 +83,7 @@ const Dashboard = () => {
 
         const unsubscribeRequests = onSnapshot(
           r,
-          (snapshot) => {
+          async (snapshot) => {
             const reqfetched = snapshot.docs.map((doc) => doc.data());
             const filtered = reqfetched.filter(
               (req) => req.requestto === user.email
@@ -92,19 +94,25 @@ const Dashboard = () => {
                   req.requestfrom === user.email) &&
                 req.accepted === true
             );
+            const emails = reqfetched.map(req => req.requestfrom);
+            const userNames = await fetchUserNames(emails);
+            const reqDetailsWithNames = reqfetched.map(req => ({
+              ...req,
+              requesterName: userNames[req.requestfrom] || req.requestfrom,
+            }));
+    
+  
             setTemp(filtered);
-            setReqDetails(reqfetched);
+            setReqDetails(reqDetailsWithNames);
             setTemp2(filtered2);
           },
           (error) => {
             console.error("Error fetching requests: ", error);
           }
+          
         );
 
-        return () => {
-          unsubscribeBooks();
-          unsubscribeRequests();
-        };
+    
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -156,10 +164,27 @@ const Dashboard = () => {
         const doc = querySnapshot2.docs[0];
         await deleteDoc(doc.ref);
       }
+      toast.success(`Book "${name}" has been deleted`, {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
   };
+
+  const fetchUserNames = async (emails) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "in", emails));
+    const querySnapshot = await getDocs(q);
+  
+    let userNames = {};
+    querySnapshot.forEach((doc) => {
+      userNames[doc.data().email] = doc.data().name;
+    });
+  
+    return userNames;
+  };
+  
 
   const handleDecline = async (id) => {
     try {
@@ -177,6 +202,9 @@ const Dashboard = () => {
           duration: 1500,
         });
       }
+      toast.success("Request declined" , {
+        duration: 1500,
+      });
     } catch (error) {
       console.error("Error handling decline: ", error);
     }
@@ -191,7 +219,6 @@ const Dashboard = () => {
     description: "",
     language: "",
     category: "",
-    borrowPeriod: "",
   });
   console.log(newBookInfo);
 
@@ -216,6 +243,9 @@ const Dashboard = () => {
         accepted: true,
       });
       console.log("Document updated successfully");
+      toast.success("Request accepted" , {
+        duration: 1500, 
+      });
     } catch (error) {
       console.error("Error updating document:", error);
     }
@@ -227,10 +257,23 @@ const Dashboard = () => {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
+        const currentDisabled = doc.data().disabled;
         await updateDoc(doc.ref, {
           disabled: !doc.data().disabled,
         });
+        if (currentDisabled) {
+          toast.success(`"${name}" is now available.`, {
+            duration: 1500, 
+          });
+    
+        } else {
+          toast.success(`"${name}" is now disabled.`, {
+            duration: 1500, 
+          });
+    
+        }
       }
+      
     } catch (error) {
       console.error("Error updating document: ", error);
     }
@@ -238,16 +281,22 @@ const Dashboard = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+  
     setNewBookInfo((prevInfo) => ({
       ...prevInfo,
       [name]: value,
     }));
   };
   const handleSubmit = async (event) => {
-    if (Object.values(newBookInfo).some((item) => item.trim() === "")) {
-      toast.error("Please fill all the fields");
-      return;
-    }
+
+    console.log(newBookInfo);
+    if (Object.values(newBookInfo).some((item) => item.trim() === "")) 
+      {
+        toast.error("Please fill all the fields" , {
+          duration: 1500, 
+        });
+        return;
+      }
     setIsDialogOpen(false);
     setExpandedBook(null);
     setBookDetails((prev) => [...prev, newBookInfo]);
@@ -268,17 +317,20 @@ const Dashboard = () => {
         owner: user.email,
         uid: ids,
         name: docu.name,
+        rating: 0,
       });
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
+    toast.success("Book added successfully" , {
+      duration: 1800, 
+    });
 
     setNewBookInfo({
       title: "",
       author: "",
       description: "",
-      borrowPeriod: "",
       language: "",
       category: "",
     });
@@ -461,7 +513,8 @@ const Dashboard = () => {
                           className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                           onClick={() => handleExpand(req.ruid)}
                         >
-                          <span>{req.requsername}</span>
+                          <span>{req.requesterName}</span>
+                          <FaArrowRight className="text-blue-600"/>
                           <span className="ml-5">{req.booktitile}</span>
                           {expandedReq === req.ruid ? (
                             <FaChevronUp />
@@ -477,24 +530,9 @@ const Dashboard = () => {
                             exit={{ opacity: 0 }}
                             className="mt-2 flex  sm:flex-row justify-end gap-6 items-center"
                           >
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleDecline(req.ruid)}
-                              className="flex items-center bg-red-500 text-white rounded-md px-3 py-1 cursor-pointer"
-                            >
-                              <FaTimes className="text-white mr-2" />
-                              <span>Decline</span>
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleAccept(req.ruid)}
-                              className="flex items-center bg-green-500 text-white rounded-md px-3 py-1 cursor-pointer"
-                            >
-                              <FaCheck className="text-white mr-2" />
-                              <span>Accept</span>
-                            </motion.button>
+                            <CustomButton icon={<FaTimes/>} text={"Accept"} color={"green"} onClick={()=>handleAccept(req.ruid)}/>
+                            <CustomButton icon={<FaCheck/>} text={"Decline"} color={"red"} onClick={()=>handleDecline(req.ruid)}/>
+      
                           </motion.div>
                         )}
                       </div>
@@ -512,7 +550,7 @@ const Dashboard = () => {
             </div>
             <div className="p-4 bg-white rounded-lg shadow-md mt-2 md:h-screen lg:h-screen overflow-auto">
               {temp2.length === 0 ? (
-                <div className="text-center text-gray-500">
+                <div className="text-center text-2xl text-gray-500">
                   No accepted requests
                 </div>
               ) : (
@@ -525,12 +563,15 @@ const Dashboard = () => {
                         key={req.ruid}
                         className="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors duration-300"
                       >
+                        {req.borrowed && (                         
+                        <div className="w-1/3 font-semibold py-2 px-4 rounded-full bg-blue-200 hover:bg-blue-300 text-blue-900 shadow-md">
+                          {req.requestto === user.email ? "Lended" : "Borrowed"}
+                        </div>
+                        )}
                         <span className="font-medium text-black">
                           {req.booktitile}
                         </span>
-                        <div className="rounded-full bg-gray-400 text-white px-2 py-1">
-                          {req.type === "lended" ? "Lended" : "Borrowed"}
-                        </div>
+                       
                         <motion.div className="flex items-center justify-center w-8 h-8 bg-blue-400 rounded-full cursor-pointer hover:bg-blue-800 transition-colors">
                           <FaCommentAlt
                             className="w-4 h-4 text-white"
@@ -587,14 +628,7 @@ const Dashboard = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-2 transition-colors duration-300 ease-in-out hover:border-blue-500"
             />
 
-            <input
-              type="text"
-              name="borrowPeriod"
-              value={newBookInfo.borrowPeriod}
-              onChange={handleChange}
-              placeholder="Borrow Period"
-              className="w-full border  border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 mb-4 transition-colors duration-300 ease-in-out hover:border-blue-500"
-            />
+         
 
             <Select
               name="category"
@@ -606,6 +640,7 @@ const Dashboard = () => {
               <Option value="">Select category</Option>
               <Option value="Fiction">Fiction</Option>
               <Option value="Non-Fiction">Non-Fiction</Option>
+              <Option value="Education">Education</Option>
             </Select>
 
             <div className="flex mt-4 justify-end ">

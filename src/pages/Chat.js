@@ -3,30 +3,87 @@ import { FaPaperPlane, FaUser } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { auth } from "../firebase/Firebase";
 import { db } from "../firebase/Firebase";
-import { motion } from "framer-motion";
+import { m, motion } from "framer-motion";
 import { FaBookOpen, FaCheck, FaTimes } from "react-icons/fa";
 import { MdCheck, MdClose } from "react-icons/md";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import CustomButton from "../components/CustomButton";
+import Loader from "../components/Loader";
 import {
   collection,
   onSnapshot,
   addDoc,
   query,
   where,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
   orderBy,
 } from "firebase/firestore";
+import { set } from "firebase/database";
+import CustomPopup from "../components/CustomPopup";
+import { getUserName } from "../utils/Search";
+import { Deleter, MultiDeleter } from "../utils/Deleter";
 
 const Chat = () => {
   const user = auth.currentUser;
   const [currentChat, setCurrentChat] = useState(null);
+  const [info, setInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [toUsername, setToUsername] = useState(null);
+  const [fromUsername, setFromUsername] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [transactionRejected, setTransactionRejected] = useState(false);
+  const [transactionComplete, setTransactionComplete] = useState(false);
+  const [popUp, setPopup] = useState(false);
+  const flag = useRef(false);
   const [newMessage, setNewMessage] = useState("");
   const location = useLocation();
   const messagesEndRef = useRef(null);
+  const nav = useNavigate();
 
   useEffect(() => {
     setCurrentChat(location.state);
     if (currentChat) {
+      getUserName(currentChat.requestto).then((name) => {
+        setToUsername(name);
+      });
+      getUserName(currentChat.requestfrom).then((name) => {
+        setFromUsername(name);
+      });
+      const unsubscribe1 = onSnapshot(
+        query(
+          collection(db, "requests"),
+          where("ruid", "==", currentChat.ruid)
+        ),
+        (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (
+              change.doc.data().requestto === user.email ||
+              change.doc.data().requestfrom === user.email
+            ) {
+              console.log("Current document: ", change.doc.data());
+              setInfo(change.doc.data());
+            }
+            if (
+              change.type === "removed" &&
+              change.doc.data().requestfrom === user.email
+            ) {
+              if (change.doc.data().borrowed === false) {
+                setTransactionRejected(true);
+                flag.current = false;
+                console.log("Removed document: ", change.doc.data());
+              } else {
+                setTransactionRejected(true);
+                flag.current = true;
+                console.log("Removed document: ", change.doc.data());
+              }
+            }
+          });
+        }
+      );
       const unsubscribe = onSnapshot(
         query(
           collection(db, "messages"),
@@ -47,13 +104,17 @@ const Chat = () => {
             messageList.push(doc.data());
           });
           setMessages(messageList);
+          console.log("Current messages: ", messageList);
         },
         (error) => {
           console.error("Error fetching messages:", error);
         }
       );
-
-      return () => unsubscribe();
+      setLoading(false);
+      return () => {
+        unsubscribe();
+        unsubscribe1();
+      };
     }
   }, [location.state, currentChat]);
 
@@ -93,7 +154,101 @@ const Chat = () => {
     }
   };
 
-  if (currentChat === null) return null;
+  console.log("Current chat: ", currentChat);
+
+  const handleMarkBorrowed = async (flag) => {
+    console.log(info)
+    setPopup(false);
+    setLoading(true);
+    try {
+      const q = query(
+        collection(db, "books"),
+        where("title", "==", info.booktitile)
+      );
+      const querySnapshot = await getDocs(q);
+
+      const mydoc = querySnapshot.docs[0].ref;
+
+      const r = query(
+        collection(db, "requests"),
+        where("ruid", "==", currentChat.ruid)
+      );
+      
+      const querySnapshot2 = await getDocs(r);
+      if (!querySnapshot2.empty) {
+        const doc = querySnapshot2.docs[0].ref;
+        if (flag) {
+          await updateDoc(doc, { borrowed: true });
+          await updateDoc(mydoc, { isBorrowed: true });
+           await MultiDeleter("requests", "bookuid", "requestfrom", info.bookuid,info.requestfrom);
+          toast.success("Transaction marked as borrowed!");
+        } else {
+          await deleteDoc(doc);
+          await updateDoc(mydoc, { isBorrowed: false });
+          toast.success("Transaction rejected!");
+          nav("/dashboard");
+        }
+      }
+    } catch (error) {
+      console.error("Error marking as borrowed:", error);
+    }
+    setLoading(false);
+  };
+
+  const handleTransactionComplete = async () => {
+    setLoading(true);
+    setTransactionComplete(false);
+    try {
+
+      
+      const q = query(
+        collection(db, "books"),
+        where("title", "==", info.booktitile)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        console.log("Document data:", querySnapshot.docs[0].data());
+        const doc = querySnapshot.docs[0].ref;
+        await updateDoc(doc, { isBorrowed: false });
+      }
+
+      const borrowerName = await getUserName(currentChat.requestfrom);
+      const lenderName = await getUserName(currentChat.requestto);
+      console.log("Borrower name: ", borrowerName);
+      console.log("Lender name: ", lenderName);
+    
+      const ids = doc(collection(db, "transactions")).id;
+      const t = await addDoc(collection(db, "transactions"), {
+        booktitle: currentChat.booktitile,
+        bookid: currentChat.bookuid,
+        borrower: currentChat.requestfrom,
+        lender: currentChat.requestto,
+        borrowerName: borrowerName,
+        lenderName: lenderName,
+        timestamp: new Date(),
+        reviewed: false,
+        stars: 0,
+        uid: ids
+      });
+
+      await Deleter("messages", "chatid", currentChat.ruid);
+      await Deleter("requests", "ruid", currentChat.ruid);
+
+      nav("/dashboard");
+      toast.success("Transaction completed!");
+    } catch (error) {
+      console.error("Error completing transaction:", error);
+    }
+    setLoading(false);
+  };
+
+  console.log("hereeesknksjln");
+  console.log(currentChat);
+
+  if (loading) {
+    return <Loader loading={loading} />;
+  }
+  if (info === null) return null;
   return (
     <>
       <div className="flex flex-col h-screen">
@@ -103,22 +258,64 @@ const Chat = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex  flex-col lg:justify-between sm:flex-row items-center">
-            <div className="flex items-center">
-              <FaBookOpen className="mt-2 mr-2" size={20} />
-              <h1 className="text-lg mt-1 font-semibold">
+          <div className="flex flex-col bg-white rounded-lg shadow-md p-4 space-y-4">
+            <div className="flex items-center border-b pb-2">
+              <FaBookOpen className="mt-1 mr-2" size={20} />
+              <h1 className="text-lg font-semibold">
                 {currentChat.booktitile}
               </h1>
             </div>
-           
+            <div className="flex items-center">
+              <FaUser className="mt-1 mr-2" size={20} />
+              {user.email===info.requestfrom ? (
+                 <h1 className="text-lg font-semibold">{toUsername}</h1>
+              ):(
+                <h1 className="text-lg font-semibold">{fromUsername}</h1>
+              )}
+          
+            </div>
+
             <motion.div
-              className="flex justify-end sm:justify-start items-center mt-4 sm:mt-0 space-x-2 sm:space-x-4"
+              className="flex justify-start sm:justify-start items-center mt-4 sm:mt-0 space-x-2 sm:space-x-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-                <CustomButton color="blue" icon={<FaCheck />} text="Complete Transaction" />
-                <CustomButton color="red" icon={<FaTimes />} text="Stop" />
+              {info.requestto === user.email && (
+                <>
+                  {info.borrowed === true ? (
+                    <>
+                      <CustomButton
+                        color="blue"
+                        icon={<FaCheck />}
+                        text="Complete Transaction"
+                        onClick={() => setTransactionComplete(true)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <CustomButton
+                        color="green"
+                        icon={<FaCheck />}
+                        text="Mark as borrowed"
+                        onClick={() => {
+                          setPopup(true);
+                          flag.current = true;
+                        }}
+                      />
+                      <CustomButton
+                        color="red"
+                        icon={<FaTimes />}
+                        text="Reject"
+                        onClick={() => {
+                          setPopup(true);
+                          flag.current = false;
+                        }}
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </motion.div>
           </div>
         </motion.div>
@@ -177,6 +374,68 @@ const Chat = () => {
           </div>
         </motion.div>
       </div>
+      {popUp && (
+        <CustomPopup
+          message={
+            flag.current
+              ? "Are you sure you want to mark this transaction as borrowed?"
+              : "Are you sure you want to reject this transaction?"
+          }
+          button1={
+            <CustomButton
+              color={flag.current ? "green" : "red"}
+              text={"yes"}
+              icon={<FaTimes />}
+              onClick={() => handleMarkBorrowed(flag.current)}
+            />
+          }
+          button2={
+            <CustomButton
+              color={flag.current ? "red" : "green"}
+              text={"no"}
+              icon={<FaCheck />}
+              onClick={() => setPopup(false)}
+            />
+          }
+        />
+      )}
+      {transactionRejected && (
+        <CustomPopup
+          message={
+            flag.current ? "Transaction Completed!" : "Transaction rejected!"
+          }
+          button1={
+            <CustomButton
+              color={flag.current ? "green" : "red"}
+              text={"ok"}
+              icon={<FaTimes />}
+              onClick={() => nav("/dashboard")}
+            />
+          }
+        />
+      )}
+      {transactionComplete && (
+        <CustomPopup
+          message="Complete Transaction?"
+          subtext={"confirm that you have received the book "}
+          button1={
+            <CustomButton
+              color="green"
+              text={"confirm"}
+              icon={<FaCheck />}
+              onClick={() => handleTransactionComplete()}
+            />
+          }
+          button2={
+            <CustomButton
+              color="red"
+              text={"cancel"}
+              icon={<FaTimes />}
+              onClick={() => setTransactionComplete(false)}
+            />
+          }
+        />
+      )}
     </>
   );
 };

@@ -1,38 +1,42 @@
 import React from 'react';
-import { Protected } from "./components/Protected";
-import { NavbarSimple } from "./components/Navb";
-import Homepage from "./pages/Homepage";
-import Dashboard from "./pages/Dashboard";
-import SignUpForm from "./pages/Signup";
-import Viewbooks from "./pages/Viewbooks";
-import Postpage from "./pages/Postpage";
-import UserProfile from "./pages/userprofile"; 
-import Forum from "./pages/Forum";
-import Chat from "./pages/Chat";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { IsSignedUpProvider } from "./context/Context";
-import { Toaster } from 'sonner';
-import { NotificationCountProvider } from "./context/Context";
-import Inbox from "./pages/Inbox";
-import NotificationListener from "./components/NotificationListener"; // Import NotificationListener component
-import { auth, db } from './firebase/Firebase'; // Import auth and db from firebaseConfig
 
-import "./App.css";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Protected } from './components/Protected';
+import { NavbarSimple } from './components/Navb';
+import Homepage from './pages/Homepage';
+import Dashboard from './pages/Dashboard';
+import SignUpForm from './pages/Signup';
+import Viewbooks from './pages/Viewbooks';
+import Postpage from './pages/Postpage';
+import UserProfile from './pages/userprofile';
+import NotificationListener from "./components/NotificationListener"; 
+import Forum from './pages/Forum';
+import Chat from './pages/Chat';
+import LearnMore from './pages/Learnmore'; // Ensure this matches the actual file name
+import { IsSignedUpProvider } from './context/Context';
+import { Toaster } from 'sonner';
+import { NotificationCountProvider } from './context/Context';
+import './App.css';
+import Inbox from './pages/inbox';
+
 
 function App() {
-  console.log("render")
+  console.log('render');
   return (
+
     <IsSignedUpProvider>
       <BrowserRouter>
         <div className="App">
           <NotificationCountProvider>
             <NavbarSimple/>
+
           </NotificationCountProvider>
           <Toaster
             richColors
             position="bottom-left"
             gap={20}
           />
+
           <NotificationListener /> {/*  */}
           <Routes>
             <Route path="/" element={<Homepage/>}/>
@@ -48,6 +52,7 @@ function App() {
         </div>
       </BrowserRouter>
     </IsSignedUpProvider>
+
   );
 }
 

@@ -14,6 +14,7 @@ const SignUpForm = () => {
   const [user, setUser] = useState();
   const [disableButton,setDisableButton] = useState(false);
   const [hide,setHide] = useState(false);
+  const [clicked,setClicked] = useState(false);
   const nav = useNavigate();
   const auth = getAuth();
   const { isSignedUp,setIsSignedUp } = useContext(IsSignedUpContext);
@@ -52,6 +53,20 @@ const SignUpForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    if(name !== "contact" && name !== "semester" && name !== "batch"){
+      const isValidName = /^[a-zA-Z\s]*$/.test(value);
+      if(!isValidName){
+        return;
+      }
+    }
+
+    if(name === "contact" || name === "semester"){
+      const isValidPhoneNumber = /^\+?\d*$/.test(value);
+      if(!isValidPhoneNumber){
+        return;
+      }
+    }
     setUserInfo(prevState => ({
       ...prevState,
       [name]: value
@@ -60,14 +75,15 @@ const SignUpForm = () => {
   };
 
   const handleSignUp = async () => {
-
+    setClicked(true);
     setHide(true);
-    if (Object.values(userInfo).some((item) => item.trim() === "")){
+    if (Object.values(userInfo).some((item) => item.trim() === "") || userInfo.contact.length !== 10){
       setDisableButton(true);
       setHide(false);
     }
     else
     {
+      setDisableButton(false);
     try {
       const userRef = await addDoc(collection(db, 'users'),{ ...userInfo,email:user.email});
       console.log('User signed up successfully! User ID:', userRef.id);
@@ -168,9 +184,10 @@ console.log(isSignedUp);
           />
         </div>
         <div className="mb-4">
+          {clicked && userInfo.contact.length !== 10 && <p className="text-red-500 text-sm">Contact number should be of 10 digits</p>}
           <input
             type="text"
-            placeholder="Contact"
+            placeholder="Contact number"
             name="contact"
             value={userInfo.contact}
             onChange={handleInputChange}
@@ -189,7 +206,8 @@ console.log(isSignedUp);
           />
         </div>
         {hide ?( <p className="text-gray-500">Signing up...</p>):(
-        <CustomButton color="green" text="Sign Up" onClick={handleSignUp} />
+        // <button onClick={handleSignUp} className={`w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500  `}>Sign Up</button>
+        <CustomButton onClick={handleSignUp} color={"green"} className="w-50" icon={<FaUserPlus/>} text="Sign Up" />
         )}
         {disableButton && <p className="text-red-500 text-sm mt-2">Please fill all the fields</p>}
       </motion.div>

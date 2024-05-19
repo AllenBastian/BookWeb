@@ -9,6 +9,7 @@ import { RiSendPlane2Line, RiCloseLine } from "react-icons/ri";
 import { FaFire } from 'react-icons/fa';
 import { FiFilter } from 'react-icons/fi';
 import Loader from "../components/Loader";
+import { getUserName } from "../utils/Search";
 
 import { motion } from "framer-motion";
 import {
@@ -39,7 +40,6 @@ const Forum = () => {
   const [postDetails, setPostDetails] = useState({
     title: "",
     description: "",
-    category: "",
   });
 
   useEffect(() => {
@@ -97,16 +97,9 @@ const Forum = () => {
             };
           });
 
-          const userQuery = query(
-            collection(db, "users"),
-            where("email", "==", user.email)
-          );
-          const querySnapshot = await getDocs(userQuery);
-
-          if (!querySnapshot.empty) {
-            const username = querySnapshot.docs[0].data().name;
-            setName(username);
-          }
+          
+          const username = await getUserName(user.email);
+          setName(username);
 
           setLoading(false);
 
@@ -127,10 +120,14 @@ const Forum = () => {
     setPostDetails((prev) => ({ ...prev, [name]: value }));
   };
 
+  console.log(postDetails);
+
   const createPost = async () => {
 
-    if (Object.values(postDetails).some((item) => item.trim() === "")) {
-      toast.error("Please fill all fields");
+    if (Object.values(postDetails).some((item) => item.trim() === "") ) {
+      toast.error("Please fill all fields" , {
+        duration: 1500, // Duration in milliseconds
+      });
       return;
     }
     const date = new Date();
@@ -154,7 +151,9 @@ const Forum = () => {
         category: "",
       });
       
-      toast.success("Post created successfully");
+      toast.success("Post created successfully" , {
+        duration: 1500, // Duration in milliseconds
+      });
     } catch (error) {
       console.error("Error creating post: ", error);
     }
@@ -360,6 +359,7 @@ const Forum = () => {
                 label="Choose category"
                 onChange={(selectedOption) => setCat(selectedOption)}
               >
+  
                 <Option value="fiction">fiction</Option>
                 <Option value="non-fiction">non-fiction</Option>
                 <Option value="engineering">Engineering</Option>
