@@ -12,7 +12,7 @@ import UserProfile from './pages/userprofile';
 import NotificationListener from "./components/NotificationListener"; 
 import Forum from './pages/Forum';
 import Chat from './pages/Chat';
-import LearnMore from './pages/Learnmore'; // Ensure this matches the actual file name
+
 import { IsSignedUpProvider } from './context/Context';
 import { Toaster } from 'sonner';
 import { NotificationCountProvider } from './context/Context';
@@ -25,12 +25,13 @@ function App() {
   return (
 
     <IsSignedUpProvider>
+        <NotificationCountProvider>
       <BrowserRouter>
         <div className="App">
-          <NotificationCountProvider>
+        
             <NavbarSimple/>
 
-          </NotificationCountProvider>
+   
           <Toaster
             richColors
             position="bottom-left"
@@ -51,6 +52,7 @@ function App() {
           </Routes>
         </div>
       </BrowserRouter>
+      </NotificationCountProvider>
     </IsSignedUpProvider>
 
   );

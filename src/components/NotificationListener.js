@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import { db, auth } from '../firebase/Firebase'; // Import the Firebase configuration
 import { collection, query, where, onSnapshot, addDoc, doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { Timestamp } from 'firebase/firestore';
+import { NotificationCountContext } from '../context/Context';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "sonner";
 const NotificationListener = () => {
     const [user, setUser] = useState(null);
+    const {notificationCount, setNotificationCount} = useContext(NotificationCountContext);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -62,11 +64,11 @@ const NotificationListener = () => {
                                       // Add new notification to the "notifications" collection
                                       const docRef = await addDoc(collection(db, 'notifications'), {
                                           notifid: notificationId,
-                                          notifto: requestTo,
+                                          notifto: reqfr,
                                           messagetype: message,
                                           timestamp: new Date(),
                                           booktitle: bookname,
-                                          notiffrom: reqfr,
+                                          notiffrom: requestTo,
                                       });
                                       console.log('Notification added with ID: ', docRef.id);
                                       toast.info("Book Accepted");
@@ -88,11 +90,11 @@ const NotificationListener = () => {
                                     // Add new notification to the "notifications" collection
                                     const docRef = await addDoc(collection(db, 'notifications'), {
                                         notifid: notificationId,
-                                        notifto: requestTo,
+                                        notifto: reqfr,
                                         messagetype: message,
                                         timestamp: new Date(),
                                         booktitle: bookname,
-                                        notiffrom: reqfr,
+                                        notiffrom: requestTo,
                                     });
                                     console.log('Notification added with ID: ', docRef.id);
                                     toast.info("Book request rejected");
@@ -110,7 +112,16 @@ const NotificationListener = () => {
         };
     }, [user]);
 
-    return null; // Since this component doesn't render anything
+    useEffect(() => {
+        if (!user) return; 
+        const q = query(collection(db, 'notifications'), where('notifto', '==', user.email));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            setNotificationCount(snapshot.docs.length);
+        });
+
+    }, [user]);
+
+    return null; 
 };
 
 export default NotificationListener;

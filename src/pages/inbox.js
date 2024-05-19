@@ -39,10 +39,10 @@ const Inbox = () => {
             newNotifications.push({ id: change.doc.id, message: `Book request from ${from} for book: ${book}` });
             
           }
-          else if (notification.messagetype === "Book Request Accepted" && notification.notiffrom === userEmail) {
+          else if (notification.messagetype === "Book Request Accepted" && to === userEmail) {
             newNotifications.push({ id: change.doc.id, message: `Book request for book ${book} has been accepted.` });
         }
-        else if (notification.messagetype === "Book Request Declined" && notification.notiffrom === userEmail) {
+        else if (notification.messagetype === "Book Request Declined" && to === userEmail) {
           newNotifications.push({ id: change.doc.id, message: `Book request for book ${book} has been declined.` });
       }
         }
