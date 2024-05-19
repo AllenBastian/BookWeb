@@ -6,6 +6,7 @@ import { Timestamp } from 'firebase/firestore';
 import { NotificationCountContext } from '../context/Context';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "sonner";
+
 const NotificationListener = () => {
     const [user, setUser] = useState(null);
     const {notificationCount, setNotificationCount} = useContext(NotificationCountContext);
@@ -41,7 +42,7 @@ const NotificationListener = () => {
                             notifto: requestTo,
                             messagetype: message,
                             timestamp: new Date(),
-                            booktitle: bookname,
+                            title: bookname,
                             notiffrom: reqfr,
                         });
                         console.log('Notification added with ID: ', docRef.id);
@@ -67,7 +68,7 @@ const NotificationListener = () => {
                                           notifto: reqfr,
                                           messagetype: message,
                                           timestamp: new Date(),
-                                          booktitle: bookname,
+                                          title: bookname,
                                           notiffrom: requestTo,
                                       });
                                       console.log('Notification added with ID: ', docRef.id);
@@ -78,7 +79,7 @@ const NotificationListener = () => {
                               }
                   else if (change.type === 'modified' && change.doc.data().requestfrom === user.email && change.doc.data().rejected === true) {
                     console.log("Entered reject mode")
-                    console.log("Change:",change.doc.data())
+                    console.log("Change:", change.doc.data())
                                 const request = change.doc.data();
                                 const notificationId = uuidv4();
                                 const requestTo = request.requestto;
@@ -93,7 +94,7 @@ const NotificationListener = () => {
                                         notifto: reqfr,
                                         messagetype: message,
                                         timestamp: new Date(),
-                                        booktitle: bookname,
+                                        title: bookname,
                                         notiffrom: requestTo,
                                     });
                                     console.log('Notification added with ID: ', docRef.id);
@@ -104,11 +105,76 @@ const NotificationListener = () => {
                             }            
             });
         });
-        
+        const commentQ = query(collection(db, "comments"), where("timestamp", ">=", Timestamp.fromMillis(Date.now())));
+        const commentUnsubscribe = onSnapshot(commentQ, async (snapshot) => {
+            snapshot.docChanges().forEach(async (change) => {
+              console.log("working isnide snaphsot comment")
+              if(change.type === 'added' && change.doc.data().email === user.email && change.doc.data().postowner !== user.email){
+                console.log("change:", change.doc.data())
+                const comment = change.doc.data();
+                const notificationId = uuidv4();
+                const owner = comment.postowner;
+                const message = 'Comment to Post';
+                const commenter = comment.email;
+                const post = comment.postname;
+
+                try {
+                    // Add new notification to the "notifications" collection
+                    const docRef = await addDoc(collection(db, 'notifications'), {
+                        notifid: notificationId,
+                        notifto: owner,
+                        messagetype: message,
+                        timestamp: new Date(),
+                        title: post,
+                        notiffrom: commenter,
+                    });
+                    console.log('Notification added with ID: ', docRef.id);
+                    
+                } catch (error) {
+                    console.error('Error adding notification: ', error);
+                }
+              }
+              if (change.doc.data().postowner=== user.email ){
+                toast.info("Someone commented on your post");
+              }
+            });
+        });
+        const reviewQ = query(collection(db, "reviews"), where("timestamp", ">=", Timestamp.fromMillis(Date.now())));
+        const reviewUnsubscribe = onSnapshot(reviewQ, async (snapshot) => {
+            snapshot.docChanges().forEach(async (change) => {
+              console.log("working isnide snapshot review")
+              if(change.type === 'added' && change.doc.data().remail === user.email){
+                console.log("Working inside if review")
+                const review = change.doc.data();
+                const notificationId = uuidv4();
+                const owner = review.bookowner;
+                const message = 'Review added';
+                const reviewer = review.remail;
+                const book = review.bookname;
+
+                try {
+                    // Add new notification to the "notifications" collection
+                    const docRef = await addDoc(collection(db, 'notifications'), {
+                        notifid: notificationId,
+                        notifto: owner,
+                        messagetype: message,
+                        timestamp: new Date(),
+                        title: book,
+                        notiffrom: reviewer,
+                    });
+                    console.log('Notification added with ID: ', docRef.id);
+                    toast.info("review added to your book ");
+                } catch (error) {
+                    console.error('Error adding notification: ', error);
+                }
+              }
+            });
+        });
 
         return () => {
             requestUnsubscribe();
-            
+            commentUnsubscribe();
+            reviewUnsubscribe();
         };
     }, [user]);
 
