@@ -1,56 +1,53 @@
+import React from 'react';
 import { Protected } from "./components/Protected";
 import { NavbarSimple } from "./components/Navb";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import SignUpForm from "./pages/Signup";
 import Viewbooks from "./pages/Viewbooks";
-import Postpage from "./pages/Postpage"
+import Postpage from "./pages/Postpage";
 import UserProfile from "./pages/userprofile"; 
 import Forum from "./pages/Forum";
 import Chat from "./pages/Chat";
-import { BrowserRouter,Route,Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { IsSignedUpProvider } from "./context/Context";
-import { Toaster } from 'sonner'
-
+import { Toaster } from 'sonner';
 import { NotificationCountProvider } from "./context/Context";
+import Inbox from "./pages/Inbox";
+import NotificationListener from "./components/NotificationListener"; // Import NotificationListener component
+import { auth, db } from './firebase/Firebase'; // Import auth and db from firebaseConfig
 
 import "./App.css";
-import Inbox from "./pages/inbox";
 
 function App() {
   console.log("render")
   return (
-  
     <IsSignedUpProvider>
-    <BrowserRouter>
-   
+      <BrowserRouter>
         <div className="App">
           <NotificationCountProvider>
-              <NavbarSimple/>
-         </NotificationCountProvider>
-         <Toaster richColors
-        position="bottom-left"
-    gap={20}
-       
-/>
-        <Routes>
-          <Route path="/" element={<Homepage/>}/>
-          <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>
-          <Route path="/Signup" element={<Protected><SignUpForm/></Protected>} />
-          <Route path="/viewbooks" element={<Protected><Viewbooks/></Protected>} />
-          <Route path="/Forum" element={<Protected><Forum/></Protected>}/>
-          <Route path="/userprofile" element={<Protected><UserProfile /></Protected>} />
-          <Route path="/forum/:id" element={<Protected><Postpage/></Protected>}/>
-          <Route path="/chat" element={<Protected><Chat/></Protected>}/>
-          <Route path="/inbox" element={<Protected><Inbox/></Protected>}/>
-        </Routes>
+            <NavbarSimple/>
+          </NotificationCountProvider>
+          <Toaster
+            richColors
+            position="bottom-left"
+            gap={20}
+          />
+          <NotificationListener /> {/*  */}
+          <Routes>
+            <Route path="/" element={<Homepage/>}/>
+            <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>
+            <Route path="/Signup" element={<Protected><SignUpForm/></Protected>} />
+            <Route path="/viewbooks" element={<Protected><Viewbooks/></Protected>} />
+            <Route path="/Forum" element={<Protected><Forum/></Protected>}/>
+            <Route path="/userprofile" element={<Protected><UserProfile /></Protected>} />
+            <Route path="/forum/:id" element={<Protected><Postpage/></Protected>}/>
+            <Route path="/chat" element={<Protected><Chat/></Protected>}/>
+            <Route path="/inbox" element={<Protected><Inbox/></Protected>}/>
+          </Routes>
         </div>
-    
-  </BrowserRouter>
-  </IsSignedUpProvider>
-
-    
-
+      </BrowserRouter>
+    </IsSignedUpProvider>
   );
 }
 

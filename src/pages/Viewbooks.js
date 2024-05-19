@@ -125,6 +125,8 @@ const Viewbooks = () => {
         bookuid: selectedBook.uid,
         ruid: ids,
         accepted: false,
+        rejected: false,
+        timestamp: new Date()
       });
 
       toast.success("Request sent successfully");
