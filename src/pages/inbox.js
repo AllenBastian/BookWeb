@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, onSnapshot, query, deleteDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, query, deleteDoc, doc, orderBy} from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Alert } from '@material-tailwind/react';
@@ -24,14 +24,14 @@ const Inbox = () => {
   useEffect(() => {
     if (!userEmail) return; // Don't proceed if userEmail is not set
 
-    const q = query(collection(firestore, 'notifications'));
+    const q = query(collection(firestore, 'notifications'), orderBy('timestamp', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newNotifications = [];
       snapshot.docChanges().forEach((change) => {
         if (change.type === 'added') {
           const notification = change.doc.data();
           const from = notification.notiffrom;
-          const book = notification.booktitle;
+          const book = notification.title;
           const to = notification.notifto;
           
           // Only add notifications meant for the current user
@@ -45,6 +45,12 @@ const Inbox = () => {
         else if (notification.messagetype === "Book Request Declined" && to === userEmail) {
           newNotifications.push({ id: change.doc.id, message: `Book request for book ${book} has been declined.` });
       }
+        else if (notification.messagetype === "Comment to Post" && to === userEmail ){
+          newNotifications.push({id: change.doc.id, message: `User ${from}  has commented on your post ${book}` });
+        }
+        else if (notification.messagetype === "Review added" && to === userEmail ){
+          newNotifications.push({id: change.doc.id, message: `User ${from}  has reviewed your book ${book}` });
+        }
         }
 
       });

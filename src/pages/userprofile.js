@@ -187,6 +187,7 @@ const UserProfilePage = () => {
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0];
           const userRef = doc(db, "users", userDoc.id);
+
           await updateDoc(userRef, updatedUserData);
 
           console.log("Updated user data in Firestore:", updatedUserData);
@@ -206,6 +207,7 @@ const UserProfilePage = () => {
   };
 
   const handleReview = async () => {
+
     if (reviewMessage.trim() === ""||star===0) {
       toast.error("Please enter a review" , {
         duration: 1500, 
@@ -219,14 +221,18 @@ const UserProfilePage = () => {
 
 
     try {
-
-    
+        
+      
+      console.log(selectedReview);
       await addDoc(collection(db, "reviews"), {
         bookid: selectedReview.bookid,
         reviewer: username,
         comment: reviewMessage,
         rating: star,
         bookname: selectedReview.booktitle,
+        timestamp: new Date(),
+        remail: selectedReview.borrower,
+        bookowner: selectedReview.lender,
       });
      
 
