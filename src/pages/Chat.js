@@ -183,6 +183,7 @@ const Chat = () => {
            await MultiDeleter("requests", "bookuid", "requestfrom", info.bookuid,info.requestfrom);
           toast.success("Transaction marked as borrowed!");
         } else {
+          await updateDoc(doc, { rejected: true });
           await deleteDoc(doc);
           await updateDoc(mydoc, { isBorrowed: false });
           toast.success("Transaction rejected!");

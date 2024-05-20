@@ -1,202 +1,314 @@
-import React, { useEffect, useState,useContext } from 'react';
-import { db, auth } from '../firebase/Firebase'; 
-import { collection, query, where, onSnapshot, addDoc, doc, getDoc } from "firebase/firestore";
+import React, { useEffect, useState, useContext } from "react";
+import { db, auth } from "../firebase/Firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Timestamp } from 'firebase/firestore';
-import { NotificationCountContext } from '../context/Context';
-import { v4 as uuidv4 } from 'uuid';
+import { Timestamp } from "firebase/firestore";
+import { NotificationCountContext } from "../context/Context";
+import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
-import { duration } from '@mui/material';
+import { duration } from "@mui/material";
 
 const NotificationListener = () => {
-    const [user, setUser] = useState(null);
-    const {notificationCount, setNotificationCount} = useContext(NotificationCountContext);
+  const [user, setUser] = useState(null);
+  const { notificationCount, setNotificationCount } = useContext(
+    NotificationCountContext
+  );
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setUser(user);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return; 
+
+    const requestQ = query(
+      collection(db, "requests"),
+      where("timestamp", ">=", Timestamp.fromMillis(Date.now()))
+    );
+    const requestUnsubscribe = onSnapshot(requestQ, async (snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        console.log("changeherehejejjh:", change.doc.data());
+        if (
+          change.type === "added" &&
+          change.doc.data().requestto === user.email
+        ) {
+          const request = change.doc.data();
+          const notificationId = uuidv4();
+          const requestTo = request.requestto;
+          const message = "Book Request";
+          const bookname = request.booktitile;
+          const reqfr = request.requestfrom;
+          const reqfrname = request.reqfromusername;
+
+          try {
+            // Add new notification to the "notifications" collection
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: requestTo,
+              messagetype: message,
+              timestamp: new Date(),
+              title: bookname,
+              notiffrom: reqfr,
+              notiffromname: reqfrname,
+              isRead: false,
+            });
+            console.log("Notification added with ID: ", docRef.id);
+            toast.info(`you have a new request for the book ${bookname}`, {
+              duration: 4000,
+            });
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+        }
+        //if the owner accepts the requests-correct verified for initial reject and transaction reject
+        else if (
+          change.type === "modified" &&
+          change.doc.data().requestfrom === user.email &&
+          change.doc.data().accepted === true &&
+          change.doc.data().rejected === false
+          && change.doc.data().borrowed === false
+        ) {
+          const request = change.doc.data();
+          const notificationId = uuidv4();
+          const requestTo = request.requestto;
+          const message = "Book Request Accepted";
+          const bookname = request.booktitile;
+          const reqfr = request.requestfrom;
+          const reqfrname = request.reqfromusername;
+
+          try {
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: reqfr,
+              messagetype: message,
+              timestamp: new Date(),
+              title: bookname,
+              notiffrom: requestTo,
+                notiffromname: reqfrname,
+              isRead: false,
+            });
+            console.log("Notification added with ID: ", docRef.id);
+            toast.info(
+              `Your request for book  ${bookname} has been accepted. you can now chat with the owner`
+            );
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+        }
+        //if the owner rejects the requests-correct verified
+        else if (
+          change.type === "modified" &&
+          change.doc.data().requestfrom === user.email &&
+          change.doc.data().rejected === true
+        ) {
+          console.log("Entered reject mode");
+          console.log("Change:", change.doc.data());
+          const request = change.doc.data();
+          const notificationId = uuidv4();
+          const requestTo = request.requestto;
+          const message = "Book Request Declined";
+          const bookname = request.booktitile;
+          const reqfr = request.requestfrom;
+          const reqfrname = request.reqfromusername;
+
+          try {
+            // Add new notification to the "notifications" collection
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: reqfr,
+              messagetype: message,
+              timestamp: new Date(),
+              title: bookname,
+              notiffrom: requestTo,
+                notiffromname: reqfrname,
+              isRead: false,
+            });
+            console.log("Notification added with ID: ", docRef.id);
+            toast.warning(
+              `your request for book ${bookname} has been declined`,
+              { duration: 4000 }
+            );
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+          //maark as borrowed - correct verified
+        } else if (
+          change.type === "modified" &&
+          change.doc.data().requestfrom === user.email &&
+          change.doc.data().borrowed === true
+        ) {
+          const request = change.doc.data();
+          const notificationId = uuidv4();
+          const requestTo = request.requestto;
+          const message = "Mark as borrowed";
+          const bookname = request.booktitile;
+          const reqfr = request.requestfrom;
+          const reqfrname = request.reqfromusername;
+
+          try {
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: reqfr,
+              messagetype: message,
+              timestamp: new Date(),
+              title: bookname,
+              notiffrom: requestTo,
+                notiffromname: reqfrname,
+              isRead: false,
+            });
+            console.log("Notification added with ID: ", docRef.id);
+            toast.info(`The owner has marked ${bookname} borrowed to you`, {
+              duration: 4000,
+            });
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+        }
+        else if (change.type = "removed" && change.doc.data().requestfrom === user.email && change.doc.data().borrowed === true) {
+            const request = change.doc.data();
+            const notificationId = uuidv4();
+            const requestTo = request.requestto;
+            const message = "Transaction Complete";
+            const bookname = request.booktitile;
+            const reqfr = request.requestfrom;
+            const reqfrname = request.reqfromusername;
+    
+            try {
+                const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: reqfr,
+                messagetype: message,
+                timestamp: new Date(),
+                title: bookname,
+                notiffrom: requestTo,
+                notiffromname: reqfrname,
+                isRead: false,
+                });
+                console.log("Notification added with ID: ", docRef.id);
+                toast.info(`The owner has marked ${bookname} returned from you`, {
+                duration: 4000,
+                });
+            } catch (error) {
+                console.error("Error adding notification: ", error);
             }
-        });
+        }
+      });
+    });
 
-        return () => unsubscribe();
-    }, []);
+    const commentQ = query(
+      collection(db, "comments"),
+      where("timestamp", ">=", Timestamp.fromMillis(Date.now()))
+    );
+    const commentUnsubscribe = onSnapshot(commentQ, async (snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        console.log("working isnide snaphsot comment");
+        if (
+          change.type === "added" &&
+          change.doc.data().email === user.email &&
+          change.doc.data().postowner !== user.email
+        ) {
+          console.log("change:", change.doc.data());
+          const comment = change.doc.data();
+          const notificationId = uuidv4();
+          const owner = comment.postowner;
+          const message = "Comment to Post";
+          const commenter = comment.email;
+          const post = comment.postname;
 
-    useEffect(() => {
-        if (!user) return; // Don't proceed if user is not set
+          try {
+            // Add new notification to the "notifications" collection
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: owner,
+              messagetype: message,
+              timestamp: new Date(),
+              title: post,
+              notiffrom: commenter,
+            });
+            console.log("Notification added with ID: ", docRef.id);
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+        }
+        if (change.doc.data().postowner === user.email) {
+          toast.info("Someone commented on your post");
+        }
+      });
+    });
+    const reviewQ = query(
+      collection(db, "reviews"),
+      where("timestamp", ">=", Timestamp.fromMillis(Date.now()))
+    );
+    const reviewUnsubscribe = onSnapshot(reviewQ, async (snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        console.log("working isnide snapshot review");
+        if (
+          change.type === "added" &&
+          change.doc.data().remail === user.email
+        ) {
+          console.log("Review change:", change.doc.data());
+          const review = change.doc.data();
+          const notificationId = uuidv4();
+          const owner = review.bookowner;
+          const message = "Review added";
+          const reviewer = review.remail;
+          const book = review.bookname;
 
-        const requestQ = query(collection(db, "requests"), where("timestamp", ">=", Timestamp.fromMillis(Date.now())));
-        const requestUnsubscribe = onSnapshot(requestQ, async (snapshot) => {
-            snapshot.docChanges().forEach(async (change) => {
-                if (change.type === 'added' && change.doc.data().requestto === user.email) {
-                    const request = change.doc.data();
-                    const notificationId = uuidv4();
-                    const requestTo = request.requestto;
-                    const message = 'Book Request';
-                    const bookname = request.booktitile;
-                    const reqfr = request.requestfrom;
-
-                    try {
-                        // Add new notification to the "notifications" collection
-                        const docRef = await addDoc(collection(db, 'notifications'), {
-                            notifid: notificationId,
-                            notifto: requestTo,
-                            messagetype: message,
-                            timestamp: new Date(),
-                            title: bookname,
-                            notiffrom: reqfr,
-                            isRead : false,
-                        });
-                        console.log('Notification added with ID: ', docRef.id);
-                        toast.info("Book Requested", {duration:1500});
-                    } catch (error) {
-                        console.error('Error adding notification: ', error);
-                    }
-                  }
-                  if (change.type === 'modified' && change.doc.data().requestfrom === user.email && change.doc.data().borrowed === true) {
-                                 
-                                  const request = change.doc.data();
-                                  const notificationId = uuidv4();
-                                  const requestTo = request.requestto;
-                                  const message = 'Book Request Accepted';
-                                  const bookname = request.booktitile;
-                                  const reqfr = request.requestfrom;
-                                
-              
-                                  try {
-                                    
-                                      // Add new notification to the "notifications" collection
-                                      const docRef = await addDoc(collection(db, 'notifications'), {
-                                          notifid: notificationId,
-                                          notifto: reqfr,
-                                          messagetype: message,
-                                          timestamp: new Date(),
-                                          title: bookname,
-                                          notiffrom: requestTo,
-                                          isRead : false,
-                                      });
-                                      console.log('Notification added with ID: ', docRef.id);
-                                      toast.info("Book has been borrowed");
-                                  } catch (error) {
-                                      console.error('Error adding notification: ', error);
-                                  }
-                              }
-                  else if (change.type === 'modified' && change.doc.data().requestfrom === user.email && change.doc.data().rejected === true) {
-                    console.log("Entered reject mode")
-                    console.log("Change:", change.doc.data())
-                                const request = change.doc.data();
-                                const notificationId = uuidv4();
-                                const requestTo = request.requestto;
-                                const message = 'Book Request Declined';
-                                const bookname = request.booktitile;
-                                const reqfr = request.requestfrom;
+          try {
             
-                                try {
-                                    // Add new notification to the "notifications" collection
-                                    const docRef = await addDoc(collection(db, 'notifications'), {
-                                        notifid: notificationId,
-                                        notifto: reqfr,
-                                        messagetype: message,
-                                        timestamp: new Date(),
-                                        title: bookname,
-                                        notiffrom: requestTo,
-                                        isRead : false,
-                                    });
-                                    console.log('Notification added with ID: ', docRef.id);
-                                    toast.info("Book request rejected");
-                                } catch (error) {
-                                    console.error('Error adding notification: ', error);
-                                }
-                            }            
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: owner,
+              messagetype: message,
+              timestamp: new Date(),
+              title: book,
+              notiffrom: reviewer,
+            //   notiffromname: review.rname,
             });
-        });
-        const commentQ = query(collection(db, "comments"), where("timestamp", ">=", Timestamp.fromMillis(Date.now())));
-        const commentUnsubscribe = onSnapshot(commentQ, async (snapshot) => {
-            snapshot.docChanges().forEach(async (change) => {
-              console.log("working isnide snaphsot comment")
-              if(change.type === 'added' && change.doc.data().email === user.email && change.doc.data().postowner !== user.email){
-                console.log("change:", change.doc.data())
-                const comment = change.doc.data();
-                const notificationId = uuidv4();
-                const owner = comment.postowner;
-                const message = 'Comment to Post';
-                const commenter = comment.email;
-                const post = comment.postname;
+            console.log("Notification added with ID: ", docRef.id);
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+        }
+        if (change.doc.data().bookowner === user.email) {
+          toast.info("Review added to your book");
+        }
+      });
+    });
 
-                try {
-                    // Add new notification to the "notifications" collection
-                    const docRef = await addDoc(collection(db, 'notifications'), {
-                        notifid: notificationId,
-                        notifto: owner,
-                        messagetype: message,
-                        timestamp: new Date(),
-                        title: post,
-                        notiffrom: commenter,
-                    });
-                    console.log('Notification added with ID: ', docRef.id);
-                    
-                } catch (error) {
-                    console.error('Error adding notification: ', error);
-                }
-              }
-              if (change.doc.data().postowner=== user.email ){
-                toast.info("Someone commented on your post");
-              }
-            });
-        });
-        const reviewQ = query(collection(db, "reviews"), where("timestamp", ">=", Timestamp.fromMillis(Date.now())));
-        const reviewUnsubscribe = onSnapshot(reviewQ, async (snapshot) => {
-            snapshot.docChanges().forEach(async (change) => {
-              console.log("working isnide snapshot review")
-              if(change.type === 'added' && change.doc.data().remail === user.email){
-                console.log("Review change:", change.doc.data())
-                const review = change.doc.data();
-                const notificationId = uuidv4();
-                const owner = review.bookowner;
-                const message = 'Review added';
-                const reviewer = review.remail;
-                const book = review.bookname;
+    return () => {
+      requestUnsubscribe();
+      commentUnsubscribe();
+      reviewUnsubscribe();
+    };
+  }, [user]);
 
-                try {
-                    // Add new notification to the "notifications" collection
-                    const docRef = await addDoc(collection(db, 'notifications'), {
-                        notifid: notificationId,
-                        notifto: owner,
-                        messagetype: message,
-                        timestamp: new Date(),
-                        title: book,
-                        notiffrom: reviewer,
-                    });
-                    console.log('Notification added with ID: ', docRef.id);
-                    
-                } catch (error) {
-                    console.error('Error adding notification: ', error);
-                }
-              }
-              if (change.doc.data().bookowner=== user.email )
-                {
-                  toast.info("Review added to your book");
-                }
-            });
-        });
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, "notifications"),
+      where("notifto", "==", user.email)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setNotificationCount(snapshot.docs.length);
+    });
+  }, [user]);
 
-        return () => {
-            requestUnsubscribe();
-            commentUnsubscribe();
-            reviewUnsubscribe();
-        };
-    }, [user]);
-
-    useEffect(() => {
-        if (!user) return; 
-        const q = query(collection(db, 'notifications'), where('notifto', '==', user.email));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            setNotificationCount(snapshot.docs.length);
-        });
-
-    }, [user]);
-
-    return null; 
+  return null;
 };
 
 export default NotificationListener;
