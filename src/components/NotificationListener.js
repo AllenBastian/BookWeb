@@ -219,8 +219,8 @@ const NotificationListener = () => {
         console.log("working isnide snaphsot comment");
         if (
           change.type === "added" &&
-          change.doc.data().email === user.email &&
-          change.doc.data().postowner !== user.email
+          change.doc.data().postowner === user.email &&
+          change.doc.data().email !== change.doc.data().postowner
         ) {
           console.log("change:", change.doc.data());
           const comment = change.doc.data();
