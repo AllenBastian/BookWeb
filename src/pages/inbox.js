@@ -65,10 +65,10 @@ const Inbox = () => {
                 message = `Book request for book ${book} has been declined.`;
                 break;
               case "Comment to Post":
-                message = `User ${from} has commented on your post ${book}`;
+                message = ` ${from} has commented on your post ${book}`;
                 break;
               case "Review added":
-                message = `User ${from} has reviewed your book ${book}`;
+                message = ` ${from} has reviewed your book ${book}`;
                 break;
               case "Mark as borrowed":
                 message = `The owner has marked ${book} as borrowed to you.`;

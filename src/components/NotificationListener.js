@@ -215,6 +215,7 @@ const NotificationListener = () => {
     );
     const commentUnsubscribe = onSnapshot(commentQ, async (snapshot) => {
       snapshot.docChanges().forEach(async (change) => {
+        console.log("change:", change.doc.data());
         console.log("working isnide snaphsot comment");
         if (
           change.type === "added" &&
@@ -228,6 +229,7 @@ const NotificationListener = () => {
           const message = "Comment to Post";
           const commenter = comment.email;
           const post = comment.postname;
+          const commenterName = comment.commenter;
 
           try {
             // Add new notification to the "notifications" collection
@@ -238,15 +240,16 @@ const NotificationListener = () => {
               timestamp: new Date(),
               title: post,
               notiffrom: commenter,
+                notiffromname: commenterName,
             });
             console.log("Notification added with ID: ", docRef.id);
           } catch (error) {
             console.error("Error adding notification: ", error);
           }
+
+          toast.info(`${commenterName} has commented on your post ${post}`);
         }
-        if (change.doc.data().postowner === user.email) {
-          toast.info("Someone commented on your post");
-        }
+        
       });
     });
     const reviewQ = query(
@@ -255,10 +258,11 @@ const NotificationListener = () => {
     );
     const reviewUnsubscribe = onSnapshot(reviewQ, async (snapshot) => {
       snapshot.docChanges().forEach(async (change) => {
+        console.log("change:", change.doc.data());
         console.log("working isnide snapshot review");
         if (
           change.type === "added" &&
-          change.doc.data().remail === user.email
+          change.doc.data().bookowner === user.email
         ) {
           console.log("Review change:", change.doc.data());
           const review = change.doc.data();
@@ -266,6 +270,7 @@ const NotificationListener = () => {
           const owner = review.bookowner;
           const message = "Review added";
           const reviewer = review.remail;
+          const reviewerName = review.reviewer;
           const book = review.bookname;
 
           try {
@@ -277,16 +282,15 @@ const NotificationListener = () => {
               timestamp: new Date(),
               title: book,
               notiffrom: reviewer,
-            //   notiffromname: review.rname,
+                notiffromname: reviewerName,
             });
             console.log("Notification added with ID: ", docRef.id);
+            toast.info(`${reviewerName} has reviewed your book ${book}`);
           } catch (error) {
             console.error("Error adding notification: ", error);
           }
         }
-        if (change.doc.data().bookowner === user.email) {
-          toast.info("Review added to your book");
-        }
+      
       });
     });
 
