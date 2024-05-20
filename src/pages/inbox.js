@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, onSnapshot, query, deleteDoc, doc, orderBy} from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, query, deleteDoc, doc, orderBy, getDocs, where } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Alert } from '@material-tailwind/react';
+import CustomButton from '../components/CustomButton';
 
 // Assuming Firebase is already initialized elsewhere in your project
 const firestore = getFirestore(getApp());
@@ -70,6 +71,24 @@ const Inbox = () => {
     }
   };
 
+  const handleDeleteAllNotifications = async () => {
+    try {
+    
+      // Fetch all notifications for the current user
+      const querySnapshot = await getDocs(query(collection(firestore, 'notifications'), where('notifto', '==', userEmail)));
+  
+      // Iterate over each notification and delete it
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+  
+      // After deleting all notifications, you can clear the notifications state
+      setNotifications([]);
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+    }
+  };
+  
   return (
     <div className="flex w-full flex-col gap-2 px-4">
       {notifications.map((notification) => (
@@ -83,7 +102,15 @@ const Inbox = () => {
           </button>
           <span>{notification.message}</span>
         </Alert>
+        
       ))}
+      <CustomButton
+                                className="mr-2"
+                                text={"Clear Inbox"}
+                                color={"blue"}
+                                onClick={() => handleDeleteAllNotifications()}
+                                
+                              />
      
     </div>
   );
