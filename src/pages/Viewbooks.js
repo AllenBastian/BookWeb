@@ -152,7 +152,7 @@ const Viewbooks = () => {
     await setSearchBook(searchString);
     console.log(searchString);
   
-    let filteredSearch = initialBook.current;
+    let filteredSearch = initialBook.current.slice();
   
     if (searchString !== "") {
       filteredSearch = filteredSearch.filter((book) =>
@@ -161,9 +161,11 @@ const Viewbooks = () => {
     }
   
     if (category !== "all") {
+      console.log(category);
       if (category === "least rated" || category === "most rated") {
+        console.log(category);
         filteredSearch.sort((a, b) => {
-          const comparison = category === "least rated" ? a.rating - b.rating : b.rating - a.rating;
+          const comparison = category === "least rated" ? a.rating - b.rating :  b.rating - a.rating ;
           return comparison;
         });
       } else {
