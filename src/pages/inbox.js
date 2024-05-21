@@ -81,10 +81,12 @@ const Inbox = () => {
             }
   
             if (message) {
+              const timestampInMilliseconds = notification.timestamp.seconds * 1000;
+              const formattedTime = moment(timestampInMilliseconds).fromNow();
               newNotifications.push({
                 id: change.doc.id,
                 message,
-                time: moment(new Date(notification.timestamp.seconds * 1000).toLocaleString(), 'DD/MM/YYYY, HH:mm:ss').fromNow()
+                time: formattedTime
               });
             }
           }
