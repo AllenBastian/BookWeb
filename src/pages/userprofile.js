@@ -45,6 +45,7 @@ import CustomPopup from "../components/CustomPopup";
 import { Deleter } from "../utils/Deleter";
 import { getUserByEmail, getUserName } from "../utils/Search";
 import { reviewer } from "../utils/Reviewer";
+import { Updater } from "../utils/Updater";
 
 const UserProfilePage = () => {
   const previous = useRef();
@@ -154,6 +155,7 @@ const UserProfilePage = () => {
   console.log(transactions);
 
   const handleSaveClick = async () => {
+
     if (Object.values(formData).some((item) => item.trim() === "")||formData.contact.length !== 10) 
       {
 
@@ -163,6 +165,8 @@ const UserProfilePage = () => {
         });
         return;
       }
+
+
       setDisableButton(false);
     setEditing(false);
     try {
@@ -177,6 +181,8 @@ const UserProfilePage = () => {
       };
 
       const currentUser = auth.currentUser;
+      await Updater("books","owner",currentUser.email,"name",formData.name);
+    
       if (currentUser) {
         const userCollectionRef = collection(db, "users");
         const q = query(
@@ -195,12 +201,15 @@ const UserProfilePage = () => {
           toast.success("User data updated successfully" , {
             duration: 1500, // Duration in milliseconds
           });
-        } else {
+        } 
+
+        else {
           console.error("User document not found");
         }
       } else {
         console.error("Current user not found");
       }
+      
     } catch (error) {
       console.error("Error saving user data:", error);
     }
