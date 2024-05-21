@@ -93,7 +93,7 @@ const SignUpForm = () => {
         semester: '',
         department: '',
         batch: '',
-        college: '',
+        college: "saingits college of Engineering",
         contact: '',
         email: userInfo.email 
       });
@@ -178,7 +178,7 @@ console.log(isSignedUp);
             type="text"
             placeholder="College"
             name="college"
-            value={userInfo.college}
+            value={"Saintgits college of Engineering"}
             onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
           />

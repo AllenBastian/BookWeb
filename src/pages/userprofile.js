@@ -176,7 +176,6 @@ const UserProfilePage = () => {
         semester: formData.semester,
         department: formData.department,
         batch: formData.batch,
-        college: formData.college,
         contact: formData.contact,
       };
 
@@ -491,19 +490,7 @@ const UserProfilePage = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
                 />
               </div>
-              <div className="mb-4">
-                <p className="text-sm font-semibold mb-2 flex items-center">
-                  <FaUniversity className="mr-2 mt-1 text-black" />
-                  College
-                </p>
-                <input
-                  type="text"
-                  name="college"
-                  value={formData.college}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors duration-300 ease-in-out hover:border-blue-500"
-                />
-              </div>
+        
               <div className="mb-4">
                 <p className="text-sm font-semibold mb-2 flex items-center">
                   <FaBuilding className="mr-2 mt-1 text-black" />
