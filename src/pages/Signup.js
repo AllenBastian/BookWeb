@@ -35,7 +35,7 @@ const SignUpForm = () => {
     semester: '',
     department: '',
     batch: '',
-    college: '',
+    college: 'Saintgits college of Engineering',
     contact: '',
   });
 
@@ -93,7 +93,7 @@ const SignUpForm = () => {
         semester: '',
         department: '',
         batch: '',
-        college: "saingits college of Engineering",
+        college: '',
         contact: '',
         email: userInfo.email 
       });
