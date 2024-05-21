@@ -31,6 +31,7 @@ import { Tooltip } from "@material-tailwind/react";
 
 import { NotificationCountContext } from "../context/Context";
 import { FaSign, FaSignInAlt } from "react-icons/fa";
+import { toast } from "sonner";
 
 function NavList() {
   const nav = useNavigate();
@@ -78,6 +79,21 @@ function NavList() {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
       const email = result.user.email; 
+      console.log(email.slice(-14));
+      if(email.slice(-14) !== "@saintgits.org")
+        {
+          toast.error("Please login with your Saintgits email id");
+          signOut(auth).then(() => {
+            setUser(false);
+            setIsSignedUp(false)
+            localStorage.setItem("isSignedUp", JSON.stringify(false));
+            nav("/");
+          }).catch((error) => {
+            console.error("Sign out error:", error);
+          });
+          return;
+        }
+      
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', email));
       const querySnapshot = await getDocs(q);
