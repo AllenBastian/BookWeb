@@ -39,7 +39,7 @@ function App() {
             gap={20}
           />
 
-          <NotificationListener /> 
+          <Protected><NotificationListener /> </Protected>
           <Routes>
             <Route path="/" element={<Homepage/>}/>
             <Route path="/dashboard" element={<Protected><Dashboard/></Protected>}/>
