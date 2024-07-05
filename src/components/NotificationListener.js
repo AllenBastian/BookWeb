@@ -98,12 +98,50 @@ const NotificationListener = () => {
               timestamp: new Date(),
               title: bookname,
               notiffrom: requestTo,
-                notiffromname: reqfrname,
+              notiffromname: reqfrname,
               isRead: false,
             });
             console.log("Notification added with ID: ", docRef.id);
             toast.info(
-              `Your request for book  ${bookname} has been accepted. you can now chat with the owner`
+              `Your request for book  ${bookname} has been accepted. you can now chat with the owner.`,
+              { duration: 5000 }
+            );
+          } catch (error) {
+            console.error("Error adding notification: ", error);
+          }
+        }
+        else if (
+          change.type === "modified" &&
+          change.doc.data().requestto === user.email &&
+          change.doc.data().accepted === true &&
+          change.doc.data().rejected === false
+          && change.doc.data().borrowed === false
+        ) {
+          const request = change.doc.data();
+          const notificationId = uuidv4();
+          const requestTo = request.requestto;
+          const message = "Chat Initiated";
+          const bookname = request.booktitile;
+          const reqfr = request.requestfrom;
+          const reqfrname = request.reqfromusername;
+          const requestToName = request.reqtousername;
+
+          try {
+            const docRef = await addDoc(collection(db, "notifications"), {
+              notifid: notificationId,
+              notifto: requestTo,
+              messagetype: message,
+              timestamp: new Date(),
+              title: bookname,
+              notiffrom: reqfr,
+              notiffromname: reqfrname,
+              notiftoname: requestToName,
+              isRead: false,
+            });
+            console.log("Notification added with ID: ", docRef.id);
+            toast.info(
+              `Chat initiated from ${reqfrname}`,
+              { duration: 2000 }
             );
           } catch (error) {
             console.error("Error adding notification: ", error);
