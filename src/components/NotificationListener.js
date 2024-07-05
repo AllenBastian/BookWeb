@@ -53,7 +53,7 @@ const NotificationListener = () => {
           const bookname = request.booktitile;
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-
+          console.log("requestfromhereherehrer:", change.doc.data().requestfrom);
           if(change.doc.data().requestfrom === user.email){
           try {
             // Add new notification to the "notifications" collection
