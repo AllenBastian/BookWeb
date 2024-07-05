@@ -113,10 +113,16 @@ const SignUpForm = () => {
 
 }
 
+
+
+
 if(isSignedUp===true){
+  console.log("signed up true conditioned if")
   nav("/");
 }
-console.log(isSignedUp);
+else
+{
+console.log("signed up false conditioned else");
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
       
@@ -213,6 +219,7 @@ console.log(isSignedUp);
       </motion.div>
     </div>
   );
+}
 };
 
 export default SignUpForm;

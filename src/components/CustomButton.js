@@ -1,7 +1,7 @@
-import { or } from 'firebase/firestore';
+
 import {motion} from 'framer-motion';
 
-const CustomButton = ({className,color,icon,text,onClick,disabled})=>{
+const CustomButton = ({className,color,icon,text,onClick,disabled=false})=>{
 
     const colorClasses = {
         blue: "bg-blue-200 hover:bg-blue-300 text-blue-900",
@@ -18,6 +18,7 @@ const CustomButton = ({className,color,icon,text,onClick,disabled})=>{
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClick}
+                disabled={disabled}
               >
                 {icon}
                 <span className="ml-2">{text}</span>

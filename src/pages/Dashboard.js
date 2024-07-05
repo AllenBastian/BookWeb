@@ -57,6 +57,7 @@ const Dashboard = () => {
   const [reqDetails, setReqDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [temp, setTemp] = useState([]);
+  const [blocker,setBlocker] = useState(false);
   const [temp2, setTemp2] = useState([]);
 
   useEffect(() => {
@@ -181,6 +182,7 @@ const Dashboard = () => {
   
 
   const handleDecline = async (id) => {
+    setBlocker(true);
     try {
       const q = query(collection(db, "requests"), where("ruid", "==", id));
       const querySnapshot = await getDocs(q);
@@ -193,6 +195,7 @@ const Dashboard = () => {
           duration: 1500,
         });
       }
+      setBlocker(false);
     
     } catch (error) {
       console.error("Error handling decline: ", error);
@@ -220,6 +223,7 @@ const Dashboard = () => {
   };
 
   const handleAccept = async (id) => {
+    setBlocker(true);
     try {
       const requestsRef = collection(db, "requests");
       const querySnapshot = await getDocs(
@@ -235,6 +239,7 @@ const Dashboard = () => {
       toast.success("Request accepted" , {
         duration: 1500, 
       });
+      setBlocker(false);
     } catch (error) {
       console.error("Error updating document:", error);
     }
@@ -519,8 +524,8 @@ const Dashboard = () => {
                             exit={{ opacity: 0 }}
                             className="mt-2 flex  sm:flex-row justify-end gap-6 items-center"
                           >
-                            <CustomButton icon={<FaTimes/>} text={"Accept"} color={"green"} onClick={()=>handleAccept(req.ruid)}/>
-                            <CustomButton icon={<FaCheck/>} text={"Decline"} color={"red"} onClick={()=>handleDecline(req.ruid)}/>
+                            <CustomButton icon={<FaTimes/>} text={"Accept"} color={"green"}  disabled={blocker} onClick={()=>handleAccept(req.ruid) }/>
+                            <CustomButton icon={<FaCheck/>} text={"Decline"} color={"red"} disabled={blocker} onClick={()=>handleDecline(req.ruid)}/>
       
                           </motion.div>
                         )}
