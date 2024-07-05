@@ -75,8 +75,8 @@ const NotificationListener = () => {
           }
           }
           if(change.doc.data().requestto === user.email){
-            toast.info(`you have a new request for the book ${bookname}`, {
-              duration: 1500,
+            toast.info(`You have a new request for the book <strong>${bookname}</strong>`, {
+              duration: 2000,
             });
           }
           
@@ -118,8 +118,8 @@ const NotificationListener = () => {
           console.log("aksjkajkjk")
           if (change.doc.data().requestfrom === user.email ){
             toast.info(
-              `Your request for book  ${bookname} has been accepted. you can now chat with the owner.`,
-              { duration: 1500 }
+              `Your request for book <strong>${bookname}</strong> has been accepted. You can now chat with the owner.`,
+              { duration: 2500 }
             );
           }
          
@@ -182,7 +182,7 @@ const NotificationListener = () => {
           if(change.doc.data().requestfrom === user.email){
             
             toast.warning(
-              `your request for book ${bookname} has been declined`,
+              `Your request for book <strong>${bookname}</strong> has been declined`,
               { duration: 4000 }
             );
           }
@@ -220,7 +220,7 @@ const NotificationListener = () => {
           }
           if(change.doc.data().requestfrom === user.email)
           {
-            toast.info(`The owner has marked ${bookname} borrowed to you`, {
+            toast.info(`The owner has marked <strong>${bookname}</strong> borrowed to you`, {
               duration: 4000,
             });
           }
@@ -255,7 +255,7 @@ const NotificationListener = () => {
             }
             }
             if(change.doc.data().requestfrom === user.email){
-              toast.info(`The owner has marked ${bookname} returned from you`, {
+              toast.info(`The owner has marked <strong>${bookname}</strong> as returned from you`, {
                 duration: 4000,
                 });
             }
@@ -302,7 +302,7 @@ const NotificationListener = () => {
             console.error("Error adding notification: ", error);
           }
 
-          toast.info(`${commenterName} has commented on your post ${post}`);
+          toast.info(`${commenterName} has commented on your post "${post}"`);
         }
         
       });
@@ -340,7 +340,7 @@ const NotificationListener = () => {
                 notiffromname: reviewerName,
             });
             console.log("Notification added with ID: ", docRef.id);
-            toast.info(`${reviewerName} has reviewed your book ${book}`);
+            toast.info(`${reviewerName} has reviewed your book <strong>${book}</strong>`);
           } catch (error) {
             console.error("Error adding notification: ", error);
           }
