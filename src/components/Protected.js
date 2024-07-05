@@ -25,12 +25,12 @@ export const Protected=({children})=>{
       }, []);
       
 
-    useEffect(() => {
-      if (isLogged && !isSignedUp) {
-          nav("/Signup");
-      }
-  }, [isLogged, isSignedUp]);
+  //   useEffect(() => {
+  //     if (isLogged && !isSignedUp) {
+  //         nav("/Signup");
+  //     }
+  // }, [isLogged, isSignedUp]);
 
-  return isLogged && (isSignedUp || window.location.pathname.includes("/Signup")) ? children : null;
+  return isLogged && (isSignedUp===true || window.location.pathname.includes("/Signup")) ? children : null;
 
 }

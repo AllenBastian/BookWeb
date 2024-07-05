@@ -100,9 +100,16 @@ function NavList() {
       const isUserSignedUp = querySnapshot.docs.length > 0;
       localStorage.setItem("isSignedUp", JSON.stringify(isUserSignedUp));
       setIsSignedUp(isUserSignedUp);
+      
      
+      console.log("before the if",isUserSignedUp)
       if(isUserSignedUp===false)
+      {
+        
+        console.log("allne sbbaus wdjsd",isUserSignedUp)
         nav("/Signup");
+      
+      }
       else  
        nav("/"); 
     } catch (error) {
