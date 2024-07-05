@@ -84,7 +84,7 @@ const NotificationListener = () => {
         //if the owner accepts the requests-correct verified for initial reject and transaction reject
         else if (
           change.type === "modified" &&
-          change.doc.data().requestfrom === user.email &&
+          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) &&
           change.doc.data().accepted === true &&
           change.doc.data().rejected === false
           && change.doc.data().borrowed === false
@@ -97,26 +97,35 @@ const NotificationListener = () => {
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
 
-          try {
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: reqfr,
-              messagetype: message,
-              timestamp: new Date(),
-              title: bookname,
-              notiffrom: requestTo,
-              notiffromname: reqfrname,
-              isRead: false,
-            });
-            console.log("Notification to accept book request added with ID: ", docRef.id);
+          if(change.doc.data().requestto === user.email){
+            try {
+              const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: reqfr,
+                messagetype: message,
+                timestamp: new Date(),
+                title: bookname,
+                notiffrom: requestTo,
+                notiffromname: reqfrname,
+                isRead: false,
+              });
+              console.log("Notification to accept book request added with ID: ", docRef.id);
+            
+            } catch (error) {
+              console.error("Error adding notification: ", error);
+            }
+          }
+          console.log("aksjkajkjk")
+          if (change.doc.data().requestfrom === user.email ){
             toast.info(
               `Your request for book  ${bookname} has been accepted. you can now chat with the owner.`,
               { duration: 1500 }
             );
-          } catch (error) {
-            console.error("Error adding notification: ", error);
           }
+         
         }
+
+        //do i need to fix this? no right
         else if (
           change.type === "modified" &&
           change.doc.data().requestto === user.email &&
@@ -139,7 +148,7 @@ const NotificationListener = () => {
         //if the owner rejects the requests-correct verified
         else if (
           change.type === "modified" &&
-          change.doc.data().requestfrom === user.email &&
+          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) &&
           change.doc.data().rejected === true
         ) {
           console.log("Entered reject mode");
@@ -151,31 +160,37 @@ const NotificationListener = () => {
           const bookname = request.booktitile;
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-
-          try {
-            // Add new notification to the "notifications" collection
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: reqfr,
-              messagetype: message,
-              timestamp: new Date(),
-              title: bookname,
-              notiffrom: requestTo,
-              notiffromname: reqfrname,
-              isRead: false,
-            });
-            console.log("Notification for book request rejected added with ID: ", docRef.id);
+          if(change.doc.data().requestto === user.email){
+            try {
+              // Add new notification to the "notifications" collection
+              const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: reqfr,
+                messagetype: message,
+                timestamp: new Date(),
+                title: bookname,
+                notiffrom: requestTo,
+                notiffromname: reqfrname,
+                isRead: false,
+              });
+              console.log("Notification for book request rejected added with ID: ", docRef.id);
+              
+            } catch (error) {
+              console.error("Error adding notification: ", error);
+            }
+          }
+          if(change.doc.data().requestfrom === user.email){
+            
             toast.warning(
               `your request for book ${bookname} has been declined`,
               { duration: 4000 }
             );
-          } catch (error) {
-            console.error("Error adding notification: ", error);
           }
+          
           //maark as borrowed - correct verified
         } else if (
           change.type === "modified" &&
-          change.doc.data().requestfrom === user.email &&
+          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) &&
           change.doc.data().borrowed === true
         ) {
           const request = change.doc.data();
@@ -185,28 +200,34 @@ const NotificationListener = () => {
           const bookname = request.booktitile;
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-
-          try {
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: reqfr,
-              messagetype: message,
-              timestamp: new Date(),
-              title: bookname,
-              notiffrom: requestTo,
-                notiffromname: reqfrname,
-              isRead: false,
-            });
-            console.log("Notification for book marked as borrowed added with ID: ", docRef.id);
+          if(change.doc.data().requestto === user.email){
+            try {
+              const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: reqfr,
+                messagetype: message,
+                timestamp: new Date(),
+                title: bookname,
+                notiffrom: requestTo,
+                  notiffromname: reqfrname,
+                isRead: false,
+              });
+              console.log("Notification for book marked as borrowed added with ID: ", docRef.id);
+              
+            } catch (error) {
+              console.error("Error adding notification: ", error);
+            }
+          }
+          if(change.doc.data().requestfrom === user.email)
+          {
             toast.info(`The owner has marked ${bookname} borrowed to you`, {
               duration: 4000,
             });
-          } catch (error) {
-            console.error("Error adding notification: ", error);
           }
+          
         }
-        else if (change.type = "removed" && 
-          change.doc.data().requestfrom === user.email && 
+        else if (change.type === "removed" && 
+          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) && 
           change.doc.data().borrowed === true) {
             const request = change.doc.data();
             const notificationId = uuidv4();
@@ -215,8 +236,8 @@ const NotificationListener = () => {
             const bookname = request.booktitile;
             const reqfr = request.requestfrom;
             const reqfrname = request.reqfromusername;
-    
-            try {
+            if(change.doc.data().requestto === user.email){
+              try {
                 const docRef = await addDoc(collection(db, "notifications"), {
                 notifid: notificationId,
                 notifto: reqfr,
@@ -228,12 +249,17 @@ const NotificationListener = () => {
                 isRead: false,
                 });
                 console.log("Notification for transaction completed added with ID: ", docRef.id);
-                toast.info(`The owner has marked ${bookname} returned from you`, {
-                duration: 4000,
-                });
+                
             } catch (error) {
                 console.error("Error adding notification: ", error);
             }
+            }
+            if(change.doc.data().requestfrom === user.email){
+              toast.info(`The owner has marked ${bookname} returned from you`, {
+                duration: 4000,
+                });
+            }
+
         }
       });
     });
