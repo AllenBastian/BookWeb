@@ -125,26 +125,6 @@ const NotificationListener = () => {
          
         }
 
-        //do i need to fix this? no right
-        else if (
-          change.type === "modified" &&
-          change.doc.data().requestto === user.email &&
-          change.doc.data().accepted === true &&
-          change.doc.data().rejected === false
-          && change.doc.data().borrowed === false
-        ) {
-          const request = change.doc.data();
-          const reqfrname = request.reqfromusername;
-          try {
-            console.log("im inside the chat notif");
-            toast.info(
-              `You can chat with ${reqfrname} now`,
-              { duration: 1500 }
-            );
-          } catch (error) {
-            console.error("Error adding notification: ", error);
-          }
-        }
         //if the owner rejects the requests-correct verified
         else if (
           change.type === "modified" &&

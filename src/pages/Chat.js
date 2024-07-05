@@ -386,7 +386,7 @@ const Chat = () => {
             <CustomButton
               color={flag.current ? "green" : "red"}
               text={"yes"}
-              icon={<FaTimes />}
+              icon={<FaCheck />}
               onClick={() => handleMarkBorrowed(flag.current)}
             />
           }
@@ -394,7 +394,7 @@ const Chat = () => {
             <CustomButton
               color={flag.current ? "red" : "green"}
               text={"no"}
-              icon={<FaCheck />}
+              icon={<FaTimes />}
               onClick={() => setPopup(false)}
             />
           }

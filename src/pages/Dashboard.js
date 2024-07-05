@@ -524,8 +524,8 @@ const Dashboard = () => {
                             exit={{ opacity: 0 }}
                             className="mt-2 flex  sm:flex-row justify-end gap-6 items-center"
                           >
-                            <CustomButton icon={<FaTimes/>} text={"Accept"} color={"green"}  disabled={blocker} onClick={()=>handleAccept(req.ruid) }/>
-                            <CustomButton icon={<FaCheck/>} text={"Decline"} color={"red"} disabled={blocker} onClick={()=>handleDecline(req.ruid)}/>
+                            <CustomButton icon={<FaCheck/>} text={"Accept"} color={"green"}  disabled={blocker} onClick={()=>handleAccept(req.ruid) }/>
+                            <CustomButton icon={<FaTimes/>} text={"Decline"} color={"red"} disabled={blocker} onClick={()=>handleDecline(req.ruid)}/>
       
                           </motion.div>
                         )}

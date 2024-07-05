@@ -62,7 +62,7 @@ const SignUpForm = () => {
     }
 
     if(name === "contact" || name === "semester"){
-      const isValidPhoneNumber = /^\+?\d*$/.test(value);
+      const isValidPhoneNumber = /^\d*$/.test(value);
       if(!isValidPhoneNumber){
         return;
       }
@@ -190,7 +190,7 @@ console.log("signed up false conditioned else");
           />
         </div>
         <div className="mb-4">
-          {clicked && userInfo.contact.length !== 10 && <p className="text-red-500 text-sm">Contact number should be of 10 digits</p>}
+          {clicked &&  userInfo.contact.length !== 10 && <p className="text-red-500 text-sm">Contact number should be of 10 digits</p>}
           <input
             type="text"
             placeholder="Contact number"
@@ -212,7 +212,6 @@ console.log("signed up false conditioned else");
           />
         </div>
         {hide ?( <p className="text-gray-500">Signing up...</p>):(
-        // <button onClick={handleSignUp} className={`w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-500  `}>Sign Up</button>
         <CustomButton onClick={handleSignUp} color={"green"} className="w-50" icon={<FaUserPlus/>} text="Sign Up" />
         )}
         {disableButton && <p className="text-red-500 text-sm mt-2">Please fill all the fields</p>}

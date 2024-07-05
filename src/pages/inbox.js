@@ -18,14 +18,14 @@ import CustomButton from "../components/CustomButton";
 import moment from "moment/moment";
 import { FaTimes, FaTrash } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
+ 
 const firestore = getFirestore(getApp());
-
+ 
 const Inbox = () => {
   const [notifications, setNotifications] = useState([]);
   const [userEmail, setUserEmail] = useState(null);
   const navigate = useNavigate(); // Initialize useNavigate
-
+ 
   useEffect(() => {
     const auth = getAuth(getApp());
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -35,15 +35,15 @@ const Inbox = () => {
     });
     return () => unsubscribe();
   }, []);
-
+ 
   useEffect(() => {
     if (!userEmail) return; 
-  
+ 
     const q = query(
       collection(firestore, "notifications"),
       orderBy("timestamp", "desc")
     );
-  
+ 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newNotifications = [];
       snapshot.docChanges().forEach((change) => {
@@ -52,7 +52,7 @@ const Inbox = () => {
           const from = notification.notiffromname;
           const book = notification.title;
           const to = notification.notifto;
-  
+ 
           if (to === userEmail) {
             let message = "";
             let path = ""; // Define a path variable
@@ -62,33 +62,33 @@ const Inbox = () => {
                 path = `/dashboard`; // Set the path
                 break;
               case "Book Request Accepted":
-                message = `Book request for book "${book}" has been accepted, you can now chat with the owner`;
+                message = <span>Book request for book "<strong>{book}</strong>" has been accepted, you can now chat with the owner</span>;
                 path = `/dashboard`; // Set the path
                 break;
               case "Book Request Declined":
-                message = `Book request for book "${book}" has been declined.`;
+                message = <span>Book request for book "<strong>{book}</strong>" has been declined.</span>;
                 // Set the path or handle case
                 break;
               case "Comment to Post":
-                message = ` ${from} has commented on your post ${book}`;
+                message = <span>{from} has commented on your post "<strong>{book}</strong>"</span>;
                 path = `/postpage`; // Set the path
                 break;
               case "Review added":
-                message = ` ${from} has reviewed your book "${book}"`;
+                message = <span>{from} has reviewed your book "<strong>{book}</strong>"</span>;
                 path = `/viewbooks`; // Set the path
                 break;
               case "Mark as borrowed":
-                message = `The owner has marked "${book}" as borrowed to you.`;
+                message = <span>The owner has marked "<strong>{book}</strong>" as borrowed to you.</span>;
                 // Set the path or handle case
                 break;
               case "Transaction Complete":
-                message = `The owner has marked "${book}" as returned from you.`;
+                message = <span>The owner has marked "<strong>{book}</strong>" as returned from you.</span>;
                 // Set the path or handle case
                 break;
               default:
                 break;
             }
-  
+ 
             if (message) {
               const timestampInMilliseconds = notification.timestamp.seconds * 1000;
               const formattedTime = moment(timestampInMilliseconds).fromNow();
@@ -102,16 +102,16 @@ const Inbox = () => {
           }
         }
       });
-  
+ 
       setNotifications((prevNotifications) => [
         ...newNotifications,
         ...prevNotifications
       ]);
     });
-  
+ 
     return () => unsubscribe();
   }, [userEmail]);
-
+ 
   const handleDelete = async (id) => {
     try {
       setNotifications((prevNotifications) =>
@@ -122,7 +122,7 @@ const Inbox = () => {
       console.error("Error deleting notification:", error);
     }
   };
-
+ 
   const handleDeleteAllNotifications = async () => {
     try {
       const querySnapshot = await getDocs(
@@ -131,21 +131,19 @@ const Inbox = () => {
           where("notifto", "==", userEmail)
         )
       );
-
+ 
       querySnapshot.forEach(async (doc) => {
         await deleteDoc(doc.ref);
       });
-
+ 
       setNotifications([]);
     } catch (error) {
       console.error("Error deleting all notifications:", error);
     }
   };
-
-  const handleNotificationClick = (path) => {
-    navigate(path); // Redirect to the specified path
-  };
-
+ 
+  
+ 
   if(notifications.length > 0){
     return (
       <div className="flex w-full flex-col gap-4 px-6 py-4  rounded-lg ">
@@ -167,7 +165,6 @@ const Inbox = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.3 }}
-              onClick={() => handleNotificationClick(notification.path)} // Add onClick here
             >
               <Alert variant="outlined" className="relative bg-gray-200 shadow-sm rounded-lg p-4">
                 <FaTimes
@@ -196,5 +193,5 @@ const Inbox = () => {
     );
   }
 };
-
+ 
 export default Inbox;
