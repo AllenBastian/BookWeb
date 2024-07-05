@@ -220,7 +220,7 @@ const NotificationListener = () => {
           }
           if(change.doc.data().requestfrom === user.email)
           {
-            toast.info(`The owner has marked <strong>${bookname}</strong> borrowed to you`, {
+            toast.info(`The owner has marked <strong>${bookname}</strong> as borrowed to you`, {
               duration: 4000,
             });
           }
