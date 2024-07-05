@@ -5,25 +5,25 @@ const teamMembers = [
     name: 'Allen Bastian Joy',
     role: 'Team Lead',
     image: '/images/allen.jpg', // Update with actual image paths
-    description: 'Allen is passionate about books and community building.',
+    description: 'The captain of the ship',
   },
   {  
     name: 'Alina Mary Sam',
-    role: 'Member',
+    role: 'Developer',
     image: '/images/alina.jpg', // Update with actual image paths
-    description: 'Alina is the tech wizard making sure everything runs smoothly.',
+    description: 'An extroverted bookworm ',
   },
   {
     name: 'Hridya Syju',
-    role: 'Member',
+    role: 'Lead Developer',
     image: '/images/hridya.jpeg',
-    description: 'Hridya is the enthuasist techi.',
+    description: 'A musicophile with a talent to code',
   },
   {
     name: 'Beneeta Bency',
-    role: 'Member',
+    role: 'Lead Designer',
     image: '/images/beneeta.jpeg',
-    description: 'Beneeta is a techi which styles and designs the pages',
+    description: 'A dancer with a heart of gold',
   },
   // Add more team members as needed
 ];
