@@ -44,7 +44,7 @@ const NotificationListener = () => {
         console.log("changeherehejejjh:", change.doc.data());
         if (
           change.type === "added" &&
-          change.doc.data().requestto === user.email
+          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email)
         ) {
           const request = change.doc.data();
           const notificationId = uuidv4();
@@ -54,6 +54,7 @@ const NotificationListener = () => {
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
 
+          if(change.doc.data().requestfrom === user.email){
           try {
             // Add new notification to the "notifications" collection
             const docRef = await addDoc(collection(db, "notifications"), {
@@ -67,12 +68,18 @@ const NotificationListener = () => {
               isRead: false,
             });
             console.log("Notification for book request added with ID: ", docRef.id);
-            toast.info(`you have a new request for the book ${bookname}`, {
-              duration: 2000,
-            });
+            
+            
           } catch (error) {
             console.error("Error adding notification: ", error);
           }
+          }
+          if(change.doc.data().requestto === user.email){
+            toast.info(`you have a new request for the book ${bookname}`, {
+              duration: 1500,
+            });
+          }
+          
         }
         //if the owner accepts the requests-correct verified for initial reject and transaction reject
         else if (
