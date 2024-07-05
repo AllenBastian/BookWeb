@@ -97,7 +97,7 @@ const NotificationListener = () => {
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
 
-          if(change.doc.data().requestfrom === user.email){
+          if(change.doc.data().requestto === user.email){
             try {
               const docRef = await addDoc(collection(db, "notifications"), {
                 notifid: notificationId,
@@ -116,7 +116,7 @@ const NotificationListener = () => {
             }
           }
           console.log("aksjkajkjk")
-          if (change.doc.data().requestto === user.email ){
+          if (change.doc.data().requestfrom === user.email ){
             toast.info(
               `Your request for book <strong>${bookname}</strong> has been accepted. You can now chat with the owner.`,
               { duration: 2500 }
