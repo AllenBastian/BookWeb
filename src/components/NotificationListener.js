@@ -33,7 +33,7 @@ const NotificationListener = () => {
   }, []);
 
   useEffect(() => {
-    if (!user) return; 
+    if (!user) return;
 
     const requestQ = query(
       collection(db, "requests"),
@@ -44,7 +44,8 @@ const NotificationListener = () => {
         console.log("changeherehejejjh:", change.doc.data());
         if (
           change.type === "added" &&
-          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email)
+          (change.doc.data().requestto === user.email ||
+            change.doc.data().requestfrom === user.email)
         ) {
           const request = change.doc.data();
           const notificationId = uuidv4();
@@ -53,41 +54,48 @@ const NotificationListener = () => {
           const bookname = request.booktitile;
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-          console.log("requestfromhereherehrer:", change.doc.data().requestfrom);
-          if(change.doc.data().requestfrom === user.email){
-          try {
-            // Add new notification to the "notifications" collection
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: requestTo,
-              messagetype: message,
-              timestamp: new Date(),
-              title: bookname,
-              notiffrom: reqfr,
-              notiffromname: reqfrname,
-              isRead: false,
-            });
-            console.log("Notification for book request added with ID: ", docRef.id);
-            
-            
-          } catch (error) {
-            console.error("Error adding notification: ", error);
+          console.log(
+            "requestfromhereherehrer:",
+            change.doc.data().requestfrom
+          );
+          if (change.doc.data().requestfrom === user.email) {
+            try {
+              // Add new notification to the "notifications" collection
+              const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: requestTo,
+                messagetype: message,
+                timestamp: new Date(),
+                title: bookname,
+                notiffrom: reqfr,
+                notiffromname: reqfrname,
+                isRead: false,
+              });
+              console.log(
+                "Notification for book request added with ID: ",
+                docRef.id
+              );
+            } catch (error) {
+              console.error("Error adding notification: ", error);
+            }
           }
+          if (change.doc.data().requestto === user.email) {
+            toast.info(
+              `You have a new request for the book <strong>${bookname}</strong>`,
+              {
+                duration: 2000,
+              }
+            );
           }
-          if(change.doc.data().requestto === user.email){
-            toast.info(`You have a new request for the book <strong>${bookname}</strong>`, {
-              duration: 2000,
-            });
-          }
-          
         }
         //if the owner accepts the requests-correct verified for initial reject and transaction reject
         else if (
           change.type === "modified" &&
-          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) &&
+          (change.doc.data().requestto === user.email ||
+            change.doc.data().requestfrom === user.email) &&
           change.doc.data().accepted === true &&
-          change.doc.data().rejected === false
-          && change.doc.data().borrowed === false
+          change.doc.data().rejected === false &&
+          change.doc.data().borrowed === false
         ) {
           const request = change.doc.data();
           const notificationId = uuidv4();
@@ -97,7 +105,7 @@ const NotificationListener = () => {
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
 
-          if(change.doc.data().requestto === user.email){
+          if (change.doc.data().requestto === user.email) {
             try {
               const docRef = await addDoc(collection(db, "notifications"), {
                 notifid: notificationId,
@@ -109,26 +117,28 @@ const NotificationListener = () => {
                 notiffromname: reqfrname,
                 isRead: false,
               });
-              console.log("Notification to accept book request added with ID: ", docRef.id);
-            
+              console.log(
+                "Notification to accept book request added with ID: ",
+                docRef.id
+              );
             } catch (error) {
               console.error("Error adding notification: ", error);
             }
           }
-          console.log("aksjkajkjk")
-          if (change.doc.data().requestfrom === user.email ){
+          console.log("aksjkajkjk");
+          if (change.doc.data().requestfrom === user.email) {
             toast.info(
               `Your request for book <strong>${bookname}</strong> has been accepted. You can now chat with the owner.`,
               { duration: 2500 }
             );
           }
-         
         }
 
         //if the owner rejects the requests-correct verified
         else if (
           change.type === "modified" &&
-          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) &&
+          (change.doc.data().requestto === user.email ||
+            change.doc.data().requestfrom === user.email) &&
           change.doc.data().rejected === true
         ) {
           console.log("Entered reject mode");
@@ -140,7 +150,7 @@ const NotificationListener = () => {
           const bookname = request.booktitile;
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-          if(change.doc.data().requestto === user.email){
+          if (change.doc.data().requestto === user.email) {
             try {
               // Add new notification to the "notifications" collection
               const docRef = await addDoc(collection(db, "notifications"), {
@@ -153,24 +163,26 @@ const NotificationListener = () => {
                 notiffromname: reqfrname,
                 isRead: false,
               });
-              console.log("Notification for book request rejected added with ID: ", docRef.id);
-              
+              console.log(
+                "Notification for book request rejected added with ID: ",
+                docRef.id
+              );
             } catch (error) {
               console.error("Error adding notification: ", error);
             }
           }
-          if(change.doc.data().requestfrom === user.email){
-            
+          if (change.doc.data().requestfrom === user.email) {
             toast.warning(
               `Your request for book <strong>${bookname}</strong> has been declined`,
               { duration: 4000 }
             );
           }
-          
+
           //maark as borrowed - correct verified
         } else if (
           change.type === "modified" &&
-          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) &&
+          (change.doc.data().requestto === user.email ||
+            change.doc.data().requestfrom === user.email) &&
           change.doc.data().borrowed === true
         ) {
           const request = change.doc.data();
@@ -180,7 +192,7 @@ const NotificationListener = () => {
           const bookname = request.booktitile;
           const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-          if(change.doc.data().requestto === user.email){
+          if (change.doc.data().requestto === user.email) {
             try {
               const docRef = await addDoc(collection(db, "notifications"), {
                 notifid: notificationId,
@@ -189,36 +201,41 @@ const NotificationListener = () => {
                 timestamp: new Date(),
                 title: bookname,
                 notiffrom: requestTo,
-                  notiffromname: reqfrname,
+                notiffromname: reqfrname,
                 isRead: false,
               });
-              console.log("Notification for book marked as borrowed added with ID: ", docRef.id);
-              
+              console.log(
+                "Notification for book marked as borrowed added with ID: ",
+                docRef.id
+              );
             } catch (error) {
               console.error("Error adding notification: ", error);
             }
           }
-          if(change.doc.data().requestfrom === user.email)
-          {
-            toast.info(`The owner has marked <strong>${bookname}</strong> as borrowed to you`, {
-              duration: 4000,
-            });
+          if (change.doc.data().requestfrom === user.email) {
+            toast.info(
+              `The owner has marked <strong>${bookname}</strong> as borrowed to you`,
+              {
+                duration: 4000,
+              }
+            );
           }
-          
-        }
-        else if (change.type === "removed" && 
-          (change.doc.data().requestto === user.email || change.doc.data().requestfrom === user.email) && 
-          change.doc.data().borrowed === true) {
-            const request = change.doc.data();
-            const notificationId = uuidv4();
-            const requestTo = request.requestto;
-            const message = "Transaction Complete";
-            const bookname = request.booktitile;
-            const reqfr = request.requestfrom;
-            const reqfrname = request.reqfromusername;
-            if(change.doc.data().requestto === user.email){
-              try {
-                const docRef = await addDoc(collection(db, "notifications"), {
+        } else if (
+          change.type === "removed" &&
+          (change.doc.data().requestto === user.email ||
+            change.doc.data().requestfrom === user.email) &&
+          change.doc.data().borrowed === true
+        ) {
+          const request = change.doc.data();
+          const notificationId = uuidv4();
+          const requestTo = request.requestto;
+          const message = "Transaction Complete";
+          const bookname = request.booktitile;
+          const reqfr = request.requestfrom;
+          const reqfrname = request.reqfromusername;
+          if (change.doc.data().requestto === user.email) {
+            try {
+              const docRef = await addDoc(collection(db, "notifications"), {
                 notifid: notificationId,
                 notifto: reqfr,
                 messagetype: message,
@@ -227,19 +244,23 @@ const NotificationListener = () => {
                 notiffrom: requestTo,
                 notiffromname: reqfrname,
                 isRead: false,
-                });
-                console.log("Notification for transaction completed added with ID: ", docRef.id);
-                
+              });
+              console.log(
+                "Notification for transaction completed added with ID: ",
+                docRef.id
+              );
             } catch (error) {
-                console.error("Error adding notification: ", error);
+              console.error("Error adding notification: ", error);
             }
-            }
-            if(change.doc.data().requestfrom === user.email){
-              toast.info(`The owner has marked <strong>${bookname}</strong> as returned from you`, {
+          }
+          if (change.doc.data().requestfrom === user.email) {
+            toast.info(
+              `The owner has marked <strong>${bookname}</strong> as returned from you`,
+              {
                 duration: 4000,
-                });
-            }
-
+              }
+            );
+          }
         }
       });
     });
@@ -254,7 +275,8 @@ const NotificationListener = () => {
         console.log("working isnide snaphsot comment");
         if (
           change.type === "added" &&
-          change.doc.data().postowner === user.email &&
+          (change.doc.data().postowner === user.email ||
+            change.doc.data().email === user.email) &&
           change.doc.data().email !== change.doc.data().postowner
         ) {
           console.log("change:", change.doc.data());
@@ -266,25 +288,30 @@ const NotificationListener = () => {
           const post = comment.postname;
           const commenterName = comment.commenter;
 
-          try {
-            // Add new notification to the "notifications" collection
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: owner,
-              messagetype: message,
-              timestamp: new Date(),
-              title: post,
-              notiffrom: commenter,
+          if (change.doc.data().email === user.email) {
+            try {
+              // Add new notification to the "notifications" collection
+              const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: owner,
+                messagetype: message,
+                timestamp: new Date(),
+                title: post,
+                notiffrom: commenter,
                 notiffromname: commenterName,
-            });
-            console.log("Notification for comments added with ID: ", docRef.id);
-          } catch (error) {
-            console.error("Error adding notification: ", error);
+              });
+              console.log(
+                "Notification for comments added with ID: ",
+                docRef.id
+              );
+            } catch (error) {
+              console.error("Error adding notification: ", error);
+            }
           }
-
-          toast.info(`${commenterName} has commented on your post "${post}"`);
+          if (change.doc.data().postowner === user.email) {
+            toast.info(`${commenterName} has commented on your post "${post}"`);
+          }
         }
-        
       });
     });
     const reviewQ = query(
@@ -297,8 +324,10 @@ const NotificationListener = () => {
         console.log("working isnide snapshot review");
         if (
           change.type === "added" &&
-          change.doc.data().bookowner === user.email
-        ) {
+          (change.doc.data().bookowner === user.email ||
+            change.doc.data().remail === user.email)
+        ) 
+        {
           console.log("Review change:", change.doc.data());
           const review = change.doc.data();
           const notificationId = uuidv4();
@@ -308,21 +337,26 @@ const NotificationListener = () => {
           const reviewerName = review.reviewer;
           const book = review.bookname;
 
-          try {
-            
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: owner,
-              messagetype: message,
-              timestamp: new Date(),
-              title: book,
-              notiffrom: reviewer,
+          if (change.doc.data().remail === user.email) {
+            try {
+              const docRef = await addDoc(collection(db, "notifications"), {
+                notifid: notificationId,
+                notifto: owner,
+                messagetype: message,
+                timestamp: new Date(),
+                title: book,
+                notiffrom: reviewer,
                 notiffromname: reviewerName,
-            });
-            console.log("Notification added with ID: ", docRef.id);
-            toast.info(`${reviewerName} has reviewed your book <strong>${book}</strong>`);
-          } catch (error) {
-            console.error("Error adding notification: ", error);
+              });
+              console.log("Notification added with ID: ", docRef.id);
+            } catch (error) {
+              console.error("Error adding notification: ", error);
+            }
+          }
+          if (change.doc.data().bookowner === user.email) {
+            toast.info(
+              `${reviewerName} has reviewed your book <strong>${book}</strong>`
+            );
           }
         }
       
