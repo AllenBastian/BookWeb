@@ -58,7 +58,7 @@ const Inbox = () => {
             let path = ""; // Define a path variable
             switch (notification.messagetype) {
               case "Book Request":
-                message = `Book request from ${from} for book "${book}"`;
+                message = <span>Book request from {from} for book "<strong>{book}</strong>"</span>;
                 path = `/dashboard`; // Set the path
                 break;
               case "Book Request Accepted":
