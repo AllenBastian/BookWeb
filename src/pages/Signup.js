@@ -35,7 +35,7 @@ const SignUpForm = () => {
     semester: '',
     department: '',
     batch: '',
-    college: 'Saintgits college of Engineering',
+    college: 'Saintgits College of Engineering',
     contact: '',
   });
 

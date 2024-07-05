@@ -65,10 +65,6 @@ const Inbox = () => {
                 message = `Book request for book "${book}" has been accepted, you can now chat with the owner`;
                 path = `/dashboard`; // Set the path
                 break;
-              case "Chat Initiated":
-                message = `Chat Initiated by ${from} `;
-                path = `/chat`; // Set the path
-                break;
               case "Book Request Declined":
                 message = `Book request for book "${book}" has been declined.`;
                 // Set the path or handle case

@@ -66,9 +66,9 @@ const NotificationListener = () => {
               notiffromname: reqfrname,
               isRead: false,
             });
-            console.log("Notification added with ID: ", docRef.id);
+            console.log("Notification for book request added with ID: ", docRef.id);
             toast.info(`you have a new request for the book ${bookname}`, {
-              duration: 4000,
+              duration: 2000,
             });
           } catch (error) {
             console.error("Error adding notification: ", error);
@@ -101,10 +101,10 @@ const NotificationListener = () => {
               notiffromname: reqfrname,
               isRead: false,
             });
-            console.log("Notification added with ID: ", docRef.id);
+            console.log("Notification to accept book request added with ID: ", docRef.id);
             toast.info(
               `Your request for book  ${bookname} has been accepted. you can now chat with the owner.`,
-              { duration: 5000 }
+              { duration: 1500 }
             );
           } catch (error) {
             console.error("Error adding notification: ", error);
@@ -118,30 +118,12 @@ const NotificationListener = () => {
           && change.doc.data().borrowed === false
         ) {
           const request = change.doc.data();
-          const notificationId = uuidv4();
-          const requestTo = request.requestto;
-          const message = "Chat Initiated";
-          const bookname = request.booktitile;
-          const reqfr = request.requestfrom;
           const reqfrname = request.reqfromusername;
-          const requestToName = request.reqtousername;
-
           try {
-            const docRef = await addDoc(collection(db, "notifications"), {
-              notifid: notificationId,
-              notifto: requestTo,
-              messagetype: message,
-              timestamp: new Date(),
-              title: bookname,
-              notiffrom: reqfr,
-              notiffromname: reqfrname,
-              notiftoname: requestToName,
-              isRead: false,
-            });
-            console.log("Notification added with ID: ", docRef.id);
+            console.log("im inside the chat notif");
             toast.info(
-              `Chat initiated from ${reqfrname}`,
-              { duration: 2000 }
+              `You can chat with ${reqfrname} now`,
+              { duration: 1500 }
             );
           } catch (error) {
             console.error("Error adding notification: ", error);
@@ -172,10 +154,10 @@ const NotificationListener = () => {
               timestamp: new Date(),
               title: bookname,
               notiffrom: requestTo,
-                notiffromname: reqfrname,
+              notiffromname: reqfrname,
               isRead: false,
             });
-            console.log("Notification added with ID: ", docRef.id);
+            console.log("Notification for book request rejected added with ID: ", docRef.id);
             toast.warning(
               `your request for book ${bookname} has been declined`,
               { duration: 4000 }
@@ -208,7 +190,7 @@ const NotificationListener = () => {
                 notiffromname: reqfrname,
               isRead: false,
             });
-            console.log("Notification added with ID: ", docRef.id);
+            console.log("Notification for book marked as borrowed added with ID: ", docRef.id);
             toast.info(`The owner has marked ${bookname} borrowed to you`, {
               duration: 4000,
             });
@@ -216,7 +198,9 @@ const NotificationListener = () => {
             console.error("Error adding notification: ", error);
           }
         }
-        else if (change.type = "removed" && change.doc.data().requestfrom === user.email && change.doc.data().borrowed === true) {
+        else if (change.type = "removed" && 
+          change.doc.data().requestfrom === user.email && 
+          change.doc.data().borrowed === true) {
             const request = change.doc.data();
             const notificationId = uuidv4();
             const requestTo = request.requestto;
@@ -236,7 +220,7 @@ const NotificationListener = () => {
                 notiffromname: reqfrname,
                 isRead: false,
                 });
-                console.log("Notification added with ID: ", docRef.id);
+                console.log("Notification for transaction completed added with ID: ", docRef.id);
                 toast.info(`The owner has marked ${bookname} returned from you`, {
                 duration: 4000,
                 });
@@ -280,7 +264,7 @@ const NotificationListener = () => {
               notiffrom: commenter,
                 notiffromname: commenterName,
             });
-            console.log("Notification added with ID: ", docRef.id);
+            console.log("Notification for comments added with ID: ", docRef.id);
           } catch (error) {
             console.error("Error adding notification: ", error);
           }
